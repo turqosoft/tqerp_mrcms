@@ -1,0 +1,50 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "autoname": "field:diseases_name",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+     "diseases_name"
+        
+    ],
+    "fields": [
+       
+        {
+            "fieldname": "diseases_name",
+            "label": "Category",
+            "fieldtype": "Data"
+            
+        }
+       
+           
+    ],
+    "is_submittable": 1,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Diseases",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1
+        }
+        
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

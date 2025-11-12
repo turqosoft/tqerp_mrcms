@@ -1,0 +1,49 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "criteria",
+    "required",
+    "present",
+    "verification"
+  ],
+  "fields": [
+    {
+      "fieldname": "criteria",
+      "fieldtype": "Data",
+      "label": "Criteria",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "required",
+      "fieldtype": "Data",
+      "label": "Required",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "present",
+      "fieldtype": "Check",
+      "label": "Present",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "verification",
+      "fieldtype": "Check",
+      "label": "Verified",
+      "in_list_view": 1
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Claim Checklist Details",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

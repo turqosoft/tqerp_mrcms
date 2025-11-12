@@ -1,0 +1,45 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "autoname": "field:relation",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "engine": "InnoDB",
+    "field_order": [
+        "relation"
+    ],
+    "fields": [
+        {
+            "fieldname": "relation",
+            "fieldtype": "Data",
+            "label": "Relation",
+            "in_list_view": 1
+        }
+    ],
+    "is_submittable": 0,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Relation",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

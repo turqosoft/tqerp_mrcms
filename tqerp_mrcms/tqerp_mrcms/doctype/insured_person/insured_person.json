@@ -1,0 +1,162 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "autoname": "field:ip_name",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "type_section",
+        "ip_no",
+        "ip_name",
+        "address",
+        "gender",
+        "dob",
+        "column_break_deuj",
+        "phone",
+        "local_office",
+        "employee",
+        "family_section",
+        "nominee",
+        "family_members",
+        "accounts_section",
+        "dispensary",
+        "bank_accounts",
+        "Entitlement_section",
+        "entitlement"
+    ],
+    "fields": [
+       
+        {
+            "fieldname": "ip_name",
+            "label": "Name",
+            "fieldtype": "Data"
+            
+        },
+        {
+            "fieldname": "ip_no",
+            "label": "Insurance No",
+            "fieldtype": "Data"
+            
+        },
+         {
+            "fieldname": "address",
+            "label": "Address",
+            "fieldtype": "Small Text"
+            
+        },
+         {
+            "fieldname": "column_break_deuj",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "dob",
+            "label": "DOB",
+            "fieldtype": "Date"
+            
+        },
+        {
+            "fieldname": "gender",
+            "label": "Gender",
+            "fieldtype": "Link",
+            "options": "Gender"
+        },
+        {
+            "fieldname": "phone",
+            "label": "Phone",
+            "fieldtype": "Data"
+            
+           
+        },
+         {
+            "fieldname": "local_office",
+            "label": "Local office",
+            "fieldtype": "Data"
+            
+           
+        },
+         {
+            "fieldname": "employee",
+            "label": "Employer",
+            "fieldtype": "Link",
+            "options":"Employee"
+         
+        },
+        {
+            "fieldname": "family_section",
+            "fieldtype": "Section Break",
+            "label": "Family Details"
+           
+        },
+        {
+            "fieldname": "family_members",
+            "label": "Family",
+            "fieldtype": "Table",
+            "in_list_view": 1,
+            "options": "Family Members"
+        },
+        {
+            "fieldname": "nominee",
+            "label": "Nominee",
+            "fieldtype": "Data"
+        },
+         {
+            "fieldname": "accounts_section",
+            "fieldtype": "Section Break",
+            "label": "Bank Account Details"
+           
+        },
+          {
+        "fieldname": "dispensary",
+        "fieldtype": "Link",
+        "label": "Dispensary",
+        "options":"Branch"
+      },
+         {
+            "fieldname": "bank_accounts",
+            "label": "Bank Accounts",
+            "fieldtype": "Table",
+            "in_list_view": 1,
+            "options": "Accounts"
+        },
+        {
+            "fieldname": "Entitlement_section",
+            "fieldtype": "Section Break",
+            "label": "Entitlement Details"
+           
+        },
+         {
+            "fieldname": "entitlement",
+            "label": "Entitlement",
+            "fieldtype": "Table",
+            "in_list_view": 1,
+            "options": "Entitlement"
+        }       
+    ],
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Insured Person",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+        
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

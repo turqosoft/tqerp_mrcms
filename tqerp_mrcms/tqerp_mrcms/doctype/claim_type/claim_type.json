@@ -1,0 +1,80 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "allow_copy": 1,
+    "allow_rename": 1,
+    "autoname": "field:claim_type",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "claim_type",
+        "sanction_authority",
+        "section_break_deuj",
+        "min_amount",
+         "max_amount",
+          "enabled"
+    ],
+    "fields": [
+        {
+            "fieldname": "claim_type",
+            "label": "Claim Type",
+            "fieldtype": "Data"
+        },
+         {
+            "fieldname": "sanction_authority",
+            "label": "Sanctioning Authority",
+            "fieldtype": "Link",
+            "options":"Authority"
+        },
+        {
+            "fieldname": "section_break_deuj",
+            "fieldtype": "Section Break",
+            "label":"Eligibility Criteria"        
+        },
+        {
+            "fieldname": "min_amount",
+            "label": "Minimum Amount",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "max_amount",
+            "label": "Maximum Amount",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "enabled",
+            "label": "Enabled",
+            "fieldtype": "Check",
+            "default": 1
+        }
+    ],
+    "is_submittable": 0,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Claim Type",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

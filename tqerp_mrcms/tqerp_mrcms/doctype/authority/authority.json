@@ -1,0 +1,62 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "allow_rename": 1,
+    "autoname": "field:authority_name",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "authority_name",
+        "parent_authority"
+    ],
+    "fields": [
+        {
+            "fieldname": "authority_name",
+            "label": "Authority Name",
+            "fieldtype": "Data",
+            "reqd": 1
+        },
+        {
+            "fieldname": "parent_authority",
+            "label": "Parent Authority",
+            "fieldtype": "Link",
+            "options": "Authority",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "is_group",
+            "label": "Is Group",
+            "fieldtype": "Check",
+            "default": 0,
+            "in_list_view": 1
+        }
+    ],
+    "is_tree": 1,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Authority",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

@@ -1,0 +1,59 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+       "bank",
+       "branch",
+       "ifsc_code",
+       "acc_no"
+      
+    ],
+    "fields": [
+      
+     {
+      "fieldname": "bank",
+      "fieldtype": "Link",
+      "label": "Bank",
+      "options": "Bank",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "branch",
+      "fieldtype": "Data",
+      "label": "Branch",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "ifsc_code",
+      "fieldtype": "Data",
+      "label": "IFS Code",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "acc_no",
+      "fieldtype": "Data",
+      "label": "Account Number",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "default",
+      "fieldtype": "Check",
+      "label": "Default Account",
+      "in_list_view": 1
+    }
+      
+    ],
+    "istable": 1,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Accounts",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+  }

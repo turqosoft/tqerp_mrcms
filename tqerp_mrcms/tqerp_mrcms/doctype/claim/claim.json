@@ -1,0 +1,177 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "autoname": "naming_series:",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "si_no",
+        "naming_series",
+        "insuarance_no",
+        "receipt_no",
+        "receipt_date",
+        "insured_person",
+        "amount_claimed",
+        "claim_type",
+        "relation",
+        "name_of_patient",
+        "column_break_deuj",
+        "age_of_patient",
+        "category",
+        "claim_begin_date",
+        "claim_end_date",
+        "diseases",
+        "hospital",
+        "nominee",
+        "rule",
+        "section_break_deuj",
+        "claim_templates",
+        "claim_checklist"
+    ],
+    "fields": [
+        {
+            "fieldname": "insuarance_no",
+            "label": "Insuarance No",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "naming_series",
+            "label": "Naming Series",
+            "fieldtype": "Select",
+            "options": "CLM-.YYYY.-.#####",
+            "reqd": 1
+        },
+        {
+            "fieldname": "insured_person",
+            "label": "Insured Person",
+            "fieldtype": "Link",
+            "options": "Insured Person"
+        },
+        {
+            "fieldname": "si_no",
+            "label": "Serial No",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "receipt_no",
+            "label": "Receipt No",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "receipt_date",
+            "label": "Receipt Date",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "amount_claimed",
+            "label": "Amount Claimed",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "claim_type",
+            "label": "Claim Type",
+            "fieldtype": "Link",
+            "options": "Claim Type"
+        },
+        {
+            "fieldname": "relation",
+            "label": "Relation",
+            "fieldtype": "Link",
+            "options": "Relation"
+        },
+        {
+            "fieldname": "name_of_patient",
+            "label": "Name of Patient",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "age_of_patient",
+            "label": "Age of Patient",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "category",
+            "label": "Category",
+            "fieldtype": "Link",
+            "options": "Category"
+        },
+        {
+            "fieldname": "claim_begin_date",
+            "label": "Claim Begin Date",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "claim_end_date",
+            "label": "Claim End Date",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "diseases",
+            "label": "Diseases",
+            "fieldtype": "Link",
+            "options": "Diseases"
+        },
+        {
+            "fieldname": "hospital",
+            "label": "Hospital",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "nominee",
+            "label": "Nominee",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "rule",
+            "label": "Rule",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "claim_templates",
+            "label": "Claim Checklist",
+            "fieldtype": "Link",
+            "options": "Claim Checklist"
+        },
+        {
+            "fieldname": "claim_checklist",
+            "fieldtype": "Table",
+            "options": "Claim Checklist Details"
+        },
+        {
+            "fieldname": "column_break_deuj",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "section_break_deuj",
+            "fieldtype": "Section Break"
+        }
+    ],
+    "is_submittable": 1,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Claim ",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

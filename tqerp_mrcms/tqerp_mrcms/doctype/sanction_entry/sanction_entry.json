@@ -1,0 +1,120 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "autoname": "field:sanction_no",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "year",
+        "organisation",
+        "column_break_leuj",
+        "authority",
+        "claim_no",
+        "section_break_gaaya",
+        "section",
+        "amount",
+        "account",
+        "column_break_deuj",
+        "bunddle_no",
+        "si_no",
+        "sanction_no"
+    ],
+    "fields": [
+        {
+            "fieldname": "year",
+            "label": "Year",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "organisation",
+            "label": "Organisation",
+            "fieldtype": "Link",
+            "options": "Organisation Management"
+        },
+        {
+            "fieldname": "authority",
+            "label": "Authority",
+            "fieldtype": "Link",
+            "options": "Authority"
+        },
+        {
+            "fieldname": "claim_no",
+            "label": "Claim No",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "section",
+            "label": "Section",
+            "fieldtype": "Link",
+            "options": "Section"
+        },
+        {
+            "fieldname": "amount",
+            "label": "Amount",
+            "fieldtype": "Currency"
+        },
+        {
+            "fieldname": "account",
+            "label": "Head Of Account",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "bunddle_no",
+            "label": "Bunddle",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "si_no",
+            "label": "Serial No",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "sanction_no",
+            "label": "Sanction No",
+            "fieldtype": "Data",
+            "reqd": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "column_break_deuj",
+            "fieldtype": "Column Break"
+        },
+         {
+            "fieldname": "column_break_leuj",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "section_break_gaaya",
+            "fieldtype": "Section Break"
+           
+        }
+    ],
+    "is_submittable": 1,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Sanction Entry",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1,
+            "submit": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

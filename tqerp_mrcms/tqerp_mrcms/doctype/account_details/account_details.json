@@ -1,0 +1,70 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "allow_import": 1,
+  "autoname": "field:acc_no",
+  "creation": "2024-04-17 11:07:50.835604",
+  "doctype": "DocType",
+  "document_type": "Document",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "bank",
+    "branch",
+    "ifsc_code",
+    "acc_no"
+  ],
+  "fields": [
+    {
+      "fieldname": "bank",
+      "fieldtype": "Link",
+      "label": "Bank",
+      "options": "Bank",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "branch",
+      "fieldtype": "Link",
+      "label": "Branch",
+      "options": "Branch",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "ifsc_code",
+      "fieldtype": "Data",
+      "label": "IFSC Code",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "acc_no",
+      "fieldtype": "Data",
+      "label": "Account Number",
+      "in_list_view": 1
+    }
+  ],
+  "is_submittable": 1,
+  "links": [],
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Account Details",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "submit": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}
