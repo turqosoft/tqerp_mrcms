@@ -54,65 +54,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Insurance",
-   "link_count": 5,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Disease",
-   "link_count": 0,
-   "link_to": "Diseases",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Claim Type",
-   "link_count": 0,
-   "link_to": "Claim Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Insured Person",
-   "link_count": 0,
-   "link_to": "Insured Person",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Claim Checklist",
-   "link_count": 0,
-   "link_to": "Claim Checklist",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Relationship",
-   "link_count": 0,
-   "link_to": "Relation",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Organization",
    "link_count": 5,
    "link_type": "DocType",
@@ -187,9 +128,68 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insurance",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Disease",
+   "link_count": 0,
+   "link_to": "Diseases",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim Type",
+   "link_count": 0,
+   "link_to": "Claim Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim Checklist",
+   "link_count": 0,
+   "link_to": "Claim Checklist",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Relationship",
+   "link_count": 0,
+   "link_to": "Relation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insured Person",
+   "link_count": 0,
+   "link_to": "Insured Person",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-11-12 16:21:01.064161",
+ "modified": "2025-11-12 17:41:06.772842",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS",

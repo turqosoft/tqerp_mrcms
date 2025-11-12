@@ -5,7 +5,7 @@ frappe.ui.form.on('Insured Person', {
         frm.set_query("dispensary", function() {
             return {
                 filters: {
-                    type: "Dispensary"
+                    type: "Dispensery"
                 }
             };
         });
