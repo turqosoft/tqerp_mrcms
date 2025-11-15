@@ -1,4 +1,4 @@
-frappe.ui.form.on('Branch', {
+frappe.ui.form.on('Office', {
     refresh:function(frm){
         
     }

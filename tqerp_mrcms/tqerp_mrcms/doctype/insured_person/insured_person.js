@@ -9,6 +9,13 @@ frappe.ui.form.on('Insured Person', {
                 }
             };
         });
+        frm.set_query("local_office", function() {
+            return {
+                filters: {
+                    type: "Regional Director Office"
+                }
+            };
+        });
     },
 
    

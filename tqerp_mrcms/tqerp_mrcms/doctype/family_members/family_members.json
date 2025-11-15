@@ -21,6 +21,12 @@
       "label": "Relation",
       "options": "Relation",
       "in_list_view": 1
+    },
+    {
+      "fieldname": "dob",
+      "label": "DOB",
+      "fieldtype": "Date",
+      "in_list_view": 1
     }
   ],
   "istable": 1,

@@ -72,7 +72,7 @@
             "fieldname": "local_office",
             "label": "Local office",
             "fieldtype": "Link",
-            "options":"Branch",
+            "options":"Office",
             "in_list_view":1
         },
         {
@@ -105,7 +105,7 @@
             "fieldname": "dispensary",
             "fieldtype": "Link",
             "label": "Dispensary",
-            "options": "Branch"
+            "options": "Office"
         },
         {
             "fieldname": "bank_accounts",

@@ -3,24 +3,24 @@
     "allow_import": 1,
     "allow_copy": 1,
     "allow_rename": 1,
-    "autoname": "field:branch_name",
+    "autoname": "field:office_name",
     "creation": "2024-04-17 11:07:50.835604",
     "doctype": "DocType",
     "document_type": "Document",
     "editable_grid": 1,
     "engine": "InnoDB",
     "field_order": [
-        "branch_name",
+        "office_name",
         "type",
         "is_group",
         "column_break_deuj",
-        "parent_branch",
+        "parent_office",
         "district"
     ],
     "fields": [
         {
-            "fieldname": "branch_name",
-            "label": "Branch",
+            "fieldname": "office_name",
+            "label": "Office",
             "fieldtype": "Data",
             "reqd": 1,
             "in_list_view": 1
@@ -48,10 +48,10 @@
             "in_list_view": 1
         },
         {
-            "fieldname": "parent_branch",
-            "label": "Parent Branch",
+            "fieldname": "parent_office",
+            "label": "Parent Office",
             "fieldtype": "Link",
-            "options": "Branch",
+            "options": "Office",
             "in_list_view": 1
         },
         {
@@ -70,7 +70,7 @@
     "links": [],
     "modified_by": "Administrator",
     "module": "Tqerp Mrcms",
-    "name": "Branch",
+    "name": "Office",
     "naming_rule": "By fieldname",
     "owner": "Administrator",
     "permissions": [

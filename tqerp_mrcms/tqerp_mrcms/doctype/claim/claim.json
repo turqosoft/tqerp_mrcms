@@ -10,43 +10,36 @@
     "field_order": [
         "naming_series",
         "section_break_insurance_details",
-        "insuarance_no",
+        "ip_no",
         "column_break_insurance_details",
-        "insured_person",
-        
+        "ip_name",
         "section_break_claim_details",
         "receipt_no",
         "receipt_date",
         "amount_claimed",
         "claim_type",
         "category",
-
-         "column_break_deuj",
-
-         
+        "column_break_deuj",
         "claim_begin_date",
         "claim_end_date",
         "diseases",
         "hospital",
         "rule",
         "nominee",
-        
-
         "section_break_patient_details",
         "name_of_patient",
+        "column_break_patient_details_1",
         "relation",
-        "column_break_patient",
+        "custom_column_break_ja9a0",
         "age_of_patient",
-       
-        
         "section_break_deuj",
         "claim_templates",
         "claim_checklist"
     ],
     "fields": [
         {
-            "fieldname": "insuarance_no",
-            "label": "Insuarance No",
+            "fieldname": "ip_name",
+            "label": "Name",
             "fieldtype": "Data"
         },
         {
@@ -57,7 +50,7 @@
             "reqd": 1
         },
         {
-            "fieldname": "insured_person",
+            "fieldname": "ip_no",
             "label": "Insured Person",
             "fieldtype": "Link",
             "options": "Insured Person"
@@ -152,7 +145,11 @@
             "fieldtype": "Column Break"
         },
         {
-            "fieldname": "column_break_patient",
+            "fieldname": "column_break_patient_details_1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_patient_details_2",
             "fieldtype": "Column Break"
         },
         {
