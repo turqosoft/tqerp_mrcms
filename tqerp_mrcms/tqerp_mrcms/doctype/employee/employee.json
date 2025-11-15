@@ -12,7 +12,7 @@
   "column_break_xpvf",
   "authority",
   "organisation",
-  "branch"
+  "office"
  ],
  "fields": [
   {
@@ -52,10 +52,10 @@
    "options": "Organisation"
   },
   {
-   "fieldname": "branch",
+   "fieldname": "office",
    "fieldtype": "Link",
-   "label": "Branch",
-   "options": "Branch"
+   "label": "Office",
+   "options": "Office"
   },
   {
    "fieldname": "column_break_xpvf",
