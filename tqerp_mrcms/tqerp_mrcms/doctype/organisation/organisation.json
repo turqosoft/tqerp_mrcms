@@ -1,6 +1,7 @@
 {
     "actions": [],
     "allow_import": 1,
+    "allow_rename": 1,
     "autoname": "field:organisation_name",
     "creation": "2024-04-17 11:07:50.835604",
     "doctype": "DocType",
@@ -21,7 +22,7 @@
             "in_list_view": 1
         },
         {
-            "fieldname": "parent_organisation",
+            "fieldname": "parent_organisation_management",
             "label": "Parent Organisation",
             "fieldtype": "Link",
             "options": "Organisation",

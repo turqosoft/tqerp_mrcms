@@ -1,0 +1,111 @@
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin: 20px;
+    line-height: 1.5;
+    color: #000;
+  }
+
+  .container {
+    border: 1px solid #000;
+    padding: 15px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  h2, h3 {
+    text-align: center;
+    margin: 5px 0;
+  }
+
+  .sub-title {
+    margin: 8px 0;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  p {
+    margin: 6px 0;
+    line-height: 1.4;
+  }
+
+  .footer {
+    margin-top: 20px;
+    text-align: right;
+  }
+
+  .to-section {
+    margin-top: 15px;
+    font-weight: bold;
+  }
+
+  /* Print-specific styles */
+  @media print {
+    body {
+      font-size: 13px;       /* slightly smaller for print */
+      margin: 10mm;          /* standard print margin */
+      line-height: 1.4;
+    }
+
+    .container {
+      width: 100%;
+      padding: 15px;
+      border-width: 1px;
+      page-break-inside: avoid;  /* prevent splitting container */
+    }
+
+    h2 {
+      font-size: 20px;
+    }
+
+    h3 {
+      font-size: 18px;
+    }
+
+    p, .sub-title {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .footer p {
+      font-size: 14px;
+    }
+  }
+</style>
+
+
+
+</head>
+<body>
+  <div class="container">
+    <h2>PROCEEDINGS OF THE DIRECTOR OF INSURANCE MEDICAL SERVICES,</h2>
+    <h3>THIRUVANANTHAPURAM-14</h3><br><br>
+
+    <p class="sub-title"><span class="bold">Sub:-</span> MRC in respect of {{doc.ip_name}}, IP No.{{doc.ip_no}}, {{doc.address}} of Rs. {{doc.passed_amount}}- Sanction orders issued</p>
+    <p class="sub-title"><span class="bold">Ref:-</span> Letter No A 75/2025, dated : {{doc.claim_date}} {{doc.address}}</p>
+
+    <p class="bold">ORDER NO. {{doc.name}}, Dated : {{doc.claim_date}}</p>
+
+    <p>Sanction is accorded for the reimbursement of Rs.{{doc.passed_amount}}/- {{doc.rupees}}, to Sri {{doc.ip_name}}, {{doc.address}} being the cost of medicines purchased by him for the treatment of{{doc.diseases}}.</p>
+
+    <p>The treatment was availed by him during the period from {{doc.from_date}} to {{doc.to_date}} from {{doc.hospital}}.</p>
+
+    <p>The expenditure in this regard will be met from the Head of Account 2210-01-102-96-03-SST.</p>
+
+    <div class="footer">
+      <p class="bold">DR MINY M S</p>
+      <p>Joint Director of Insurance Medical Services</p>
+    </div>
+
+    <p class="to-section">To</p>
+    <p>S1 - Section</p>
+
+    <p>Forwarded by Order</p>
+  </div>
+</body>
+</html>

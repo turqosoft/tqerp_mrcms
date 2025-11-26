@@ -38,10 +38,10 @@
       "label": "Account Number",
       "in_list_view": 1
     },
-    {
-      "fieldname": "default",
+     {
+      "fieldname": "default_account",
       "fieldtype": "Check",
-      "label": "Default Account",
+      "label": " Default Account",
       "in_list_view": 1
     }
       

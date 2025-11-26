@@ -1,3 +1,4 @@
+
 {
   "actions": [],
   "allow_rename": 1,
@@ -24,8 +25,8 @@
     },
     {
       "fieldname": "dob",
-      "label": "DOB",
       "fieldtype": "Date",
+      "label": "Date oF Birth",
       "in_list_view": 1
     }
   ],

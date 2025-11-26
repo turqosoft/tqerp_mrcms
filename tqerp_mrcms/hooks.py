@@ -29,6 +29,7 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Claim" : "public/js/claim.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -227,3 +228,22 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+override_whitelisted_methods = {
+    "tqerp_mrcms.www.add_ip_backend.save_ip": "tqerp_mrcms.www.add_ip_backend.save_ip"
+}
+
+# Website Route Rules
+website_route_rules = [
+    {"from_route": "/claims", "to_route": "claim/claim_list"},
+    # {"from_route": "/claim/new", "to_route": "claim/add_claim"},
+    {"from_route": "/claim/modify", "to_route": "claim/update_claim"},
+    {"from_route": "/insured", "to_route": "ip/ip"},
+    {"from_route": "/insured/new", "to_route": "ip/add_ip"},
+    {"from_route": "/insured/search", "to_route": "ip/select_ip"},
+    {"from_route": "/dashboard", "to_route": "dashboard"},
+]
+
+# In tqerp_mrcms/hooks.py
+# has_website_permission = [
+#     "tqerp_mrcms.api.check_page_permission"
+# ]

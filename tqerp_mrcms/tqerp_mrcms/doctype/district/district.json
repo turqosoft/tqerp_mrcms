@@ -1,16 +1,30 @@
 {
  "actions": [],
- "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:district",
- "creation": "2025-11-11 12:34:16.200997",
- "description": "All Districts",
+ "creation": "2025-11-11 13:23:52.443309",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_vhrw",
+  "amended_from",
   "district"
  ],
  "fields": [
+  {
+   "fieldname": "section_break_vhrw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "District",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
   {
    "fieldname": "district",
    "fieldtype": "Data",
@@ -18,10 +32,9 @@
    "unique": 1
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-11 12:38:35.047238",
+ "modified": "2025-11-11 13:25:25.192824",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "District",
@@ -38,14 +51,11 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
- "quick_entry": 1,
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+ "states": []
 }

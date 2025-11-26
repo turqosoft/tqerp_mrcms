@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-20 12:00:17.975501",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "objection"
+ ],
+ "fields": [
+  {
+   "fieldname": "objection",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Objection"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-20 12:00:36.386337",
+ "modified_by": "Administrator",
+ "module": "Tqerp Mrcms",
+ "name": "Objection",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

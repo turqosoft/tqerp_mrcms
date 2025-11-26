@@ -8,7 +8,7 @@
  "for_user": "",
  "hide_custom": 0,
  "icon": "unhide",
- "idx": 0,
+ "idx": 1,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "MRCMS",
@@ -28,25 +28,6 @@
    "label": "Bank",
    "link_count": 0,
    "link_to": "Bank",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Claim",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Claim",
-   "link_count": 0,
-   "link_to": "Claim",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -187,9 +168,38 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim",
+   "link_count": 0,
+   "link_to": "Claim",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Proceedings",
+   "link_count": 0,
+   "link_to": "Claim Proceedings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-11-15 13:20:38.360152",
+ "modified": "2025-11-25 21:26:13.335483",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS",

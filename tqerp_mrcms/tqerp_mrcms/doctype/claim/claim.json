@@ -6,75 +6,150 @@
     "doctype": "DocType",
     "document_type": "Document",
     "editable_grid": 1,
-    "engine": "InnoDB",
     "field_order": [
+        "custom_header",
+        "section_break_embe",
+        "claim_status",
+        "dispensary",
+        "column_break_eeuj",
         "naming_series",
-        "section_break_insurance_details",
+        "claim_date",
+        "section_break_eeuj",
         "ip_no",
-        "column_break_insurance_details",
+        "phone",
         "ip_name",
-        "section_break_claim_details",
-        "receipt_no",
-        "receipt_date",
-        "amount_claimed",
-        "claim_type",
-        "category",
-        "column_break_deuj",
-        "claim_begin_date",
-        "claim_end_date",
-        "diseases",
-        "hospital",
-        "rule",
-        "nominee",
-        "section_break_patient_details",
+        "address",
+        "book_no",
+        "employer",
         "name_of_patient",
-        "column_break_patient_details_1",
-        "relation",
-        "custom_column_break_ja9a0",
         "age_of_patient",
-        "section_break_deuj",
+        "relation",
+        "from_date",
+        "to_date",
+        "type",
+        "hospital",
+        "in_patient_no",
+        "diseases",
+        "amount_claimed",
+        "bank_name",
+        "branch",
+        "bank_account_no",
+        "ifs_code",
+        "column_break_peuj",
+        "heading_hospital_category",
+        "nabh",
+        "non_nabh",
+        "heading_rate_type",
+        "package_rate",
+        "non_package_rate",
+        "heading_amount",
+        "passed_amount",
+        "rupees",
+        "bill_details",
+        "heading_objections",
+        "no_prescription",
+        "date_mismatch",
+        "bill_improper",
+        "no_cash_received_seal_in_bills",
+        "entitlment_certificate_improper",
+        "essential_certificate_improper",
+        "bank_ac_details",
+        "esi_identity_proofepehechen",
+        "others",
+        "remarks",
+        "ip_communication",
+        "section_break_ct",
         "claim_templates",
-        "claim_checklist"
+        "claim_checklist",
+        "claim_process"
     ],
     "fields": [
         {
-            "fieldname": "ip_name",
-            "label": "Name",
-            "fieldtype": "Data"
+            "fieldname": "custom_header",
+            "label": "Custom Header",
+            "fieldtype": "HTML",
+            "options": "<div style='text-align:center; font-weight:bold; font-size:20px;'>മെഡിക്കൽ റീ-ഇംബഴ്സ്മെന്റിനുള്ള അപേക്ഷ</div><div style='text-align:center; font-size:12px; margin-top:2px;'>Ayur / Homeo / SST / Specialty (DIMS / RDD / IMO) / Spects / Way Bill / Covid-19 / Spl Situ / Rule 60(6)</div>"
+        },
+        {
+            "fieldname": "claim_status",
+            "label": "Claim Status",
+            "fieldtype": "Select",
+            "options": "\nDraft\nHC Review\nIMO Review\nRD Review\nJoin Director Review\nDirector Review\nSanctioned\nPaid\nObjection",
+            "default": "Draft"
+        },
+        {
+            "fieldname": "dispensary",
+            "label": "ESI Dispensary",
+            "fieldtype": "Data",
+            "fetch_from:": "ip_no.dispensary"
+        },
+        {
+            "fieldname": "column_break_eeuj",
+            "fieldtype": "Column Break"
         },
         {
             "fieldname": "naming_series",
             "label": "Naming Series",
             "fieldtype": "Select",
             "options": "CLM-.YYYY.-.#####",
-            "reqd": 1
+            "reqd": 1,
+            "default": "CLM-.YYYY.-.#####"
+        },
+        {
+            "fieldname": "claim_date",
+            "label": "Date",
+            "fieldtype": "Date",
+            "default": "Today"
+        },
+        {
+            "fieldname": "section_break_eeuj",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_embe",
+            "fieldtype": "Section Break"
         },
         {
             "fieldname": "ip_no",
-            "label": "Insured Person",
+            "label": "Insurance Number",
             "fieldtype": "Link",
             "options": "Insured Person"
         },
         {
-            "fieldname": "receipt_no",
-            "label": "Receipt No",
+            "fieldname": "phone",
+            "label": "Mobile Phone Number(s)",
             "fieldtype": "Data"
         },
         {
-            "fieldname": "receipt_date",
-            "label": "Receipt Date",
-            "fieldtype": "Date"
+            "fieldname": "ip_name",
+            "label": "IP Name",
+            "fieldtype": "Data"
         },
         {
-            "fieldname": "amount_claimed",
-            "label": "Amount Claimed",
-            "fieldtype": "Float"
+            "fieldname": "address",
+            "label": "Address",
+            "fieldtype": "Small Text"
         },
         {
-            "fieldname": "claim_type",
-            "label": "Claim Type",
-            "fieldtype": "Link",
-            "options": "Claim Type"
+            "fieldname": "book_no",
+            "label": "ESI Dispensary Book no",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "employer",
+            "label": "Working Organization/Establishment",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "name_of_patient",
+            "label": "Name of Patient",
+            "fieldtype": "Select",
+            "options": "\n"
+        },
+        {
+            "fieldname": "age_of_patient",
+            "label": "Age of Patient",
+            "fieldtype": "Data"
         },
         {
             "fieldname": "relation",
@@ -83,51 +158,191 @@
             "options": "Relation"
         },
         {
-            "fieldname": "name_of_patient",
-            "label": "Name of Patient",
-            "fieldtype": "Data"
-        },
-        {
-            "fieldname": "age_of_patient",
-            "label": "Age of Patient",
-            "fieldtype": "Data"
-        },
-        {
-            "fieldname": "category",
-            "label": "Category",
-            "fieldtype": "Link",
-            "options": "Category"
-        },
-        {
-            "fieldname": "claim_begin_date",
-            "label": "Claim Begin Date",
+            "fieldname": "from_date",
+            "label": "Treatment Start Date",
             "fieldtype": "Date"
         },
         {
-            "fieldname": "claim_end_date",
-            "label": "Claim End Date",
+            "fieldname": "to_date",
+            "label": "Treatment End Date",
             "fieldtype": "Date"
         },
         {
-            "fieldname": "diseases",
-            "label": "Diseases",
-            "fieldtype": "Link",
-            "options": "Diseases"
+            "fieldname": "type",
+            "label": "IP/OP",
+            "fieldtype": "Select",
+            "options": "\nOP\nIP"
         },
         {
             "fieldname": "hospital",
-            "label": "Hospital",
+            "label": "If IP, Hospital",
             "fieldtype": "Data"
         },
         {
-            "fieldname": "nominee",
-            "label": "Nominee",
+            "fieldname": "in_patient_no",
+            "fieldtype": "Data",
+            "label": "In Patient No"
+        },
+        {
+            "fieldname": "diseases",
+            "label": "Diagnosis",
             "fieldtype": "Data"
         },
         {
-            "fieldname": "rule",
-            "label": "Rule",
+            "fieldname": "rupees",
+            "label": "Rupees",
             "fieldtype": "Data"
+        },
+        {
+            "fieldname": "amount_claimed",
+            "label": "Claim Amount",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "bank_name",
+            "label": "Bank name",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "branch",
+            "label": "Branch",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "bank_account_no",
+            "label": "Bank Account No",
+            "fieldtype": "Data",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "ifs_code",
+            "label": "IFS Code",
+            "fieldtype": "Data",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_peuj",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "heading_hospital_category",
+            "label": "Hospital Category",
+            "fieldtype": "Heading"
+        },
+        {
+            "fieldname": "nabh",
+            "label": "NABH",
+            "fieldtype": "Check"
+        },
+        {
+            "fieldname": "non_nabh",
+            "label": "NON-NABH",
+            "fieldtype": "Check"
+        },
+        {
+            "fieldname": "heading_rate_type",
+            "label": "Rate Type",
+            "fieldtype": "Heading"
+        },
+        {
+            "fieldname": "non_package_rate",
+            "label": "Non-Package Rate",
+            "fieldtype": "Check"
+        },
+        {
+            "fieldname": "package_rate",
+            "label": "Package Rate",
+            "fieldtype": "Check"
+        },
+        {
+            "fieldname": "heading_amount",
+            "label": "Amount",
+            "fieldtype": "Heading"
+        },
+        {
+            "fieldname": "passed_amount",
+            "label": "Passed Amount",
+            "fieldtype": "Float"
+        },
+        {
+            "fieldname": "bill_details",
+            "label": "Bill Details",
+            "fieldtype": "Table",
+            "options": "Bill Details"
+        },
+        {
+            "fieldname": "heading_objections",
+            "label": "MR Claim Objections",
+            "fieldtype": "Heading"
+        },
+        {
+            "default": "0",
+            "fieldname": "no_prescription",
+            "fieldtype": "Check",
+            "label": "No prescription"
+        },
+        {
+            "default": "0",
+            "fieldname": "date_mismatch",
+            "fieldtype": "Check",
+            "label": "Date mismatch"
+        },
+        {
+            "default": "0",
+            "fieldname": "bill_improper",
+            "fieldtype": "Check",
+            "label": "Bill Improper"
+        },
+        {
+            "default": "0",
+            "fieldname": "no_cash_received_seal_in_bills",
+            "fieldtype": "Check",
+            "label": "No cash received seal in Bill(s)"
+        },
+        {
+            "default": "0",
+            "fieldname": "entitlment_certificate_improper",
+            "fieldtype": "Check",
+            "label": "Entitlment Certificate Improper"
+        },
+        {
+            "default": "0",
+            "fieldname": "essential_certificate_improper",
+            "fieldtype": "Check",
+            "label": "Esential Certificate Improper"
+        },
+        {
+            "default": "0",
+            "fieldname": "bank_ac_details",
+            "fieldtype": "Check",
+            "label": "Bank A/C Details"
+        },
+        {
+            "default": "0",
+            "fieldname": "esi_identity_proofepehechen",
+            "fieldtype": "Check",
+            "label": "ESI Identity Proof/ePehechen"
+        },
+        {
+            "default": "0",
+            "fieldname": "others",
+            "fieldtype": "Check",
+            "label": "Others"
+        },
+        {
+            "fieldname": "remarks",
+            "fieldtype": "Small Text",
+            "label": "Remarks"
+        },
+        {
+            "fieldname": "ip_communication",
+            "label": "IP Communication",
+            "fieldtype": "Table",
+            "options": "IP Communication"
+        },
+        {
+            "fieldname": "section_break_ct",
+            "fieldtype": "Section Break"
         },
         {
             "fieldname": "claim_templates",
@@ -141,48 +356,18 @@
             "options": "Claim Checklist Details"
         },
         {
-            "fieldname": "column_break_deuj",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "column_break_patient_details_1",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "column_break_patient_details_2",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "column_break_insurance_details",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "section_break_insurance_details",
-            "fieldtype": "Section Break",
-            "label": "Insurance Details"
-        },
-        {
-            "fieldname": "section_break_patient_details",
-            "fieldtype": "Section Break",
-            "label": "Patient Details"
-        },
-        {
-            "fieldname": "section_break_claim_details",
-            "fieldtype": "Section Break",
-            "label": "Claim Details"
-        },
-        {
-            "fieldname": "section_break_deuj",
-            "fieldtype": "Section Break"
+            "fieldname": "claim_process",
+            "label": "Claim Progress",
+            "fieldtype": "Table",
+            "options": "Claim Process"
         }
     ],
     "is_submittable": 1,
     "links": [],
     "modified_by": "Administrator",
     "module": "Tqerp Mrcms",
-    "name": "Claim ",
-    "naming_rule": "By fieldname",
-    "owner": "Administrator",
+    "name": "Claim",
+    "naming_rule": "By \"Naming Series\" field",
     "permissions": [
         {
             "create": 1,

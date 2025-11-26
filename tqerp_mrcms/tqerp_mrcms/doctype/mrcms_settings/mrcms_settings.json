@@ -1,47 +1,47 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "creation": "2025-11-12 12:47:38.158831",
-    "doctype": "DocType",
-    "engine": "InnoDB",
-    "field_order": [
-        "dispensary_organisation"
-    ],
-    "fields": [
-        {
-            "fieldname": "dispensary_organisation",
-            "fieldtype": "Link",
-            "label": "Dispensary Organisation",
-            "options": "Organisation"
-        },
-        {
-            "fieldname": "default_claim_checklist",
-            "fieldtype": "Link",
-            "label": "Claim checklist",
-            "options": "Claim Checklist"
-        }
-    ],
-    "index_web_pages_for_search": 1,
-    "issingle": 1,
-    "links": [],
-    "modified": "2025-11-12 12:48:22.926208",
-    "modified_by": "Administrator",
-    "module": "Tqerp Mrcms",
-    "name": "Mrcms Settings",
-    "owner": "Administrator",
-    "permissions": [
-        {
-            "create": 1,
-            "delete": 1,
-            "email": 1,
-            "print": 1,
-            "read": 1,
-            "role": "System Manager",
-            "share": 1,
-            "write": 1
-        }
-    ],
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "states": []
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-12 12:47:38.158831",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "dispensary_organisation"
+ ],
+ "fields": [
+  {
+   "fieldname": "dispensary_organisation",
+   "fieldtype": "Link",
+   "label": "Dispensary Organisation",
+   "options":"Organisation"
+  },
+  {
+   "fieldname": "default_claim_checklist",
+   "fieldtype": "Link",
+   "label": "Claim checklist",
+   "options":"Claim Checklist"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-11-12 12:48:22.926208",
+ "modified_by": "Administrator",
+ "module": "Tqerp Mrcms",
+ "name": "Mrcms Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
 }

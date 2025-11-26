@@ -1,88 +1,264 @@
-frappe.ui.form.on('Claim', {
-    claim_templates: function(frm) {
-        load_claim_checklist(frm);
-    },
- 
-    onload: function(frm) {
-        // Load default checklist only if no template is selected
-        if (!frm.doc.claim_templates) {
-            load_claim_checklist(frm, true);
+// ------------------------------
+// Helper function to fetch family members
+// ------------------------------
+function fetch_family_members(frm) {
+    if (!frm.doc.ip_no) return;
+
+    frappe.call({
+        method: "tqerp_mrcms.api.get_family_members_for_dropdown",
+        args: { ip_no: frm.doc.ip_no },
+        callback(r) {
+            if (r.message) {
+                let options = r.message.join("\n"); // convert array to newline-separated string
+                frm.set_df_property("name_of_patient", "options", options);
+                frm.refresh_field("name_of_patient");
+
+                // If only one member, auto-select and trigger auto-fill
+                if (r.message.length === 1) {
+                    frm.set_value("name_of_patient", r.message[0]);
+                    frm.events.name_of_patient(frm);
+                }
+            }
+        },
+        error(err) {
+            console.error("Error fetching family members:", err);
         }
- 
-        // Make the child table fields read-only in Claim
-        make_claim_checklist_readonly(frm);
-    }
+    });
+}
+
+// ------------------------------
+// Helper function to fetch IP details and bank details
+// ------------------------------
+function fetch_ip_details(frm) {
+    if (!frm.doc.ip_no) return;
+
+    frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Insured Person",
+            name: frm.doc.ip_no
+        },
+        callback(r) {
+            if (r.message) {
+                const ip = r.message;
+
+                // Auto-fill IP details
+                frm.set_value("ip_name", ip.ip_name || "");
+                frm.set_value("phone", ip.phone || "");
+                frm.set_value("dispensary", ip.dispensary || "");
+
+                // Auto-fill first bank account if exists
+                const banks = ip.bank_accounts || [];
+                if (banks.length > 0) {
+                    const bank = banks[0]; // pick first bank account
+                    frm.set_value("bank_name", bank.bank || "");
+                    frm.set_value("bank_account_no", bank.acc_no || "");
+                    frm.set_value("branch", bank.branch || "");
+                    frm.set_value("ifs_code", bank.ifsc_code || "");
+                } else {
+                    frm.set_value("bank_name", "");
+                    frm.set_value("bank_account_no", "");
+                    frm.set_value("branch", "");
+                    frm.set_value("ifs_code", "");
+                }
+            }
+        },
+        error(err) {
+            console.error("Error fetching IP details:", err);
+        }
+    });
+}
+
+// ------------------------------
+// Main client script
+// ------------------------------
+frappe.ui.form.on('Claim', {
+
+    refresh(frm) {
+        // IP dropdown
+        frm.set_query("ip_no", () => ({ query: "tqerp_mrcms.api.get_ip_details_list" }));
+
+        // name_of_patient options set dynamically in ip_no trigger
+        frm.set_query("name_of_patient", () => ({}));
+    },
+
+    onload(frm) {
+        // Load Default Checklist if empty
+        if (!frm.doc.claim_templates) load_claim_checklist(frm, true);
+
+        // Make checklist fields readonly after a short delay
+        setTimeout(() => make_claim_checklist_readonly(frm), 500);
+
+        // Route options support
+        const opts = frappe.route_options || {};
+        if (opts.ip_no) frm.set_value("ip_no", opts.ip_no);
+        if (opts.ip_name) frm.set_value("ip_name", opts.ip_name);
+
+        // Ensure patient field is editable
+        frm.set_df_property("name_of_patient", "read_only", 0);
+
+        // If IP already set, fetch family members & IP details
+        if (frm.doc.ip_no) {
+            fetch_family_members(frm);
+            fetch_ip_details(frm);
+        }
+    },
+
+    ip_no(frm) {
+        // Reset patient & IP details
+        frm.set_value("name_of_patient", "");
+        frm.set_value("relation", "");
+        frm.set_value("age_of_patient", "");
+        frm.set_value("bank_name", "");
+        frm.set_value("bank_account_no", "");
+        frm.set_value("branch", "");
+        frm.set_value("ifs_code", "");
+        frm.set_value("ip_name", "");
+        frm.set_value("phone", "");
+
+        // Fetch family members and IP details for selected IP
+        if (frm.doc.ip_no) {
+            fetch_family_members(frm);
+            fetch_ip_details(frm);
+        }
+    },
+
+    name_of_patient(frm) {
+        if (!frm.doc.ip_no || !frm.doc.name_of_patient) return;
+
+        frappe.call({
+            method: "tqerp_mrcms.api.get_family_member_details",
+            args: {
+                ip_no: frm.doc.ip_no,
+                member_name: frm.doc.name_of_patient
+            },
+            callback(r) {
+                if (!r.message) {
+                    frm.set_value("relation", "");
+                    frm.set_value("age_of_patient", "");
+                    return;
+                }
+
+                frm.set_value("relation", r.message.relation || "");
+
+                // Calculate age from dob if available
+                if (r.message.dob) {
+                    const dob = new Date(r.message.dob);
+                    const today = new Date();
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const m = today.getMonth() - dob.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                    }
+                    frm.set_value("age_of_patient", age);
+                } else if (r.message.age_of_patient) {
+                    frm.set_value("age_of_patient", r.message.age_of_patient);
+                } else {
+                    frm.set_value("age_of_patient", "");
+                }
+            },
+            error(err) {
+                console.error("Error fetching family member details:", err);
+            }
+        });
+    },
+
+    claim_objection_template(frm) { load_claim_objections(frm); },
+    claim_templates(frm) { load_claim_checklist(frm); }
+
 });
- 
-// 🔹 Helper function to load claim checklist
+
+// ------------------------------
+// Load Claim Objections
+// ------------------------------
+function load_claim_objections(frm) {
+    if (!frm.doc.claim_objection_template) {
+        frm.clear_table('claim_objection_details');
+        frm.refresh_field('claim_objection_details');
+        return;
+    }
+
+    frappe.db.get_doc('Claim Objections', frm.doc.claim_objection_template)
+        .then(doc => {
+            frm.clear_table('claim_objection_details');
+            (doc.objection || []).forEach(row => {
+                let child = frm.add_child('claim_objection_details');
+                child.claim_objection = row.objection || "";
+            });
+            frm.refresh_field('claim_objection_details');
+        });
+}
+
+// ------------------------------
+// Load Claim Checklist
+// ------------------------------
 function load_claim_checklist(frm, use_default = false) {
-    let template_name = frm.doc.claim_templates;
- 
-    // If no template and use_default is true → get from MRCMS Settings
-    if (!template_name && use_default) {
+    let template = frm.doc.claim_templates;
+
+    if (!template && use_default) {
         frappe.db.get_single_value('MRCMS Settings', 'default_claim_checklist')
             .then(default_template => {
                 if (default_template) {
                     frm.set_value('claim_templates', default_template);
-                    frm.refresh_field('claim_templates');
- 
-                    // Then load checklist from that template
                     frappe.db.get_doc('Claim Checklist', default_template)
-                        .then(doc => {
-                            populate_claim_checklist(frm, doc);
-                        });
+                        .then(doc => populate_claim_checklist(frm, doc));
                 }
             });
+        return;
     }
-    else if (template_name) {
-        frappe.db.get_doc('Claim Checklist', template_name)
-            .then(doc => {
-                populate_claim_checklist(frm, doc);
-            });
+
+    if (template) {
+        frappe.db.get_doc('Claim Checklist', template)
+            .then(doc => populate_claim_checklist(frm, doc));
+        return;
     }
-    else {
-        // Clear if neither selected nor default
-        frm.clear_table('claim_checklist');
-        frm.refresh_field('claim_checklist');
-    }
+
+    frm.clear_table('claim_checklist');
+    frm.refresh_field('claim_checklist');
 }
- 
-// 🔹 Populate checklist rows
+
+// ------------------------------
+// Populate Checklist
+// ------------------------------
 function populate_claim_checklist(frm, doc) {
     frm.clear_table('claim_checklist');
- 
     (doc.claim_checklist_details || []).forEach(row => {
         let child = frm.add_child('claim_checklist');
-        child.criteria = row.criteria;
-        child.required = row.required;
-        child.present = row.present;
+        child.criteria = row.criteria || "";
+        child.required = row.required || 0;
+        child.present = row.present || 0;
     });
- 
     frm.refresh_field('claim_checklist');
- 
-    // After populating, make fields read-only
-    make_claim_checklist_readonly(frm);
+
+    setTimeout(() => make_claim_checklist_readonly(frm), 300);
 }
- 
-//  Make the checklist fields read-only in Claim only
+
+// ------------------------------
+// Safe Readonly Mode
+// ------------------------------
 function make_claim_checklist_readonly(frm) {
-    // Make grid fields readonly
-    const grid = frm.get_field('claim_checklist').grid;
-    ['criteria', 'required', ].forEach(fieldname => {
-        frappe.meta.get_docfield('Claim Checklist Details', fieldname, frm.doc.name).read_only = 1;
+    let field = frm.get_field('claim_checklist');
+    if (!field || !field.grid) return;
+
+    let grid = field.grid;
+    if (!grid.grid_rows || grid.grid_rows.length === 0) return;
+
+    grid.grid_rows.forEach(row => {
+        if (row.fields_dict?.criteria) row.fields_dict.criteria.df.read_only = 1;
+        if (row.fields_dict?.required) row.fields_dict.required.df.read_only = 1;
+        if (row.fields_dict?.present) row.fields_dict.present.df.read_only = 0;
     });
- 
-    // Prevent adding or deleting rows
+
     grid.cannot_add_rows = true;
     grid.cannot_delete_rows = true;
-    grid.only_sortable = false;
- 
+
     frm.refresh_field('claim_checklist');
- 
-    // Wait until grid is rendered, then hide "Add Row"
+
     setTimeout(() => {
-        $(frm.fields_dict.claim_checklist.grid.wrapper)
-            .find('.grid-add-row, .grid-footer, .grid-empty')
-            .hide();
-    }, 300);
+        try {
+            $(grid.wrapper).find('.grid-add-row, .grid-footer, .grid-empty').hide();
+        } catch (e) {
+            console.error("Error hiding grid elements:", e);
+        }
+    }, 200);
 }

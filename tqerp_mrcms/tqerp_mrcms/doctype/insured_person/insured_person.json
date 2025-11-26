@@ -19,13 +19,14 @@
         "local_office",
         "employer",
         "family_section",
-        "nominee",
         "family_members",
         "accounts_section",
         "dispensary",
         "bank_accounts",
         "Entitlement_section",
-        "entitlement"
+        "entitlement",
+        "Nominee_section",
+        "nominee_details"
     ],
     "fields": [
         {
@@ -92,11 +93,6 @@
             "options": "Family Members"
         },
         {
-            "fieldname": "nominee",
-            "label": "Nominee",
-            "fieldtype": "Data"
-        },
-        {
             "fieldname": "accounts_section",
             "fieldtype": "Section Break",
             "label": "Bank Account Details"
@@ -125,6 +121,18 @@
             "fieldtype": "Table",
             "in_list_view": 1,
             "options": "Entitlement"
+        },
+        {
+            "fieldname": "Nominee_section",
+            "fieldtype": "Section Break",
+            "label": "Nominee Details"
+        },
+       {
+            "fieldname": "nominee_details",
+            "label": "Nominee",
+            "fieldtype": "Table",
+            "in_list_view": 1,
+            "options": "Nominee"
         }
     ],
     "links": [],

@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-19 15:37:39.237296",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name_of_nominee",
+  "relation_with_ip",
+  "date_of_birth",
+  "uhidabha_number",
+  "address",
+  "percentage"
+ ],
+ "fields": [
+  {
+   "fieldname": "name_of_nominee",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name Of Nominee"
+  },
+  {
+   "fieldname": "relation_with_ip",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Relation with IP"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Date Of Birth"
+  },
+  {
+   "fieldname": "uhidabha_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UHID/ABHA Number"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Address"
+  },
+  {
+   "fieldname": "percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Percentage"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-19 15:53:43.834105",
+ "modified_by": "Administrator",
+ "module": "Tqerp Mrcms",
+ "name": "Nominee",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

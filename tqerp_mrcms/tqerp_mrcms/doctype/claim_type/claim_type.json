@@ -25,7 +25,7 @@
         },
          {
             "fieldname": "sanction_authority",
-            "label": "Sanctioning Authority",
+            "label": "sanction Authority",
             "fieldtype": "Link",
             "options":"Authority"
         },
@@ -47,8 +47,7 @@
         {
             "fieldname": "enabled",
             "label": "Enabled",
-            "fieldtype": "Check",
-            "default": 1
+            "fieldtype": "Check"
         }
     ],
     "is_submittable": 0,

@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Turqosoft Solutions Pvt. Ltd. and Contributors
+# Copyright (c) 2025, turqosoft and Contributors
 # See license.txt
 
 # import frappe
