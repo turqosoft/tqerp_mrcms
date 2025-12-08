@@ -1,0 +1,162 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+      "claim_no",
+      "claim_date",
+      "ip_no",
+      "ip_name",
+      "name_of_patient",
+      "dispensary",
+      "claim_status",
+      "amount_claimed",
+      "passed_amount",
+      "cb_break_cb1",
+      "ifs_code",
+      "bank_account_no",
+      "bank_name",
+      "credit_date",
+      "credit_status",
+       "utr_number",
+       "credit_amount"
+      
+    ],
+    "fields": [
+
+        {
+            "fieldname": "claim_no",
+            "label": "Claim Number",
+            "fieldtype": "Link",
+            "options": "Claim",
+            "in_list_view":1,
+            "reqd":1
+        },
+        {
+            "fieldname": "claim_date",
+            "fieldtype": "Date",
+            "label": "Date",
+            "fetch_from":"claim_no.claim_date",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "ip_no",
+            "fieldtype": "Data",
+            "label": "IP Number",
+            "fetch_from":"claim_no.ip_no",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "ip_name",
+            "fieldtype": "Data",
+            "label": "IP Name",
+            "fetch_from":"claim_no.ip_name",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "name_of_patient",
+            "fieldtype": "Data",
+            "label": "Patient Name",
+            "fetch_from":"claim_no.name_of_patient",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "dispensary",
+            "fieldtype": "Data",
+            "label": "Dispensary",
+            "fetch_from":"claim_no.dispensary",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "claim_status",
+            "fieldtype": "Data",
+            "label": "Claim Status",
+            "fetch_from":"claim_no.claim_status",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "amount_claimed",
+            "fieldtype": "Currency",
+            "label": "Amount Claimed",
+            "fetch_from":"claim_no.amount_claimed",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "passed_amount",
+            "fieldtype": "Currency",
+            "label": "Passed Amount",
+            "fetch_from":"claim_no.passed_amount",
+            "in_list_view":1
+        },
+        {
+            "fieldname": "cb_break_cb1",
+            "fieldtype": "Column Break"
+          },
+        {
+            "fieldname": "ifs_code",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "fetch_from":"claim_no.ifs_code",
+            "label": "IFSC Code"
+        },
+        {
+            "fieldname": "bank_account_no",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "fetch_from":"claim_no.bank_account_no",
+            "label": "Bank Account No"
+        },
+        {
+            "fieldname": "bank_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "fetch_from":"claim_no.bank_name",
+            "label": "Bank Name"
+        },
+        
+
+        {
+            "fieldname": "credit_date",
+            "fieldtype": "Date",
+            "label": "Credit Date",
+            "allow_on_submit":1
+        },
+        {
+            "fieldname": "credit_status",
+            "fieldtype": "Data",
+            "label": "Credit Status",
+            "allow_on_submit":1
+        },
+        {
+            "fieldname": "utr_number",
+            "fieldtype": "Data",
+            "label": "UTR Number",
+            "allow_on_submit":1
+        },
+        {
+            "fieldname": "credit_amount",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Credit Amount",
+            "default":0,
+            "allow_on_submit":1
+        }
+
+
+      
+    ],
+    "istable": 1,
+    "links": [],
+    "modified": "2024-04-19 18:09:31.959597",
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Claim Bundle Details",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+  }

@@ -45,7 +45,9 @@
         "heading_amount",
         "passed_amount",
         "rupees",
+        "claim_category",
         "bill_details",
+        "bill_total",
         "heading_objections",
         "no_prescription",
         "date_mismatch",
@@ -74,14 +76,18 @@
             "fieldname": "claim_status",
             "label": "Claim Status",
             "fieldtype": "Select",
-            "options": "\nDraft\nHC Review\nIMO Review\nRD Review\nJoin Director Review\nDirector Review\nSanctioned\nPaid\nObjection",
-            "default": "Draft"
+            "in_standard_filter":1,
+            "options": "\nData Entry\nRegistered\nProcessing\nSanctioned\nPaid\nRejected\nReturned\nClosed",
+            "default": "Data Entry",
+            "read_only": 1
         },
         {
             "fieldname": "dispensary",
             "label": "ESI Dispensary",
             "fieldtype": "Data",
-            "fetch_from:": "ip_no.dispensary"
+            "fetch_from:": "ip_no.dispensary",
+            "reqd": 1,
+            "read_only": 1
         },
         {
             "fieldname": "column_break_eeuj",
@@ -113,7 +119,8 @@
             "fieldname": "ip_no",
             "label": "Insurance Number",
             "fieldtype": "Link",
-            "options": "Insured Person"
+            "options": "Insured Person",
+            "reqd":1
         },
         {
             "fieldname": "phone",
@@ -123,7 +130,8 @@
         {
             "fieldname": "ip_name",
             "label": "IP Name",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "reqd":1
         },
         {
             "fieldname": "address",
@@ -135,6 +143,7 @@
             "label": "ESI Dispensary Book no",
             "fieldtype": "Data"
         },
+        
         {
             "fieldname": "employer",
             "label": "Working Organization/Establishment",
@@ -144,7 +153,8 @@
             "fieldname": "name_of_patient",
             "label": "Name of Patient",
             "fieldtype": "Select",
-            "options": "\n"
+            "options": "",
+            "reqd":1
         },
         {
             "fieldname": "age_of_patient",
@@ -160,65 +170,71 @@
         {
             "fieldname": "from_date",
             "label": "Treatment Start Date",
-            "fieldtype": "Date"
+            "fieldtype": "Date",
+            "reqd":1
         },
         {
             "fieldname": "to_date",
             "label": "Treatment End Date",
-            "fieldtype": "Date"
+            "fieldtype": "Date",
+            "reqd":1
         },
         {
             "fieldname": "type",
             "label": "IP/OP",
             "fieldtype": "Select",
-            "options": "\nOP\nIP"
+            "options": "\nOP\nIP",
+            "reqd":1
         },
         {
             "fieldname": "hospital",
             "label": "If IP, Hospital",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "depends_on": "eval:doc.type=='IP'"
         },
         {
             "fieldname": "in_patient_no",
             "fieldtype": "Data",
-            "label": "In Patient No"
+            "label": "In Patient No",
+            "depends_on": "eval:doc.type=='IP'"
         },
         {
             "fieldname": "diseases",
             "label": "Diagnosis",
-            "fieldtype": "Data"
-        },
-        {
-            "fieldname": "rupees",
-            "label": "Rupees",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "reqd":1
         },
         {
             "fieldname": "amount_claimed",
             "label": "Claim Amount",
-            "fieldtype": "Float"
+            "fieldtype": "Float",
+            "reqd":1
         },
         {
             "fieldname": "bank_name",
             "label": "Bank name",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "reqd": 1
         },
         {
             "fieldname": "branch",
             "label": "Branch",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "reqd": 1
         },
         {
             "fieldname": "bank_account_no",
             "label": "Bank Account No",
             "fieldtype": "Data",
-            "in_list_view": 1
+            "in_list_view": 1,
+            "reqd": 1
         },
         {
             "fieldname": "ifs_code",
             "label": "IFS Code",
             "fieldtype": "Data",
-            "in_list_view": 1
+            "in_list_view": 1,
+            "reqd": 1
         },
         {
             "fieldname": "column_break_peuj",
@@ -265,10 +281,29 @@
             "fieldtype": "Float"
         },
         {
+            "fieldname": "rupees",
+            "label": "Rupees",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "claim_category",
+            "label": "Claim Category",
+            "fieldtype": "Link",
+            "options": "Claim Category",
+            "depends_on":"eval:doc.passed_amount>0",
+            "mandatory_depends_on":"eval:doc.passed_amount>0"
+        },
+        {
             "fieldname": "bill_details",
             "label": "Bill Details",
             "fieldtype": "Table",
             "options": "Bill Details"
+        },
+        {
+            "fieldname": "bill_total",
+            "fieldtype": "Float",
+            "label": "Medical Bill Total",
+            "read_only":1
         },
         {
             "fieldname": "heading_objections",
@@ -332,13 +367,15 @@
         {
             "fieldname": "remarks",
             "fieldtype": "Small Text",
-            "label": "Remarks"
+            "label": "Remarks",
+            "mandatory_depends_on":"eval:doc.others==1"
         },
         {
             "fieldname": "ip_communication",
             "label": "IP Communication",
             "fieldtype": "Table",
-            "options": "IP Communication"
+            "options": "IP Communication",
+            "allow_on_submit":1
         },
         {
             "fieldname": "section_break_ct",
@@ -360,10 +397,45 @@
             "label": "Claim Progress",
             "fieldtype": "Table",
             "options": "Claim Process"
+        },
+        {
+            "fieldname": "credit_date",
+            "fieldtype": "Date",
+            "label": "Credit Date",
+            "allow_on_submit":1,
+            "read_only":1,
+            "depends_on":"eval:doc.claim_status=='Paid' || doc.claim_status=='Closed'"
+        },
+        {
+            "fieldname": "credit_status",
+            "fieldtype": "Data",
+            "label": "Credit Status",
+            "allow_on_submit":1,
+            "read_only":1,
+            "depends_on":"eval:doc.claim_status=='Paid' || doc.claim_status=='Closed'"
+        },
+        {
+            "fieldname": "utr_number",
+            "fieldtype": "Data",
+            "label": "UTR Number",
+            "allow_on_submit":1,
+            "read_only":1,
+            "depends_on":"eval:doc.claim_status=='Paid' || doc.claim_status=='Closed'"
+        },
+        {
+            "fieldname": "credit_amount",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Credit Amount",
+            "default":0,
+            "allow_on_submit":1,
+            "read_only":1,
+            "depends_on":"eval:doc.claim_status=='Paid' || doc.claim_status=='Closed'"
         }
     ],
     "is_submittable": 1,
     "links": [],
+    "search_fields": "claim_status",
     "modified_by": "Administrator",
     "module": "Tqerp Mrcms",
     "name": "Claim",

@@ -4,202 +4,269 @@
 <meta charset="UTF-8">
 <title>Insurance Payment Voucher</title>
 <style>
-  @page {
+@page {
     size: A4;
-    margin: 0.4in; /* safe printable area */
-  }
+    margin: 0.4in;
+}
 
-  body {
+body {
     font-family: Arial, sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     margin: 0;
     padding: 0;
     color: #000;
-  }
+    background: #f8f8f8;
+}
 
-  /* Container with 4-side border */
-  .container {
-    width: 210mm;
-    min-height: 297mm;
-    padding: 15mm;
+.container {
+    width: 190mm;
+    min-height: 277mm;
+    padding: 10mm;
     box-sizing: border-box;
-    border: 2px solid #000;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-  }
+    border: 1px solid #000;
+    margin: 20px auto;
+    background: #fff;
+    position: relative;
+}
 
-  h2, h3 {
+/* ---------- HEADER ---------- */
+.header {
+    margin-bottom: 15px;
     text-align: center;
-    margin: 5px 0;
-  }
+}
 
-  table.main {
+.header h2 {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 8px 0;
+}
+
+.header h3 {
+    font-size: 18px;
+    margin: 5px 0;
+}
+
+/* ---------- SUB INFO ---------- */
+.sub-info {
+    margin: 20px 0;
+}
+
+.sub-info p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    text-align: justify;
+}
+
+/* ---------- TABLE ---------- */
+table.main {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin-top: 10px;
-  }
+    margin-top: 20px;
+}
 
-  table.main th, table.main td {
+table.main th, table.main td {
     border: 1px solid #000;
-    padding: 4px;
+    padding: 8px;
     text-align: center;
-    font-size: 12px;
+    font-size: 13px;
     word-wrap: break-word;
-  }
+}
 
-  table.main th {
+table.main th {
     background-color: #f2f2f2;
     font-weight: bold;
-  }
-
-  table.main td.amount {
-    text-align: right;
-  }
-
-  .buyer-section {
-    text-align: left;
-    padding: 4px;
-    font-size: 12px;
-  }
-
-  .buyer-section span {
-    font-weight: bold;
     font-size: 14px;
-  }
+}
 
-  .sign-section {
-    margin-top: 20px;
+table.main td.amount {
+    text-align: right;
+}
+
+/* ---------- SIGN SECTION ---------- */
+.sign-section {
+    margin-top: 35px;
     display: flex;
     justify-content: space-between;
-  }
+    font-size: 14px;
+}
 
-  .sign-section div {
+.sign-section div {
     text-align: center;
-  }
+}
 
-  /* Print optimization */
-  @media print {
+/* ---------- PRINT SPECIFIC ---------- */
+@media print {
     body, .container {
-      margin: 0;
-      padding: 0;
-      width: 210mm;
-      height: 297mm;
-      border: 2px solid #000;
-      box-sizing: border-box;
+        margin: 0;
+        padding: 5mm;
+        width: 210mm;
+        min-height: 297mm;
+        box-sizing: border-box;
+        background: #fff;
     }
 
     table.main {
-      page-break-inside: avoid;
+        page-break-inside: avoid;
     }
 
     tr {
-      page-break-inside: avoid;
-      page-break-after: auto;
+        page-break-inside: avoid;
+        page-break-after: auto;
     }
-  }
+}
+
 </style>
 </head>
 <body>
 
 <div class="container">
+
+  <!-- HEADER -->
   <div class="header">
     <h2>PROCEEDINGS OF THE INSURANCE MEDICAL OFFICER E.S.I DISPENSARY</h2>
-    <h3>No.1, ERNAKULAM</h3>
-    <h3>(Present: Dr Leena J)</h3>
-  </div>
 
-{# ----------------- Fetch claim_dates ----------------- #}
-{% set table_rows = doc.claim_proceedings if doc.claim_proceedings else [] %}
-{% set total_amount = namespace(value=0) %}
-{% set claim_dates = [] %}
+  {# Get logged-in user's office and office address #}
+{% set user_doc = frappe.get_doc("User", frappe.session.user) %}
 
-{% for row in table_rows %}
-    {% if row.claim_no %}
-        {% set claim_doc = frappe.get_doc("Claim", row.claim_no) %}
-        {% if claim_doc.claim_date %}
-            {% set claim_dates = claim_dates + [claim_doc.claim_date] %}
-        {% endif %}
-    {% endif %}
-{% endfor %}
-
-{% if claim_dates %}
-    {% set earliest_date = claim_dates|min %}
-    {% set latest_date = claim_dates|max %}
+{% if user_doc.office %}
+    {% set office_doc = frappe.get_doc("Office", user_doc.office) %}
+    {% set user_office_name = office_doc.name %}
+    {% set office_address = office_doc.address or "Address Not Available" %}
 {% else %}
-    {% set earliest_date = None %}
-    {% set latest_date = None %}
+    {% set user_office_name = "Office Not Set" %}
+    {% set office_address = "Address Not Available" %}
 {% endif %}
 
-<div class="sub-info">
-    <p>
-        Sub: E.S.I Dispensary No.1, Ernakulam – Medical Reimbursement claims submitted 
-        {% if earliest_date and latest_date %}
-            from {{ earliest_date }} to {{ latest_date }}
-        {% else %}
-            (Dates Not Available)
-        {% endif %}
-        of insured Persons – Sanctioned - orders issued.
-    </p>
-    <p>Ref: <strong>Order No A-670/2025/ESID No 1/EKM Dated 23/10/2025</strong></p>
-    <p>Sanction is hearby accorded to draw and disburse an amount RS.{{total_amount.value}}(Rupees:)to the insured person of this dispensary for their Medical Reimbursement claims submitted from dates to dates vide sub voucher no.{{doc.claim_no}} to {{doc.claim_no}}.The amount may be transffred to the appeded beneficiary accounts</p>
-</div>
+<h3>{{ user_office_name }}</h3>
+<p>{{ office_address }}</p>
 
-<table class="main">
-  <thead>
-    <tr>
-      <th style="width:4%;">No</th>
-      <th style="width:15%;">Claim No</th>
-      <th style="width:25%;">Name</th>
-      <th style="width:15%;">IP No</th>
-      <th style="width:15%;">Mobile</th>
-      <th style="width:15%;">IFSC</th>
-      <th style="width:15%;">A/C No</th>
-      <th style="width:10%;">Amount</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in table_rows %}
-    <tr>
-      <td>{{ loop.index }}</td>
-      <td>{{ row.claim_no or "" }}</td>
-      <td>{{ row.name1 or "" }}</td>
-      <td>{{ row.ip_no or "" }}</td>
-      <td>{{ row.phone or "" }}</td>
-      <td>{{ row.ifsc or "" }}</td>
-      <td>{{ row.bank_account_no or "" }}</td>
-      <td class="amount">
-        {% set amt = row.passed_amount or 0 %}
-        {{ "{:,.2f}".format(amt) }}
-        {% set total_amount.value = total_amount.value + amt %}
-      </td>
-    </tr>
-    {% endfor %}
+{# Get employee full name (NO get_value allowed) #}
+{% set employee_doc = frappe.get_doc("User", doc.employee) %}
+<h3>{{ employee_doc.full_name }}</h3>
 
-    <tr>
-      <td colspan="7" style="text-align:right; font-weight:bold;">TOTAL</td>
-      <td class="amount" style="font-weight:bold;">{{ "{:,.2f}".format(total_amount.value) }}</td>
-    </tr>
-  </tbody>
-</table>
+  {# ------------------------ Claim Proceedings Table ------------------------ #}
+  {% set rows = doc.claim_proceedings or [] %}
+  {% set sorted_rows = rows | sort(attribute='claim_date') %}
+  {% set dates = namespace(list=[]) %}
+  {% set claim_numbers = namespace(list=[]) %}
+  {% set total_amount = namespace(value=0) %}
 
-<div class="sign-section">
-  <div>
-    <p>Verified By</p>
-    <br><br>
-    <p>Signature & Date</p>
+  {% for row in sorted_rows %}
+      {% if row.claim_date %}
+          {% set dates.list = dates.list + [row.claim_date] %}
+      {% endif %}
+      {% if row.claim_no %}
+          {% set claim_numbers.list = claim_numbers.list + [row.claim_no] %}
+      {% endif %}
+      {% set total_amount.value = total_amount.value + (row.passed_amount or 0) %}
+  {% endfor %}
+
+  {% if dates.list %}
+    {% set earliest = dates.list | min %}
+    {% set latest = dates.list | max %}
+
+    {% set earliest_parts = earliest.split("-") %}
+    {% set latest_parts = latest.split("-") %}
+
+    {% set earliest_date = earliest_parts[2] ~ "-" ~ earliest_parts[1] ~ "-" ~ earliest_parts[0] %}
+    {% set latest_date = latest_parts[2] ~ "-" ~ latest_parts[1] ~ "-" ~ latest_parts[0] %}
+
+  {% else %}
+      {% set earliest_date = None %}
+      {% set latest_date = None %}
+  {% endif %}
+
+
+
+  {% if claim_numbers.list %}
+      {% set first_claim = claim_numbers.list | min %}
+      {% set last_claim = claim_numbers.list | max %}
+  {% else %}
+      {% set first_claim = None %}
+      {% set last_claim = None %}
+  {% endif %}
+
+  <div class="sub-info">
+      <p>
+          Sub: {{ office_address }} – Medical Reimbursement claims submitted
+          {% if earliest_date and latest_date %}
+              from {{ earliest_date }} to {{ latest_date }}
+          {% else %}
+              (Dates Not Available)
+          {% endif %}
+          of insured Persons – Sanctioned - orders issued.
+      </p>
+
+    
+      <p><strong>{{ doc.remarks }} Dated {{ doc.get_formatted('date') }}</strong></p>
+
+
+      <p>
+          Sanction is hereby accorded to draw and disburse an amount 
+          RS.{{ "%.2f"|format(total_amount.value) }}
+          (Rupees: {{ frappe.utils.money_in_words(total_amount.value) }})
+          to the insured person of this dispensary for their Medical Reimbursement claims submitted
+          {% if earliest_date and latest_date %}
+              from {{ earliest_date }} to {{ latest_date }}
+          {% else %}
+              (Dates Not Available)
+          {% endif %}
+          {% if first_claim and last_claim %}
+              vide sub voucher no. {{ first_claim }} to {{ last_claim }}.
+          {% else %}
+              (Voucher Numbers Not Available).
+          {% endif %}
+          The amount may be transferred to the appended beneficiary accounts.
+      </p>
   </div>
-  <div>
-    <p>Approved By</p>
-    <br><br>
-    <p>Dr. CINI PRIYA DARSINI V A</p>
-    <p>Director of Insurance Medical Services (IIC)</p>
+
+  <table class="main">
+    <thead>
+      <tr>
+        <th style="width:6%;">No</th>
+        <th style="width:15%;">Claim No</th>
+        <th style="width:23%;">Name</th>
+        <th style="width:15%;">IP No</th>
+        <th style="width:15%;">Mobile</th>
+        <th style="width:15%;">IFSC</th>
+        <th style="width:15%;">A/C No</th>
+        <th style="width:15%;">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in sorted_rows %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row.claim_no }}</td>
+        <td>{{ row.name1 }}</td>
+        <td>{{ row.ip_no }}</td>
+        <td>{{ row.phone }}</td>
+        <td>{{ row.ifsc }}</td>
+        <td>{{ row.bank_account_no }}</td>
+        <td class="amount">{{ "%.2f"|format(row.passed_amount or 0) }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="7" style="text-align:right; font-weight:bold;">TOTAL</td>
+        <td class="amount" style="font-weight:bold;">{{ "%.2f"|format(total_amount.value) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="sign-section">
+    <div>
+      <p>Verified By</p><br><br>
+      <p>Signature & Date</p>
+    </div>
+    <div>
+      <p>Approved By</p><br><br>
+      <p><strong>{{ employee_doc.full_name }}</strong></p>
+      <p>Director of Insurance Medical Services (IIC)</p>
+    </div>
   </div>
+
 </div>
-
-</div> <!-- container end -->
-
 </body>
 </html>

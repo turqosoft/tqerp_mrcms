@@ -8,7 +8,9 @@
  "field_order": [
   "date",
   "bill_no",
-  "amount"
+  "amount",
+  "doctor",
+  "remarks"
  ],
  "fields": [
   {
@@ -28,6 +30,18 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Amount"
+  },
+  {
+   "fieldname": "doctor",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Doctor"
+  },
+   {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks"
   }
  ],
  "index_web_pages_for_search": 1,

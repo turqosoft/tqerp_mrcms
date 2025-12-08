@@ -1,45 +1,59 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2025-11-19 13:15:09.607919",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "date",
-  "activity",
-  "user"
- ],
- "fields": [
-  {
-   "fieldname": "date",
-   "fieldtype": "Datetime",
-   "in_list_view": 1,
-   "label": "Date"
-  },
-  {
-   "fieldname": "activity",
-   "fieldtype": "Text",
-   "in_list_view": 1,
-   "label": "Activity"
-  },
-  {
-   "fieldname": "user",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "User"
-  }
- ],
- "index_web_pages_for_search": 1,
- "istable": 1,
- "links": [],
- "modified": "2025-11-20 13:12:16.197263",
- "modified_by": "Administrator",
- "module": "Tqerp Mrcms",
- "name": "Claim Process",
- "owner": "Administrator",
- "permissions": [],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2025-11-19 13:15:09.607919",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "date",
+        "activity",
+        "user",
+        "office",
+        "duration_seconds"
+    ],
+    "fields": [
+        {
+            "fieldname": "date",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Date"
+        },
+        {
+            "fieldname": "activity",
+            "fieldtype": "Text",
+            "in_list_view": 1,
+            "label": "Activity"
+        },
+        {
+            "fieldname": "user",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "User"
+        },
+        {
+            "fieldname": "office",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Office"
+        },
+        {
+            "fieldname": "duration_seconds",
+            "fieldtype": "Int",
+            "label": "Duration (Seconds)",
+            "allow_on_submit": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2025-11-20 13:12:16.197263",
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Claim Process",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
 }

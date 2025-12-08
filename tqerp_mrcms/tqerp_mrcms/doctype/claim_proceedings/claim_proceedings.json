@@ -1,69 +1,128 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2025-11-25 15:04:49.482493",
- "autoname": "naming_series:",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "section_break_ig7n",
-  "amended_from",
-  "name1",
-  "claim_proceedings"
- ],
- "fields": [
-  {
-   "fieldname": "section_break_ig7n",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Claim Proceedings",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "name1",
-   "fieldtype": "Select",
-   "label": "Naming series",
-   "options": "CP-.YYYY.-.####"
-  },
-  {
-   "fieldname": "claim_proceedings",
-   "fieldtype": "Table",
-   "label": "Claim Proceedings",
-   "options": "Claim Proceedings Details"
-  }
- ],
- "index_web_pages_for_search": 1,
- "is_submittable": 1,
- "links": [],
- "modified": "2025-11-25 15:18:39.673738",
- "modified_by": "Administrator",
- "module": "Tqerp Mrcms",
- "name": "Claim Proceedings",
-"naming_rule": "By \"Naming Series\" field",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "creation": "2025-11-25 15:04:49.482493",
+  "autoname": "naming_series:",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "section_break_ig7n",
+    "amended_from",
+    "name1",
+    "proceedings_status",
+    "office",
+    "employee",
+    "employee_name",
+    "column_break_deuj",
+    "remarks",
+    "date",
+    "section_break_abc",
+    "claim_proceedings"
+  ],
+  "fields": [
+    {
+      "fieldname": "section_break_ig7n",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Claim Proceedings",
+      "print_hide": 1,
+      "read_only": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "name1",
+      "fieldtype": "Select",
+      "label": "Naming series",
+      "options": "CP-.YYYY.-.####"
+    },
+    {
+      "fieldname": "proceedings_status",
+      "fieldtype": "Select",
+      "options": "\nUn Paid\nPaid",
+      "label": "Proceedings Status",
+      "allow_on_submit": 1,
+      "read_only": 1,
+      "default": "Un Paid",
+       "in_list_view":1
+    },
+    {
+      "fieldname": "office",
+      "fieldtype": "Link",
+      "label": "Office",
+      "options": "Office",
+      "read_only": 1,
+       "in_list_view":1
+    },
+    {
+      "fieldname": "employee",
+      "fieldtype": "Link",
+      "label": "Employee ID",
+      "options": "User",
+      "read_only": 1
+    },
+    {
+      "fieldname": "employee_name",
+      "label": "Employee Name",
+      "fieldtype": "Data",
+      "read_only": 1
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks"
+    },
+    {
+      "fieldname": "date",
+      "fieldtype": "Date",
+      "label": "Date",
+      "default": "Today",
+       "in_list_view":1
+    },
+    {
+      "fieldname": "column_break_deuj",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_abc",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "claim_proceedings",
+      "fieldtype": "Table",
+      "label": "Claim Proceedings",
+      "options": "Claim Proceedings Details"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2025-11-25 15:18:39.673738",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Claim Proceedings",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "submit": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
 }

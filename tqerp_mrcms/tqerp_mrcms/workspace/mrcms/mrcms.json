@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"QlFMBRSFmR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">MRCMS</span>\",\"col\":12}},{\"id\":\"yEJ1m2qb8k\",\"type\":\"card\",\"data\":{\"card_name\":\"Organization\",\"col\":4}},{\"id\":\"iSseW9Bw22\",\"type\":\"card\",\"data\":{\"card_name\":\"Accounts\",\"col\":4}},{\"id\":\"m5AFBON7jY\",\"type\":\"card\",\"data\":{\"card_name\":\"Insurance\",\"col\":4}},{\"id\":\"LL-iaxCQYR\",\"type\":\"card\",\"data\":{\"card_name\":\"Claim\",\"col\":4}},{\"id\":\"LWfc9y5LCc\",\"type\":\"card\",\"data\":{\"card_name\":\"General\",\"col\":4}}]",
+ "content": "[{\"id\":\"QlFMBRSFmR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h1\\\">          Medical Reimbursement Claim Management System</span>\",\"col\":12}},{\"id\":\"rmjX4u8MQq\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">                               \u0d2e\u0d46\u0d21\u0d3f\u0d15\u0d4d\u0d15\u0d7d \u0d31\u0d40-\u0d07\u0d02\u0d2c\u0d34\u0d4d\u0d38\u0d4d\u0d2e\u0d46\u0d28\u0d4d\u0d7b\u0d31\u0d4d \u0d15\u0d4d\u0d32\u0d46\u0d2f\u0d3f\u0d02 \u0d2e\u0d3e\u0d28\u0d47\u0d1c\u0d4d\u200c\u0d2e\u0d28\u0d4d\u0d31\u0d4d \u0d38\u0d3f\u0d38\u0d4d\u0d31\u0d4d\u0d31\u0d02<b></b></span>\",\"col\":12}},{\"id\":\"-am7tkdOIF\",\"type\":\"card\",\"data\":{\"card_name\":\"Master\",\"col\":4}},{\"id\":\"C3simq74v-\",\"type\":\"card\",\"data\":{\"card_name\":\"Transactions\",\"col\":4}},{\"id\":\"SZlVLQm6xf\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2025-11-10 21:14:20.250922",
  "custom_blocks": [],
  "docstatus": 0,
@@ -8,68 +8,11 @@
  "for_user": "",
  "hide_custom": 0,
  "icon": "unhide",
- "idx": 1,
+ "idx": 2,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "MRCMS",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Accounts",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Bank",
-   "link_count": 0,
-   "link_to": "Bank",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "General",
-   "link_count": 1,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "MRCMS Settings",
-   "link_count": 0,
-   "link_to": "Mrcms Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Insurance",
-   "link_count": 5,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Disease",
-   "link_count": 0,
-   "link_to": "Diseases",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -109,15 +52,6 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Organization",
-   "link_count": 5,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
   },
   {
    "hidden": 0,
@@ -162,9 +96,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee",
+   "label": "Claim",
    "link_count": 0,
-   "link_to": "Employee",
+   "link_to": "Claim",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -172,8 +106,37 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Claim",
-   "link_count": 2,
+   "label": "Proceedings",
+   "link_count": 0,
+   "link_to": "Claim Proceedings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "MRC Register",
+   "link_count": 0,
+   "link_to": "MRC Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transactions",
+   "link_count": 5,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -197,9 +160,68 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim Bundle",
+   "link_count": 0,
+   "link_to": "Claim Bundle Management",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim Sanctions",
+   "link_count": 0,
+   "link_to": "Claim Sanction List",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim Payments",
+   "link_count": 0,
+   "link_to": "Claim Payment List",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insured Person",
+   "link_count": 0,
+   "link_to": "Insured Person",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fund Manager",
+   "link_count": 0,
+   "link_to": "Fund Manager",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-11-25 21:26:13.335483",
+ "modified": "2025-12-08 11:09:20.358745",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS",
@@ -211,6 +233,39 @@
  "roles": [
   {
    "role": "Administrator"
+  },
+  {
+   "role": "Clerk"
+  },
+  {
+   "role": "IMO"
+  },
+  {
+   "role": "Head Clerk"
+  },
+  {
+   "role": "Regional Director"
+  },
+  {
+   "role": "Deputy Director"
+  },
+  {
+   "role": "Junior Superintendent"
+  },
+  {
+   "role": "Cashier"
+  },
+  {
+   "role": "RDD Section"
+  },
+  {
+   "role": "JD Section"
+  },
+  {
+   "role": "DIR Section"
+  },
+  {
+   "role": "Director"
   }
  ],
  "sequence_id": 28.0,

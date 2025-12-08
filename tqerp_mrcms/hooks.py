@@ -30,7 +30,12 @@ app_license = "mit"
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {"Claim" : "public/js/claim.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {
+    "Claim" : "public/js/claim_list.js",
+    "Claim Bundle Management" : "public/js/claim_bundle_management.js",
+    "Claim Sanction List":"public/js/claim_sanction_list.js",
+    "Claim Payment List":"public/js/claim_payment_list.js"
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -106,6 +111,15 @@ doctype_js = {"Claim" : "public/js/claim.js"}
 # permission_query_conditions = {
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
+
+permission_query_conditions = {
+	"Claim": "tqerp_mrcms.tqerp_mrcms.doctype.claim.claim.get_permission_query_conditions",
+    "Claim Proceedings": "tqerp_mrcms.tqerp_mrcms.doctype.claim_proceedings.claim_proceedings.get_permission_query_conditions",
+    "Claim Bundle Management": "tqerp_mrcms.tqerp_mrcms.doctype.claim_bundle_management.claim_bundle_management.get_permission_query_conditions",
+    "Claim Sanction List": "tqerp_mrcms.tqerp_mrcms.doctype.claim_sanction_list.claim_sanction_list.get_permission_query_conditions",
+    "Claim Payment List": "tqerp_mrcms.tqerp_mrcms.doctype.claim_payment_list.claim_payment_list.get_permission_query_conditions",
+}
+
 #
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
@@ -247,3 +261,9 @@ website_route_rules = [
 # has_website_permission = [
 #     "tqerp_mrcms.api.check_page_permission"
 # ]
+doc_events = {
+    "Claim Proceedings": {
+        "on_submit": "tqerp_mrcms.api.update_claim_status_on_submit",
+        "on_cancel": "tqerp_mrcms.api.update_claim_status_on_cancel"
+    }
+}

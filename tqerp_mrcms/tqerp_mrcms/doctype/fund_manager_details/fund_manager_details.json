@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-06 09:41:27.045883",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "office",
+  "fixed",
+  "allocated",
+  "paid",
+  "expired",
+  "allocatable"
+ ],
+ "fields": [
+    {
+        "fieldname": "office",
+        "fieldtype": "Link",
+        "label": "Office",
+        "options": "Office",
+        "in_list_view":1
+       },
+  {
+   "fieldname": "fixed",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Fixed"
+  },
+  {
+   "fieldname": "allocated",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Allocated",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "paid",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Paid",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "expired",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Expired"
+  },
+  {
+   "fieldname": "allocatable",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Allocatable",
+   "allow_on_submit": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-06 09:43:48.485988",
+ "modified_by": "Administrator",
+ "module": "Tqerp Mrcms",
+ "name": "Fund Manager Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

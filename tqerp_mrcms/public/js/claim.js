@@ -1,54 +1,69 @@
-frappe.ui.form.on('Claim', {
-    // Triggered when the form is loaded
-    onload: function(frm) {
-        const ip_no = frm.doc.ip_no;
-        if (!ip_no) return;
+// ------------------------------
+// Parent Doctype (Claim)
+// ------------------------------
+frappe.ui.form.on("Claim", {
 
-        frappe.call({
-            method: "tqerp_mrcms.api.get_ip_details",
-            args: { ip_no: ip_no },
-            callback: function(r) {
-                const data = r.message;
-                if (!data) return;
-
-                frm.set_value("ip_name", data.ip_name);
-                frm.set_value("address", data.address);
-                console.log("Address::: "+ data.address);
-                frm.set_value("phone", data.phone);
-                frm.set_value("employer", data.employer);
-
-                // Calculate age
-                if (data.dob) {
-                    const dob = new Date(data.dob);
-                    const age = Math.floor((Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-                    frm.set_value("patient_age", age);
-                }
-
-                // Relationship from first family member
-                if (data.family_members && data.family_members.length > 0) {
-                    frm.set_value("relationship", data.family_members[0].relationship || "");
-                }
-            }
-        });
+    refresh(frm) {
+        // console.log("Claim Form: refresh triggered");
+        // Convert passed_amount to rupees on refresh if already set
+        if (frm.doc.passed_amount) frm.trigger("passed_amount");
     },
 
-    // Triggered when ip_no field is changed
-    ip_no: function(frm) {
-        const ip_no = frm.doc.ip_no;
-        if (!ip_no) return;
+    validate(frm) {
+        // console.log("Claim Form: validate triggered");
+        calculate_total_bill_amount(frm);
+    },
+
+    // Trigger when passed_amount field changes
+    passed_amount(frm) {
+        if (!frm.doc.passed_amount) {
+            frm.set_value("rupees", "");
+            return;
+        }
 
         frappe.call({
-            method: "tqerp_mrcms.api.get_ip_details",
-            args: { ip_no: ip_no },
-            callback: function(r) {
-                const data = r.message;
-                if (!data) return;
-
-                frm.set_value("ip_name", data.ip_name);
-                frm.set_value("address", data.address);
-                frm.set_value("phone", data.phone);
-                frm.set_value("employer", data.employer);
+            method: "tqerp_mrcms.api.number_to_words_indian",
+            args: { num: frm.doc.passed_amount },
+            callback(r) {
+                if (r.message) {
+                    frm.set_value("rupees", r.message);
+                }
+            },
+            error(err) {
+                console.error("Error converting number to words:", err);
             }
         });
     }
 });
+
+// ------------------------------
+// Child Table Events (Bill Details)
+// ------------------------------
+frappe.ui.form.on("Bill Details", {
+    bill_amount(frm, cdt, cdn) {
+        // console.log("Bill Details: bill_amount changed", cdt, cdn);
+        calculate_total_bill_amount(frm);
+    },
+
+    bill_details_remove(frm, cdt, cdn) {
+        // console.log("Bill Details: row removed", cdt, cdn);
+        calculate_total_bill_amount(frm);
+    }
+});
+
+// ------------------------------
+// Calculate Total Amount
+// ------------------------------
+function calculate_total_bill_amount(frm) {
+    // console.log("Calculating total bill amount...");
+
+    let total = 0;
+
+    (frm.doc.bill_details || []).forEach(row => {
+        // console.log("Row bill_amount:", row.bill_amount);
+        total += flt(row.bill_amount);
+    });
+
+    // console.log("Total calculated:", total);
+    frm.set_value("bill_total", total);
+}

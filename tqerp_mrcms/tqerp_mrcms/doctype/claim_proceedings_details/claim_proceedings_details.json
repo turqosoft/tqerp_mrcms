@@ -1,81 +1,110 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2025-11-25 15:14:40.233872",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "claim_no",
-  "name1",
-  "ip_no",
-  "phone",
-  "ifsc",
-  "bank_account_no",
-  "passed_amount",
-  "claim_date"
- ],
- "fields": [
-  {
-   "fieldname": "name1",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Name"
-  },
-  {
-   "fieldname": "ip_no",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Ip No",
-   "options": "Insured Person"
-  },
-  {
-   "fieldname": "ifsc",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "IFSC"
-  },
-  {
-   "fieldname": "phone",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Mobile"
-  },
-  {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "A/c No"
-  },
-  {
-   "fieldname": "passed_amount",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Amount"
-  },
-  {
-   "fieldname": "claim_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Claim No"
-  },
-  {
-   "fieldname": "claim_date",
-   "fieldtype": "Date",
-   "label": "Claim Date"
-  }
- ],
- "index_web_pages_for_search": 1,
- "istable": 1,
- "links": [],
- "modified": "2025-11-25 17:35:15.657962",
- "modified_by": "Administrator",
- "module": "Tqerp Mrcms",
- "name": "Claim Proceedings Details",
- "owner": "Administrator",
- "permissions": [],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+    "actions": [],
+    "creation": "2025-11-25 15:14:40.233872",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "claim_no",
+        "name1",
+        "ip_no",
+        "passed_amount",
+        "phone",
+        "ifsc",
+        "bank_account_no",
+        "claim_date",
+        "credit_date",
+        "credit_status",
+        "utr_number",
+        "credit_amount"
+    ],
+    "fields": [
+        {
+            "fieldname": "name1",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Name"
+        },
+        {
+            "fieldname": "ip_no",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "IP No",
+            "options": "Insured Person"
+        },
+        {
+            "fieldname": "ifsc",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "IFSC"
+        },
+        {
+            "fieldname": "phone",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Mobile"
+        },
+        {
+            "fieldname": "bank_account_no",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "A/c No"
+        },
+        {
+            "fieldname": "passed_amount",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Amount"
+        },
+        {
+            "fieldname": "claim_no",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Claim No"
+        },
+        {
+            "fieldname": "claim_date",
+            "fieldtype": "Date",
+            "label": "Claim Date"
+        },
+        {
+            "fieldname": "credit_date",
+            "fieldtype": "Date",
+            "label": "Credit Date",
+            "allow_on_submit":1
+        },
+        {
+            "fieldname": "credit_status",
+            "fieldtype": "Data",
+            "label": "Credit Status",
+            "allow_on_submit":1
+        },
+        {
+            "fieldname": "utr_number",
+            "fieldtype": "Data",
+            "label": "UTR Number",
+            "allow_on_submit":1
+        },
+        {
+            "fieldname": "credit_amount",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Credit Amount",
+            "default":0,
+            "allow_on_submit":1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2025-11-25 17:35:15.657962",
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Claim Proceedings Details",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
 }

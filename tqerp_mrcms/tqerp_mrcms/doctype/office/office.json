@@ -13,9 +13,11 @@
         "office_name",
         "type",
         "is_group",
+        "office_code",
         "column_break_deuj",
         "parent_office",
-        "district"
+        "district",
+        "address"
     ],
     "fields": [
         {
@@ -55,6 +57,18 @@
             "in_list_view": 1
         },
         {
+            "fieldname": "office_code",
+            "label": "Office Code",
+            "fieldtype": "Data",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "address",
+            "label": "Adress",
+            "fieldtype": "Small Text",
+            "in_list_view": 1
+        },
+        {
             "fieldname": "district",
             "label": "District",
             "fieldtype": "Link",
@@ -84,8 +98,7 @@
             "report": 1,
             "role": "System Manager",
             "share": 1,
-            "write": 1,
-            "submit": 1
+            "write": 1
         }
     ],
     "sort_field": "modified",

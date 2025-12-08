@@ -1,12 +1,41 @@
-frappe.ui.form.on("Claim Proceedings", {
-    refresh(frm) {
+frappe.ui.form.on("Claim Payment List", {
+    onload: function(frm) {
+        // Auto-set Office from logged-in user
+        if (!frm.doc.office) {
+            frappe.call({
+                method: "frappe.client.get_value",
+                args: {
+                    doctype: "User",
+                    filters: { name: frappe.session.user },
+                    fieldname: "office"
+                },
+                callback: function(r) {
+                    if (r && r.message) {
+                        frm.set_value("office", r.message.office);
+                        frm.refresh_field("office");
+                    }
+                }
+            });
+        }
+    },
+
+    before_save: function(frm) {
+        // Calculate total of passed_amount from child table
+        let total = 0;
+        if (frm.doc.details && frm.doc.details.length) {
+            frm.doc.details.forEach(function(row) {
+                total += row.passed_amount || 0;
+            });
+        }
+        frm.set_value("payment_total", total);
+    },
+
+    refresh: function(frm) {
         // Show Download button ONLY if submitted
         if (frm.doc.docstatus === 1) {
-            // Add a single Download button
             frm.add_custom_button(__('Download List'), function() {
-                // Show dialog to choose Excel or CSV
                 let d = new frappe.ui.Dialog({
-                    title: __('Download Payee List'),
+                    title: __('Download Payment List'),
                     fields: [
                         {
                             fieldname: 'file_type',
@@ -20,15 +49,18 @@ frappe.ui.form.on("Claim Proceedings", {
                     primary_action_label: __('Download'),
                     primary_action(values) {
                         let method = values.file_type === 'CSV'
-                            ? "tqerp_mrcms.api.download_claim_details_csv"
-                            : "tqerp_mrcms.api.download_claim_details_excel";
+                            ? "tqerp_mrcms.api.download_payment_details_csv"
+                            : "tqerp_mrcms.api.download_payment_details_excel";
 
                         frappe.call({
                             method: method,
                             args: { docname: frm.doc.name },
                             callback: function(r) {
-                                if (r.message) window.open(r.message);
-                                else frappe.msgprint(__('No file available for download'));
+                                if (r.message) {
+                                    window.open(r.message);
+                                } else {
+                                    frappe.msgprint(__('No file available for download'));
+                                }
                             }
                         });
 
@@ -37,12 +69,11 @@ frappe.ui.form.on("Claim Proceedings", {
                 });
                 d.show();
             });
-        
 
 
-        // =====================================================
-            //  NEW: Upload Payment Excel/CSV button
-            // =====================================================
+            // -----------------------------
+            // UPLOAD PAYMENT BUTTON
+            // -----------------------------
             frm.add_custom_button(__('Upload Payment'), function () {
 
                 let d = new frappe.ui.Dialog({
@@ -59,7 +90,7 @@ frappe.ui.form.on("Claim Proceedings", {
                     primary_action(values) {
 
                         frappe.call({
-                            method: "tqerp_mrcms.api.process_payment_file",
+                            method: "tqerp_mrcms.api.process_payment_file_paymentlist",
                             args: {
                                 docname: frm.doc.name,
                                 file_url: values.upload_file
@@ -68,6 +99,7 @@ frappe.ui.form.on("Claim Proceedings", {
                             freeze_message: "Processing file...",
                             callback: function (r) {
                                 if (!r.exc) {
+
                                     let msg = `
                                         <b>Updated Rows:</b> ${r.message.updated}<br>
                                         <b>Unmatched Rows:</b> ${r.message.unmatched_count}<br>
@@ -94,8 +126,8 @@ frappe.ui.form.on("Claim Proceedings", {
                 });
 
                 d.show();
-
             });
+
         }
     }
 });
