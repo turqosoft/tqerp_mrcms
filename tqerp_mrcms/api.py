@@ -1411,19 +1411,20 @@ def process_payment_file(docname, file_url):
 
 @frappe.whitelist()
 def number_to_words_indian(num):
-    """Convert a number to Indian words"""
+    """Convert a number to Indian words (Camel Case / Title Case)"""
+   
     try:
         num = int(math.floor(float(num)))
     except:
         return ""
  
     if num == 0:
-        return "zero"
+        return "Zero"
  
-    ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-            "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-            "seventeen", "eighteen", "nineteen"]
-    tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+    ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+            "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+            "Seventeen", "Eighteen", "Nineteen"]
+    tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
  
     def two_digit_to_words(n):
         if n < 20:
@@ -1435,7 +1436,7 @@ def number_to_words_indian(num):
     def three_digit_to_words(n):
         h = n // 100
         rest = n % 100
-        return (ones[h] + " hundred " if h else "") + (two_digit_to_words(rest) if rest else "")
+        return (ones[h] + " Hundred " if h else "") + (two_digit_to_words(rest) if rest else "")
  
     crore = num // 10000000
     num %= 10000000
@@ -1446,15 +1447,17 @@ def number_to_words_indian(num):
  
     parts = []
     if crore:
-        parts.append(three_digit_to_words(crore) + "crore")
+        parts.append(three_digit_to_words(crore) + " Crore")
     if lakh:
-        parts.append(three_digit_to_words(lakh) + " lakh")
+        parts.append(three_digit_to_words(lakh) + " Lakh")
     if thousand:
-        parts.append(three_digit_to_words(thousand) + " thousand")
+        parts.append(three_digit_to_words(thousand) + " Thousand")
     if hundreds_and_rest:
         parts.append(three_digit_to_words(hundreds_and_rest))
  
-    return " ".join(parts).strip() + " only"
+    # Join all parts and capitalize the first letter of each word
+    result = " ".join(parts).strip()
+    return result + " Only"
 
 
 # -----claim bundle management creation-------
@@ -1962,15 +1965,19 @@ def allocate_fund_on_submit(payment_list_name):
 
 @frappe.whitelist()
 def get_claim_category_by_amount(passed_amount):
-    passed_amount = float(passed_amount)
+    amount = float(passed_amount)
  
-    category = frappe.db.sql("""
-        SELECT name
-        FROM `tabClaim Category`
-        WHERE %s BETWEEN min_amount AND max_amount
-        LIMIT 1
-    """, (passed_amount,), as_dict=True)
+    categories = frappe.get_all(
+        "Claim Category",
+        fields=["name", "min_amount", "max_amount"],
+        order_by="min_amount asc"  
+    )
  
-    if category:
-        return category[0].name
+    for c in categories:
+        min_val = float(c.min_amount or 0)
+        max_val = float(c.max_amount or 0)
+ 
+        if min_val <= amount <= max_val:
+            return c.name
+ 
     return None

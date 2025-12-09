@@ -1,6 +1,7 @@
 from frappe.model.document import Document
 import frappe
 from frappe.utils import now_datetime
+from frappe.utils import getdate
 
 class Claim(Document):
 
@@ -12,15 +13,61 @@ class Claim(Document):
 
     def on_update(self):
         self.log_claim_process("Created")
+        self.validate_entitlement_period()
 
     def before_save(self):
         """Log changes to claim_status only"""
         previous_doc = self.get_doc_before_save()
         # self.log_claim_status_change(previous_doc)
+        self.validate_entitlement_period()
 
     def on_submit(self):
         """Log submission of the Claim"""
         self.log_claim_process("Submitted")
+        self.validate_entitlement_period()
+
+    def validate_entitlement_period(self):
+        """
+        Ensure treatment period (from_date -> to_date) falls fully
+        within at least one entitlement period of the Insured Person.
+        """
+
+        if not (self.ip_no and self.from_date and self.to_date):
+            frappe.throw("IP No, From Date and To Date are mandatory for entitlement check.")
+
+        # Get entitlement rows from Insured Person
+        entitlements = frappe.get_all(
+            "Entitlement",
+            filters={
+                "parent": self.ip_no,
+                "parenttype": "Insured Person",
+                "parentfield": "entitlement",
+            },
+            fields=["start_date", "end_date"],
+        )
+
+        if not entitlements:
+            frappe.throw(f"Entitlement periods not configured for Insured Person {0}. "
+                         .format(self.ip_no))
+
+        # Convert to date objects (safety)
+        claim_from = getdate(self.from_date)
+        claim_to   = getdate(self.to_date)
+
+        allowed = False
+        for ent in entitlements:
+            start = getdate(ent.start_date)
+            end   = getdate(ent.end_date)
+
+            # Inclusive check: the ENTIRE treatment period must lie within one entitlement row
+            if claim_from >= start and claim_to <= end:
+                allowed = True
+                break
+
+        if not allowed:
+            frappe.throw(
+                f"Entitlement not available for treatment period "
+            )
 
     def log_claim_process(self, action, user=None, office=None):
         """Append an entry to Claim Process child table"""

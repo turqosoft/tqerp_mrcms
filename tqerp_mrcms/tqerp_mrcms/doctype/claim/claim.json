@@ -283,12 +283,14 @@
         {
             "fieldname": "rupees",
             "label": "Rupees",
+            "read_only":1,
             "fieldtype": "Data"
         },
         {
             "fieldname": "claim_category",
             "label": "Claim Category",
             "fieldtype": "Link",
+            "read_only":1,
             "options": "Claim Category",
             "depends_on":"eval:doc.passed_amount>0",
             "mandatory_depends_on":"eval:doc.passed_amount>0"
@@ -356,7 +358,7 @@
             "default": "0",
             "fieldname": "esi_identity_proofepehechen",
             "fieldtype": "Check",
-            "label": "ESI Identity Proof/ePehechen"
+            "label": "ESI Identity Proof/ePehechan"
         },
         {
             "default": "0",

@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:local_office",
+ "creation": "2025-12-08 22:14:33.876736",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "local_office",
+  "local_office_address"
+ ],
+ "fields": [
+  {
+   "fieldname": "local_office",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Local Office",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "local_office_address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-08 22:16:32.402737",
+ "modified_by": "Administrator",
+ "module": "Tqerp Mrcms",
+ "name": "Local Office",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

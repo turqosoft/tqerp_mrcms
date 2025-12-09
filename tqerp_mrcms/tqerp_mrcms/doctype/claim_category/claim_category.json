@@ -20,6 +20,13 @@
             "fieldtype": "Data",
             "required":1
         },
+         {
+            "fieldname": "sanction_authority",
+            "label": "Sanctioning Authority",
+            "fieldtype": "Link",
+            "options":"Authority",
+            "in_list_view":1
+        },
         {
             "fieldname": "column_break_eeuj",
             "fieldtype": "Column Break"
@@ -36,6 +43,12 @@
             "label": "Maximum Amount",
             "fieldtype": "Data",
             "in_list_view":1
+        },
+        {
+            "fieldname": "enabled",
+            "label": "Enabled",
+            "fieldtype": "Check",
+            "default": 1
         }
     ],
     "links": [],

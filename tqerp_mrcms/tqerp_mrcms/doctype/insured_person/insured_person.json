@@ -76,8 +76,9 @@
         },
         {
             "fieldname": "local_office",
-            "label": "Local office",
-            "fieldtype": "Data"
+            "label": "Local Office",
+            "fieldtype": "Link",
+            "options": "Local Office"
         },
         {
             "fieldname": "employer",
