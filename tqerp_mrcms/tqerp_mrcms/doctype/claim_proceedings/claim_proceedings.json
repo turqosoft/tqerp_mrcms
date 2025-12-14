@@ -8,7 +8,7 @@
   "field_order": [
     "section_break_ig7n",
     "amended_from",
-    "name1",
+    "naming_series",
     "proceedings_status",
     "office",
     "employee",
@@ -16,8 +16,20 @@
     "column_break_deuj",
     "remarks",
     "date",
+    "cp_section2",
+    "fund_manager",
+    "cp_cb3",
+    "fund_date",
+    "cp_cb4",
+    "approval_note",
     "section_break_abc",
-    "claim_proceedings"
+    "claim_proceedings",
+    "cp_section1",
+    "available",
+    "cp_cb1",
+    "total_allocated",
+    "cp_cb2",
+    "balance"
   ],
   "fields": [
     {
@@ -35,7 +47,7 @@
       "search_index": 1
     },
     {
-      "fieldname": "name1",
+      "fieldname": "naming_series",
       "fieldtype": "Select",
       "label": "Naming series",
       "options": "CP-.YYYY.-.####"
@@ -47,16 +59,14 @@
       "label": "Proceedings Status",
       "allow_on_submit": 1,
       "read_only": 1,
-      "default": "Un Paid",
-       "in_list_view":1
+      "default": "Un Paid"
     },
     {
       "fieldname": "office",
       "fieldtype": "Link",
       "label": "Office",
       "options": "Office",
-      "read_only": 1,
-       "in_list_view":1
+      "read_only": 1
     },
     {
       "fieldname": "employee",
@@ -80,8 +90,7 @@
       "fieldname": "date",
       "fieldtype": "Date",
       "label": "Date",
-      "default": "Today",
-       "in_list_view":1
+      "default": "Today"
     },
     {
       "fieldname": "column_break_deuj",
@@ -96,6 +105,63 @@
       "fieldtype": "Table",
       "label": "Claim Proceedings",
       "options": "Claim Proceedings Details"
+    },
+    {
+      "fieldname": "cp_section1",
+      "fieldtype": "Section Break",
+      "label": "Fund Details"
+    },
+    {
+      "fieldname": "balance",
+      "fieldtype": "Currency",
+      "label": "Balance"
+    },
+    {
+      "fieldname": "available",
+      "fieldtype": "Currency",
+      "label": "Fund Available"
+    },
+    {
+      "fieldname": "cp_cb1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "total_allocated",
+      "fieldtype": "Currency",
+      "label": "Total Allocated"
+    },
+    {
+      "fieldname": "cp_cb2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "fund_manager",
+      "label": "Fund",
+      "fieldtype": "Link",
+      "options": "Fund Manager"
+    },
+    {
+      "fieldname": "fund_date",
+      "fieldtype": "Date",
+      "label": "Fund Date"
+    },
+    {
+      "fieldname": "approval_note",
+      "fieldtype": "Data",
+      "label": "Approval Note"
+    },
+    {
+      "fieldname": "cp_cb3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "cp_cb4",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "cp_section2",
+      "fieldtype": "Section Break",
+      "label": "Funding Details"
     }
   ],
   "index_web_pages_for_search": 1,

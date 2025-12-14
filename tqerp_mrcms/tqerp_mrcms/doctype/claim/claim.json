@@ -159,7 +159,7 @@
         {
             "fieldname": "age_of_patient",
             "label": "Age of Patient",
-            "fieldtype": "Data"
+            "fieldtype": "Int"
         },
         {
             "fieldname": "relation",
@@ -437,7 +437,7 @@
     ],
     "is_submittable": 1,
     "links": [],
-    "search_fields": "claim_status",
+    "search_fields": "claim_status, claim_date, ip_no, ip_name, dispensary",
     "modified_by": "Administrator",
     "module": "Tqerp Mrcms",
     "name": "Claim",

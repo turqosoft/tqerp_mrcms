@@ -1,14 +1,18 @@
 {
   "actions": [],
   "allow_rename": 1,
-  "autoname": "FM-.#####",
+  "autoname": "naming_series:",
   "creation": "2025-12-05 15:29:38.838883",
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
     "section_break_v0c1",
     "amended_from",
+    "naming_series",
     "date",
+    "approval_note",
+    "cb_fm1",
+    "remarks",
     "sb_fund1",
     "details"
   ],
@@ -28,10 +32,15 @@
       "search_index": 1
     },
     {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Naming series",
+      "options": "FM-.YYYY.-.####"
+    },
+    {
       "fieldname": "date",
       "fieldtype": "Date",
-      "label": "Date",
-      "in_list_view": 1
+      "label": "Date"
     },
     {
       "fieldname": "details",
@@ -42,6 +51,20 @@
     {
       "fieldname": "sb_fund1",
       "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "cb_fm1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "approval_note",
+      "fieldtype": "Data",
+      "label": "Approval Note"
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks"
     }
   ],
   "index_web_pages_for_search": 1,
@@ -51,6 +74,7 @@
   "modified_by": "Administrator",
   "module": "Tqerp Mrcms",
   "name": "Fund Manager",
+  "naming_rule": "By \"Naming Series\" field",
   "owner": "Administrator",
   "permissions": [
     {

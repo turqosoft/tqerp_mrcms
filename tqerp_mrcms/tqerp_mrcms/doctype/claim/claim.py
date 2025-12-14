@@ -1,7 +1,7 @@
 from frappe.model.document import Document
 import frappe
 from frappe.utils import now_datetime
-from frappe.utils import getdate
+from frappe.utils import getdate, add_days
 
 class Claim(Document):
 
@@ -28,14 +28,15 @@ class Claim(Document):
 
     def validate_entitlement_period(self):
         """
-        Ensure treatment period (from_date -> to_date) falls fully
-        within at least one entitlement period of the Insured Person.
+        Ensure treatment period (from_date -> to_date) is fully covered by
+        one or more contiguous entitlement periods (no gaps), even if
+        it crosses multiple 6-month rows (e.g. Jun → Jul).
         """
 
         if not (self.ip_no and self.from_date and self.to_date):
-            frappe.throw("IP No, From Date and To Date are mandatory for entitlement check.")
+            frappe.throw(_("IP No, From Date and To Date are mandatory for entitlement check."))
 
-        # Get entitlement rows from Insured Person
+        # Fetch entitlement rows from Insured Person
         entitlements = frappe.get_all(
             "Entitlement",
             filters={
@@ -44,30 +45,67 @@ class Claim(Document):
                 "parentfield": "entitlement",
             },
             fields=["start_date", "end_date"],
+            order_by="start_date asc",
         )
 
         if not entitlements:
-            frappe.throw(f"Entitlement periods not configured for Insured Person {0}. "
+            frappe.throw(f"No entitlement periods are configured for Insured Person {0}. "
+                "Please update entitlement periods before processing the claim."
                          .format(self.ip_no))
 
-        # Convert to date objects (safety)
         claim_from = getdate(self.from_date)
         claim_to   = getdate(self.to_date)
 
-        allowed = False
+        # --- 1) Normalise & sort intervals ---
+        intervals = []
         for ent in entitlements:
-            start = getdate(ent.start_date)
-            end   = getdate(ent.end_date)
+            if ent.start_date and ent.end_date:
+                intervals.append((
+                    getdate(ent.start_date),
+                    getdate(ent.end_date),
+                ))
 
-            # Inclusive check: the ENTIRE treatment period must lie within one entitlement row
+        # Safety: if somehow no valid intervals
+        if not intervals:
+            frappe.throw(
+                f"No valid entitlement date ranges found for Insured Person {0}."
+            ).format(self.ip_no)
+
+        intervals.sort(key=lambda x: x[0])  # sort by start_date
+
+        # --- 2) Merge overlapping / contiguous intervals ---
+        merged = []
+        cur_start, cur_end = intervals[0]
+
+        for start, end in intervals[1:]:
+            # If next interval starts on or before the day after current end,
+            # we treat it as continuous coverage and merge.
+            if start <= add_days(cur_end, 1):
+                # Extend the current interval
+                if end > cur_end:
+                    cur_end = end
+            else:
+                # Gap detected, push current and start a new one
+                merged.append((cur_start, cur_end))
+                cur_start, cur_end = start, end
+
+        # Push the last interval
+        merged.append((cur_start, cur_end))
+
+        # --- 3) Check if any merged interval fully covers claim period ---
+        allowed = False
+        for start, end in merged:
             if claim_from >= start and claim_to <= end:
                 allowed = True
                 break
 
         if not allowed:
-            frappe.throw(
-                f"Entitlement not available for treatment period "
-            )
+            msg = (
+                f"Treatment period {0} to {1} does not fall within any continuous "
+                "entitlement coverage for Insured Person {2}. Claim cannot be processed."
+            ).format(claim_from, claim_to, self.ip_no)
+            frappe.throw(msg)
+
 
     def log_claim_process(self, action, user=None, office=None):
         """Append an entry to Claim Process child table"""

@@ -1,83 +1,86 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "autoname": "CP-.#####",
-    "creation": "2025-11-28 16:40:10.281765",
-    "doctype": "DocType",
-    "engine": "InnoDB",
-    "field_order": [
-      "name1",
-      "payment_status",
-     "claim_payment_no",
-     "office",
-     "cb_break_cpl1",
-     "payment_date",
-     "remarks",
-     "cpl_section",
-     "details",
-     "payment_total",
-     "cpl_section1",
-     "available",
-     "cb_break_cpl2",
-     "total_allocated",
-      "cb_break_cpl3",
-      "balance"
-     
-    ],
-    "fields": [ 
-     {
-       "fieldname": "claim_payment_no",
-       "fieldtype": "Data",
-       "label": "Claim payment Number"
-     }, 
-     {
-        "fieldname": "office",
-        "fieldtype": "Data",
-        "label": "Office",
-        "read_only":1
-      }, 
-      {
-        "fieldname": "name1",
-        "fieldtype": "Select",
-        "label": "Naming series",
-        "options": "CP-.#####"
-      },
-      {
-        "fieldname": "payment_status",
-        "fieldtype": "Select",
-        "options": "\nPaid\nUnpaid",
-        "label": "Payment Status",
-        "default": "Unpaid",
-        "allow_on_submit": 1
-      },
-  {
-        "fieldname": "remarks",
-        "fieldtype": "Small Text",
-        "label": "Remarks"
-      },
-      {
-        "fieldname": "cb_break_cpl1",
-        "fieldtype": "Column Break"
-      },  
-     
-     {
-        "fieldname": "payment_date",
-        "fieldtype": "Date",
-        "label": "Payment Date",
-        "default": "Today"
-      },
-     
-      {
-        "fieldname": "cpl_section",
-        "fieldtype": "Section Break"
-     },
-     {
-        "fieldname": "details",
-        "fieldtype": "Table",
-        "label": "Claim Payment Details",
-        "options": "Claim Payment Details"
-     },
-     {
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "naming_series:",
+  "creation": "2025-11-28 16:40:10.281765",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "payment_status",
+    "claim_payment_no",
+    "office",
+    "cb_break_cpl1",
+    "payment_date",
+    "remarks",
+    "cpl_section2",
+    "fund_manager",
+    "cb_break_cpl4",
+    "fund_date",
+    "cb_break_cpl5",
+    "approval_note",
+    "cpl_section",
+    "details",
+    "payment_total",
+    "cpl_section1",
+    "available",
+    "cb_break_cpl2",
+    "total_allocated",
+    "cb_break_cpl3",
+    "balance"
+  ],
+  "fields": [
+    {
+      "fieldname": "claim_payment_no",
+      "fieldtype": "Data",
+      "label": "Claim payment Number"
+    },
+    {
+      "fieldname": "office",
+      "fieldtype": "Data",
+      "label": "Office",
+      "read_only": 1
+    },
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Naming series",
+      "options": "CPL-.YYYY.-.####"
+    },
+    {
+      "fieldname": "payment_status",
+      "fieldtype": "Select",
+      "options": "\nPaid\nUnpaid",
+      "label": "Payment Status",
+      "default": "Unpaid",
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks"
+    },
+    {
+      "fieldname": "cb_break_cpl1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "payment_date",
+      "fieldtype": "Date",
+      "label": "Payment Date",
+      "default": "Today"
+    },
+    {
+      "fieldname": "cpl_section",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "details",
+      "fieldtype": "Table",
+      "label": "Claim Payment Details",
+      "options": "Claim Payment Details"
+    },
+    {
       "fieldname": "payment_total",
       "fieldtype": "Float",
       "label": "Total Passed Amount",
@@ -86,43 +89,73 @@
     {
       "fieldname": "cpl_section1",
       "fieldtype": "Section Break",
-      "label":"Fund Details"
-     },
-     {
+      "label": "Fund Details"
+    },
+    {
       "fieldname": "balance",
       "fieldtype": "Currency",
       "label": "Balance"
-     },
-     {
+    },
+    {
       "fieldname": "available",
       "fieldtype": "Currency",
       "label": "Fund Available"
-     },
-     {
+    },
+    {
       "fieldname": "cb_break_cpl2",
       "fieldtype": "Column Break"
-     },
-     {
+    },
+    {
       "fieldname": "total_allocated",
       "fieldtype": "Currency",
       "label": "Total Allocated"
-     },
-     {
+    },
+    {
       "fieldname": "cb_break_cpl3",
       "fieldtype": "Column Break"
-     }
-    ],
-    "grid_page_length": 50,
-    "index_web_pages_for_search": 1,
-    "is_submittable": 1,
-    "links": [],
-    "modified": "2025-11-28 16:40:10.281765",
-    "modified_by": "Administrator",
-    "module": "Tqerp Mrcms",
-    "name": "Claim Payment List",
-    "owner": "Administrator",
-    "permissions": [
-     {
+    },
+    {
+      "fieldname": "fund_manager",
+      "label": "Fund",
+      "fieldtype": "Link",
+      "options": "Fund Manager"
+    },
+    {
+      "fieldname": "fund_date",
+      "fieldtype": "Date",
+      "label": "Fund Date"
+    },
+    {
+      "fieldname": "approval_note",
+      "fieldtype": "Data",
+      "label": "Approval Note"
+    },
+    {
+      "fieldname": "cb_break_cpl4",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "cb_break_cpl5",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "cpl_section2",
+      "fieldtype": "Section Break",
+      "label": "Funding Details"
+    }
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2025-11-28 16:40:10.281765",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Claim Payment List",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
       "create": 1,
       "delete": 1,
       "email": 1,
@@ -134,10 +167,10 @@
       "share": 1,
       "submit": 1,
       "write": 1
-     }
-    ],
-    "row_format": "Dynamic",
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "states": []
-   }
+    }
+  ],
+  "row_format": "Dynamic",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

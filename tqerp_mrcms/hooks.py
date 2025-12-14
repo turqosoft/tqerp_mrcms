@@ -34,7 +34,8 @@ doctype_list_js = {
     "Claim" : "public/js/claim_list.js",
     "Claim Bundle Management" : "public/js/claim_bundle_management.js",
     "Claim Sanction List":"public/js/claim_sanction_list.js",
-    "Claim Payment List":"public/js/claim_payment_list.js"
+    "Claim Payment List":"public/js/claim_payment_list.js",
+    "Claim Proceedings": "public/js/claim_proceedings.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

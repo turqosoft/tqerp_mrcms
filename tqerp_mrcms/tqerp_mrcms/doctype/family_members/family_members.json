@@ -1,4 +1,3 @@
-
 {
   "actions": [],
   "allow_rename": 1,
@@ -7,19 +6,31 @@
   "engine": "InnoDB",
   "field_order": [
     "member_name",
-    "relation"
+    "gender",
+    "relation",
+    "dob"
   ],
   "fields": [
     {
       "fieldname": "member_name",
       "fieldtype": "Data",
       "label": "Member Name",
+      "in_list_view": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "gender",
+      "label": "Gender",
+      "fieldtype": "Link",
+      "options": "Gender",
+      "reqd": 1,
       "in_list_view": 1
     },
     {
       "fieldname": "relation",
       "fieldtype": "Link",
       "label": "Relation",
+      "reqd": 1,
       "options": "Relation",
       "in_list_view": 1
     },

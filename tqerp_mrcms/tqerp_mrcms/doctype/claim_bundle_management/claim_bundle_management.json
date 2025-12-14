@@ -1,93 +1,92 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "autoname": "CBM-.#####",
-    "creation": "2025-11-28 16:40:10.281765",
-    "doctype": "DocType",
-    "engine": "InnoDB",
-    "field_order": [
-     "name1",
-     "bundle_status",
-     "physical_bundle_no",
-     "office",
-     "cb_break_cbm1",
-     "bundle_date",
-     "remarks",
-     "sbm_section",
-     "details",
-     "bundle_total"
-     
-    ],
-    "fields": [ 
-     {
-       "fieldname": "physical_bundle_no",
-       "fieldtype": "Data",
-       "label": "Physical Bundle Number"
-     },      
-     {
-        "fieldname": "office",
-        "fieldtype": "Data",
-        "label": "Office",
-        "read_only":1
-      }, 
-      {
-        "fieldname": "name1",
-        "fieldtype": "Select",
-        "label": "Naming series",
-        "options": "CBM-.#####"
-      },
-      {
-        "fieldname": "bundle_status",
-        "fieldtype": "Select",
-        "options": "\nSanctioned\nNot-Sanctioned",
-        "label": "Bundle Status",
-        "default": "Not-Sanctioned",
-        "allow_on_submit": 1
-      },
-  {
-        "fieldname": "remarks",
-        "fieldtype": "Small Text",
-        "label": "Remarks"
-      },
-      {
-        "fieldname": "cb_break_cbm1",
-        "fieldtype": "Column Break"
-      },
-     
-     {
-        "fieldname": "bundle_date",
-        "fieldtype": "Date",
-        "label": "Bundle Date",
-        "default": "Today"
-      },
-      {
-        "fieldname": "sbm_section",
-        "fieldtype": "Section Break"
-     },
-     {
-        "fieldname": "details",
-        "fieldtype": "Table",
-        "label": "Claim Bundle Details",
-        "options": "Claim Bundle Details"
-     },
-     {
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "naming_series:",
+  "creation": "2025-11-28 16:40:10.281765",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "bundle_status",
+    "physical_bundle_no",
+    "office",
+    "cb_break_cbm1",
+    "bundle_date",
+    "remarks",
+    "sbm_section",
+    "details",
+    "bundle_total"
+  ],
+  "fields": [
+    {
+      "fieldname": "physical_bundle_no",
+      "fieldtype": "Data",
+      "label": "Physical Bundle Number"
+    },
+    {
+      "fieldname": "office",
+      "fieldtype": "Data",
+      "label": "Office",
+      "read_only": 1
+    },
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Naming series",
+      "options": "CB-.YYYY.-.####"
+    },
+    {
+      "fieldname": "bundle_status",
+      "fieldtype": "Select",
+      "options": "\nSanctioned\nNot-Sanctioned",
+      "label": "Bundle Status",
+      "default": "Not-Sanctioned",
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks"
+    },
+    {
+      "fieldname": "cb_break_cbm1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "bundle_date",
+      "fieldtype": "Date",
+      "label": "Bundle Date",
+      "default": "Today"
+    },
+    {
+      "fieldname": "sbm_section",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "details",
+      "fieldtype": "Table",
+      "label": "Claim Bundle Details",
+      "options": "Claim Bundle Details"
+    },
+    {
       "fieldname": "bundle_total",
       "fieldtype": "Float",
       "label": "Total Passed Amount",
-      "in_list_view":1
+      "in_list_view": 1
     }
-    ],
-    "grid_page_length": 50,
-    "index_web_pages_for_search": 1,
-    "is_submittable": 1,
-    "links": [],
-    "modified": "2025-11-28 16:40:10.281765",
-    "modified_by": "Administrator",
-    "module": "Tqerp Mrcms",
-    "name": "Claim Bundle Management",
-    "owner": "Administrator",
-    "permissions": [
-     {
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2025-11-28 16:40:10.281765",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Claim Bundle Management",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
       "create": 1,
       "delete": 1,
       "email": 1,
@@ -99,10 +98,10 @@
       "share": 1,
       "submit": 1,
       "write": 1
-     }
-    ],
-    "row_format": "Dynamic",
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "states": []
-   }
+    }
+  ],
+  "row_format": "Dynamic",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}
