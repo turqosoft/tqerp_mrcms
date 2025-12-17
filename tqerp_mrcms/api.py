@@ -1526,6 +1526,7 @@ def create_claim_bundle_management(claims_data):
             "claim_date": claim.get("claim_date", ""),
             "ip_no": claim.get("ip_no", ""),
             "ip_name": claim.get("ip_name", ""),
+            "phone": claim.get("phone", ""),
             "name_of_patient": claim.get("name_of_patient", ""),
             "dispensary": claim.get("dispensary", ""),
             "claim_status": claim.get("claim_status"),
@@ -1624,6 +1625,7 @@ def create_claim_sanction_list(claims_data):
             "claim_date": row.get("claim_date", ""),
             "ip_no": row.get("ip_no", ""),
             "ip_name": row.get("ip_name", ""),
+            "phone": row.get("phone", ""),
             "name_of_patient": row.get("name_of_patient", ""),
             "dispensary": row.get("dispensary", ""),
             "claim_status": row.get("claim_status", ""),
@@ -1724,6 +1726,7 @@ def create_claim_payment_list(payments_data):
             "claim_date": row.get("claim_date", ""),
             "ip_no": row.get("ip_no", ""),
             "ip_name": row.get("ip_name", ""),
+            "phone": row.get("phone", ""),
             "name_of_patient": row.get("name_of_patient", ""),
             "dispensary": row.get("dispensary", ""),
             "claim_status": row.get("claim_status", ""),
@@ -1790,136 +1793,110 @@ import os
  
 @frappe.whitelist()
 def download_payment_details_excel(docname):
-    """
-    Download Excel for Claim Payment List with all child table details
-    """
-    # Fetch parent document
+ 
+     
     doc = frappe.get_doc("Claim Payment List", docname)
  
     # Prepare file path
     filename = f"{docname}_payment_details.xlsx"
     filepath = get_site_path("public", "files", filename)
  
-    # Remove existing file if exists
+ 
+    # Remove old file
     if os.path.exists(filepath):
         os.remove(filepath)
  
-    # Create workbook
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Payment Details"
  
-    # Styles
-    grey_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
-    bold_font = Font(bold=True)
- 
-   
- 
-    # Header row for child table
-    headers = [
-        "Claim No", "Claim Date",
-        "IP Name", "IP No", "Patient Name", "Dispensary",
-        "Claim Status", "Amount Claimed", "Passed Amount","IFSC Code","Bank Account No","Bank Name",
-        "Credit Date","Credit Status","UTR Number","Credit Amount",
-    ]
+    # Header row only
+    headers = ["Claim No", "Name", "IP No", "Phone", "IFSC", "Bank Account No", "Passed Amount", "Claim Date"]
     ws.append(headers)
-    for cell in ws[ws.max_row]:
-        cell.fill = grey_fill
-        cell.font = bold_font
+ 
+    # Style header
+    for cell in ws[1]:
+        cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center")
  
-    # Populate child table rows
+    # Populate rows
+    total_passed_amount = 0.0
     for row in doc.details:
         ws.append([
             row.claim_no or "",
-            row.claim_date.strftime("%d-%m-%Y") if row.claim_date else "",
             row.ip_name or "",
             row.ip_no or "",
-            row.name_of_patient or "",
-            row.dispensary or "",
-            row.claim_status or "",
-            row.amount_claimed or 0,
-            row.passed_amount or 0,
+            row.phone or "",
             row.ifs_code or "",
             row.bank_account_no or "",
-            row.bank_name or "",
-            row.credit_date or "",
-            row.credit_status or "",
-            row.utr_number or "",
-            row.credit_amount or "",
+            float(row.passed_amount or 0),
+            row.claim_date.strftime("%d-%m-%Y") if row.claim_date else ""
         ])
+        total_passed_amount += float(row.passed_amount or 0)
  
-   
-    # Set column widths
-    col_widths = {
-        "A": 20, "B": 20, "C": 15, "D": 15, "E": 20, "F": 15,
-        "G": 25, "H": 20, "I": 15, "J": 15, "K": 20
-    }
-    for col, width in col_widths.items():
+    # Total row
+    ws.append(["", "", "", "", "", "TOTAL", total_passed_amount, ""])
+    for cell in ws[ws.max_row]:
+        cell.font = Font(bold=True)
+ 
+    # Column widths
+    widths = {"A": 15, "B": 30, "C": 15, "D": 15, "E": 15, "F": 20, "G": 15, "H": 15}
+    for col, width in widths.items():
         ws.column_dimensions[col].width = width
  
-    # Save file
-    wb.save(filepath) 
- 
+    wb.save(filepath)
     return f"/files/{filename}"
-
-# Download payment Details as CSV
+ 
+ 
+ 
 import pandas as pd
 import frappe
 from frappe.utils import get_site_path
-import os
  
 @frappe.whitelist()
 def download_payment_details_csv(docname):
     """
-    Download CSV for Claim Payment List with fields:
-    Claim No, Claim Date, IP Name, IP No, Patient Name, Dispensary,
-    Claim Status, Amount Claimed, Passed Amount, IFSC, Bank Account, Bank Name
+    Download CSV for Claim Proceedings with fields:
+    claim_no, name1, ip_no, phone, ifsc, bank_account_no, passed_amount, claim_date
     """
  
-    # Get parent document
     doc = frappe.get_doc("Claim Payment List", docname)
  
-    filename = f"{docname}_payment_details.csv"
+    # Prepare file path
+    filename = f"{docname}_payment_details.xlsx"
     filepath = get_site_path("public", "files", filename)
- 
-    # Remove existing file
-    if os.path.exists(filepath):
-        os.remove(filepath)
  
     data = []
  
+    total_passed_amount = 0.0
+ 
     # Header row
     headers = [
-        "Claim No", "Claim Date",
-        "IP Name", "IP No", "Patient Name", "Dispensary",
-        "Claim Status", "Amount Claimed", "Passed Amount",
-        "IFSC Code", "Bank Account No", "Bank Name",
-        "Credit Date","Credit Status","UTR Number","Credit Amount",
+        "Claim No", "Name", "IP No", "Phone",
+        "IFSC", "Bank Account No", "Passed Amount", "Claim Date"
     ]
  
-    # Populate rows from child table
+    # Populate rows
     for row in doc.details:
+        passed_amount = float(row.passed_amount or 0)
+ 
         data.append([
-            row.claim_no or "",
-            row.claim_date.strftime("%d-%m-%Y") if row.claim_date else "",
+           row.claim_no or "",
             row.ip_name or "",
             row.ip_no or "",
-            row.name_of_patient or "",
-            row.dispensary or "",
-            row.claim_status or "",
-            row.amount_claimed or 0,
-            row.passed_amount or 0,
+            row.phone or "",
             row.ifs_code or "",
             row.bank_account_no or "",
-            row.bank_name or "",
-            row.credit_date or "",
-            row.credit_status or "",
-            row.utr_number or "",
-            row.credit_amount or "",
+            float(row.passed_amount or 0),
+            row.claim_date.strftime("%d-%m-%Y") if row.claim_date else ""
         ])
  
-    # Convert to DataFrame
+        total_passed_amount += passed_amount
+ 
+    # Add total row
+    data.append(["", "", "", "", "", "TOTAL", total_passed_amount, ""])
+ 
+    # Create DataFrame
     df = pd.DataFrame(data, columns=headers)
  
     # Save CSV
@@ -1932,15 +1909,12 @@ def process_payment_file_paymentlist(docname, file_url):
     import os
     import pandas as pd
     from frappe.utils import getdate
-    import frappe
  
-    # Load Payment List DocType
     doc = frappe.get_doc("Claim Payment List", docname)
  
     if doc.docstatus != 1:
         frappe.throw("Upload allowed only after submission.")
- 
-    # ---------------------
+        # ---------------------
     # Validate File URL
     # ---------------------
     if not file_url:
@@ -1978,46 +1952,39 @@ def process_payment_file_paymentlist(docname, file_url):
     except Exception as e:
         frappe.throw(f"Failed to read the file: {e}")
  
-    # ---------------------
-    # Normalize Columns
-    # ---------------------
+ 
     df.columns = [
         c.strip().lower().replace(" ", "_").replace(".", "")
         for c in df.columns
     ]
  
-    required_cols = ["account_no", "credit_amount", "credit_date", "credit_status", "utr_number"]
+    required_cols = ["account_no", "amount", "credit_date", "credit_status", "utr_number"]
     for col in required_cols:
         if col not in df.columns:
-            frappe.throw(f"Missing required column: {col}")
+            frappe.throw(f"Missing column: {col}")
  
     rows = df.to_dict("records")
  
     updated = 0
     unmatched = []
  
-    # ---------------------
-    # Match and Update Records
-    # ---------------------
-    for row in doc.details:  # correct fieldname
+    for row in doc.details:
         matched = False
- 
         for rec in rows:
-            if (
-                str(row.bank_account_no).strip() ==
+            if (str(row.bank_account_no).strip() ==
                 str(rec.get("account_no") or "").strip()
                 and float(row.passed_amount) ==
-                float(rec.get("credit_amount") or 0)
-            ):
+                    float(rec.get("amount") or 0)):
  
-                # Update child row
-                row.credit_amount = rec.get("credit_amount")
+                row.credit_amount = rec.get("amount")
                 row.credit_status = rec.get("credit_status")
                 row.utr_number = rec.get("utr_number")
                 row.credit_date = getdate(rec.get("credit_date"))
                 row._highlight = "green"
  
-                # Mark Claim as Paid
+                # -----------------------
+                # Update Claims to To Paid
+                # -----------------------
                 frappe.db.set_value("Claim", row.claim_no, "claim_status", "Paid")
  
                 updated += 1
@@ -2030,9 +1997,9 @@ def process_payment_file_paymentlist(docname, file_url):
                 "passed_amount": row.passed_amount
             })
  
-    # ---------------------
-    # Generate Mismatch File
-    # ---------------------
+    # -----------------------
+    # Generate Mismatch Excel
+    # -----------------------
     mismatch_file_url = None
     if unmatched:
         mismatch_df = pd.DataFrame(unmatched)
@@ -2041,16 +2008,14 @@ def process_payment_file_paymentlist(docname, file_url):
         mismatch_df.to_excel(mismatch_path, index=False)
         mismatch_file_url = f"/files/{mismatch_filename}"
  
-    # ---------------------
-    # Auto Set Payment List to Paid
-    # ---------------------
-    if doc.details and all(
-        r.credit_status and str(r.credit_status).lower() == "delivered"
-        for r in doc.details
-    ):
+   
+    # -----------------------
+    # Auto Move To Paid
+    # -----------------------
+    if all([r.credit_status and str(r.credit_status).lower() == "delivered"
+            for r in doc.details]):
         doc.payment_status = "Paid"
  
-    # Save and Commit
     doc.save(ignore_permissions=True)
     frappe.db.commit()
  
