@@ -138,7 +138,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Regional Director",
+    "allow_edit": "RDD",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -154,7 +154,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Deputy Director",
+    "allow_edit": "JD",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
