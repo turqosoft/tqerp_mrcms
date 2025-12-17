@@ -33,53 +33,53 @@ frappe.listview_settings['Claim'] = {
             // -----------------------------------------------------
             //  Create ALLOCATION, SUM, DIFFERENCE Boxes
             // -----------------------------------------------------
-            setTimeout(() => {
-                if (listview.doctype !== "Claim") return;
-                if (!document.getElementById("allocation_main_box")) {
-                    const html = `
-                        <div id="allocation_main_box" style="
-                            display:flex;
-                            align-items:center;
-                            gap:20px;
-                            margin-left:12px;
-                        ">
+            // setTimeout(() => {
+            //     if (listview.doctype !== "Claim") return;
+            //     if (!document.getElementById("allocation_main_box")) {
+            //         const html = `
+            //             <div id="allocation_main_box" style="
+            //                 display:flex;
+            //                 align-items:center;
+            //                 gap:20px;
+            //                 margin-left:12px;
+            //             ">
 
-                            <!-- Allocation box (always visible) -->
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <label style="font-size:13px;">Allocation:</label>
-                                <input type="number" id="allocation_input"
-                                    style="width:120px; padding:4px 6px;
-                                    font-size:13px; border:1px solid #ccc;
-                                    border-radius:4px;" />
-                            </div>
+            //                 <!-- Allocation box (always visible) -->
+            //                 <div style="display:flex; align-items:center; gap:6px;">
+            //                     <label style="font-size:13px;">Allocation:</label>
+            //                     <input type="number" id="allocation_input"
+            //                         style="width:120px; padding:4px 6px;
+            //                         font-size:13px; border:1px solid #ccc;
+            //                         border-radius:4px;" />
+            //                 </div>
 
-                            <!-- Sum box (visible when selected) -->
-                            <div id="sum_box" style="display:none; align-items:center; gap:6px;">
-                                <label style="font-size:13px;">Sum:</label>
-                                <input type="text" id="sum_input"
-                                    style="width:120px; padding:4px 6px;
-                                    font-size:13px; border:1px solid #ccc;
-                                    border-radius:4px;" readonly />
-                            </div>
+            //                 <!-- Sum box (visible when selected) -->
+            //                 <div id="sum_box" style="display:none; align-items:center; gap:6px;">
+            //                     <label style="font-size:13px;">Sum:</label>
+            //                     <input type="text" id="sum_input"
+            //                         style="width:120px; padding:4px 6px;
+            //                         font-size:13px; border:1px solid #ccc;
+            //                         border-radius:4px;" readonly />
+            //                 </div>
 
-                            <!-- Difference box -->
-                            <div id="diff_box" style="display:none; align-items:center; gap:6px;">
-                                <label style="font-size:13px;">Difference:</label>
-                                <input type="text" id="diff_input"
-                                    style="width:120px; padding:4px 6px;
-                                    font-size:13px; border:1px solid #ccc;
-                                    border-radius:4px;" readonly />
-                            </div>
+            //                 <!-- Difference box -->
+            //                 <div id="diff_box" style="display:none; align-items:center; gap:6px;">
+            //                     <label style="font-size:13px;">Difference:</label>
+            //                     <input type="text" id="diff_input"
+            //                         style="width:120px; padding:4px 6px;
+            //                         font-size:13px; border:1px solid #ccc;
+            //                         border-radius:4px;" readonly />
+            //                 </div>
 
-                        </div>
-                    `;
+            //             </div>
+            //         `;
 
-                    $(".page-actions").prepend(html);
-                    console.log("Allocation, Sum, Difference boxes added");
+            //         $(".page-actions").prepend(html);
+            //         console.log("Allocation, Sum, Difference boxes added");
 
-                    bind_sum_diff_handler(listview);
-                }
-            }, 600);
+            //         bind_sum_diff_handler(listview);
+            //     }
+            // }, 600);
 
 
 

@@ -120,7 +120,8 @@
             "label": "Insurance Number",
             "fieldtype": "Link",
             "options": "Insured Person",
-            "reqd":1
+            "reqd":1,
+            "description": "ഇൻഷുറൻസ് നമ്പറോ ഫോൺ നമ്പറോ വെച്ചു തിരയാവുന്നതാണ്"
         },
         {
             "fieldname": "phone",
@@ -129,41 +130,41 @@
         },
         {
             "fieldname": "ip_name",
-            "label": "IP Name",
+            "label": "IP Name (ഇൻഷുർ ചെയ്‌ത തൊഴിലാളിയുടെ പേര്)",
             "fieldtype": "Data",
             "reqd":1
         },
         {
             "fieldname": "address",
-            "label": "Address",
+            "label": "Address (മേൽവിലാസം)",
             "fieldtype": "Small Text"
         },
         {
             "fieldname": "book_no",
-            "label": "ESI Dispensary Book no",
+            "label": "ESI Dispensary Book no (ഡിസ്‌പെൻസറി ബുക്ക് നമ്പർ)",
             "fieldtype": "Data"
         },
         
         {
             "fieldname": "employer",
-            "label": "Working Organization/Establishment",
+            "label": "Working Organization/Establishment (ജോലി ചെയ്യുന്ന സ്ഥാപനം)",
             "fieldtype": "Data"
         },
         {
             "fieldname": "name_of_patient",
-            "label": "Name of Patient",
+            "label": "Name of Patient (രോഗിയുടെ പേര്)",
             "fieldtype": "Select",
             "options": "",
             "reqd":1
         },
         {
             "fieldname": "age_of_patient",
-            "label": "Age of Patient",
+            "label": "Age of Patient (രോഗിയുടെ വയസ്സ്)",
             "fieldtype": "Int"
         },
         {
             "fieldname": "relation",
-            "label": "Relation",
+            "label": "Relation (തൊഴിലാളിയുമായുള്ള ബന്ധം)",
             "fieldtype": "Link",
             "options": "Relation"
         },

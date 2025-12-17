@@ -42,12 +42,6 @@
    "allow_on_submit": 1
   },
   {
-   "fieldname": "expired",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Expired"
-  },
-  {
    "fieldname": "allocatable",
    "fieldtype": "Data",
    "in_list_view": 1,

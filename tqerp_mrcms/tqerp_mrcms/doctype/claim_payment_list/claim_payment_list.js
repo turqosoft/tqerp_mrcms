@@ -17,6 +17,14 @@ frappe.ui.form.on("Claim Payment List", {
                 }
             });
         }
+
+        frm.set_query("fund_manager", () => {
+            return {
+                filters: {
+                    expired: 0
+                }
+            };
+        });
     },
 
     before_save: function(frm) {

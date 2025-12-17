@@ -51,3 +51,7 @@ def get_permission_query_conditions(user):
 		escaped_offices = ", ".join(frappe.db.escape(o) for o in offices)
 	
 		return f"`tabClaim Payment List`.`office` in ({escaped_offices})"
+
+def on_cancel(self):
+        from tqerp_mrcms.api import reverse_fund_on_cancel
+        reverse_fund_on_cancel(self.name)

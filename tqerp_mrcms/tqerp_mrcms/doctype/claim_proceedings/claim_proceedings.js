@@ -97,5 +97,14 @@ frappe.ui.form.on("Claim Proceedings", {
 
             });
         }
+    },
+    onload(frm) {
+        frm.set_query("fund_manager", () => {
+            return {
+                filters: {
+                    expired: 0
+                }
+            };
+        });
     }
 });

@@ -22,7 +22,7 @@
             "in_list_view": 1
         },
         {
-            "fieldname": "parent_organisation_management",
+            "fieldname": "parent_organisation",
             "label": "Parent Organisation",
             "fieldtype": "Link",
             "options": "Organisation",

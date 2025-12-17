@@ -55,20 +55,10 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Masters",
-   "link_count": 9,
+   "link_count": 8,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Claim Type",
-   "link_count": 0,
-   "link_to": "Claim Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   },
   {
    "hidden": 0,
@@ -151,7 +141,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-08 22:17:22.226777",
+ "modified": "2025-12-15 00:24:33.131537",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS Admin",

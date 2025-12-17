@@ -11,6 +11,15 @@ class ClaimProceedings(Document):
         # Optional: You may still log creation if needed
         pass
 
+    def on_cancel(self):
+        if not self.fund_manager or not self.total_allocated:
+            return
+ 
+        frappe.get_attr("tqerp_mrcms.api.reverse_fund_on_cancel")(
+            self.name,
+            doctype="Claim Proceedings"
+        )
+        
 def get_child_offices(root_office):
     """Return root_office + all its descendants using parent_office."""
     to_visit = [root_office]
@@ -59,3 +68,4 @@ def get_permission_query_conditions(user):
     # IMPORTANT: adjust `office` to your actual Link field on Claim
     # e.g. `dispensary_office` or `assigned_office`
     return f"`tabClaim Proceedings`.`office` in ({escaped_offices})"
+

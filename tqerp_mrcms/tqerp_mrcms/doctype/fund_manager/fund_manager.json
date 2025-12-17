@@ -65,6 +65,21 @@
       "fieldname": "remarks",
       "fieldtype": "Small Text",
       "label": "Remarks"
+    },
+    {
+      "fieldname": "expired",
+      "fieldtype": "Check",
+      "label": "Expired",
+      "default":0,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "expired_on",
+      "fieldtype": "Date",
+      "label": "Expired On",
+      "depends_on": "eval:doc.expired",
+      "mandatory_depends_on": "eval:doc.expired",
+      "allow_on_submit": 1
     }
   ],
   "index_web_pages_for_search": 1,

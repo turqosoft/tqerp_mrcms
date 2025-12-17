@@ -854,7 +854,7 @@ def get_ip_details_list(doctype, txt, searchfield, start, page_len, filters):
     return frappe.db.sql("""
         SELECT
             ip_no,
-            CONCAT(ip_no, ' - ', MAX(ip_name), ' - ', MAX(phone))
+            CONCAT(MAX(ip_name), ' - ', MAX(phone), ' - ', MAX(dispensary))
         FROM `tabInsured Person`
         WHERE
             ip_no LIKE %(txt)s
@@ -1105,7 +1105,7 @@ def download_claim_details_excel(docname):
     ws.title = "Claim Details"
  
     # Header row only
-    headers = ["Claim No", "Name", "IP No", "Phone", "IFSC", "Bank Account No", "Passed Amount", "Claim Date"]
+    headers = ["Claim No", "Name", "IP No", "Phone", "IFSC", "ACCOUNT NO.", "Passed Amount", "Claim Date"]
     ws.append(headers)
  
     # Style header
@@ -1749,6 +1749,38 @@ def create_claim_payment_list(payments_data):
         "redirect_to": f"/app/claim-payment-list/{cpl.name}"
     }
 
+
+def validate_fund_availability(doc):
+    if not doc.fund_manager:
+        return
+ 
+    total_allocated = flt(doc.total_allocated or 0)
+ 
+    fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
+ 
+    total_fixed = sum(flt(row.fixed or 0) for row in fm_doc.details)
+ 
+    total_previous_allocated = frappe.db.sql("""
+        SELECT COALESCE(SUM(total_allocated), 0)
+        FROM `tabClaim Payment List`
+        WHERE fund_manager = %s
+          AND docstatus = 1
+          AND name != %s
+    """, (doc.fund_manager, doc.name))[0][0]
+ 
+    fund_available = total_fixed - total_previous_allocated
+ 
+    if total_allocated > fund_available:
+        frappe.throw(
+            f"Total Allocated ({total_allocated}) exceeds current Available Fund ({fund_available})."
+        )
+   
+def validate(doc, method):
+    if doc.doctype not in ("Claim Payment List", "Claim Proceedings"):
+        return
+ 
+    validate_fund_availability(doc)
+
 #download payment list as excel
 import frappe
 import openpyxl
@@ -1827,7 +1859,7 @@ def download_payment_details_excel(docname):
         ws.column_dimensions[col].width = width
  
     # Save file
-    wb.save(filepath)
+    wb.save(filepath) 
  
     return f"/files/{filename}"
 
@@ -2135,18 +2167,20 @@ def get_claim_category_by_amount(passed_amount):
  
     return None
 
-# ✅Allocate  Fund Manager Details
+# -------------------------------------------------
+# Allocate fund on CPL submit (SAFE SYNC)
+# -------------------------------------------------
 @frappe.whitelist()
 def allocate_fund_on_submit(docname, doctype=None):
-    """Allocate fund for Claim Payment List or Claim Proceedings"""
+    """Freeze CPL balance and safely sync Fund Manager"""
+ 
     if not doctype:
-        if frappe.db.exists("Claim Proceedings", docname):
-            doctype = "Claim Proceedings"
-        else:
-            doctype = "Claim Payment List"
+        doctype = "Claim Payment List"
  
     doc = frappe.get_doc(doctype, docname)
-   
+ 
+    validate_fund_availability(doc)
+ 
     fm_name = doc.fund_manager
     total_allocated = flt(doc.total_allocated or 0)
  
@@ -2156,212 +2190,213 @@ def allocate_fund_on_submit(docname, doctype=None):
     if total_allocated <= 0:
         frappe.throw("Total Allocated must be greater than 0")
  
+    # -----------------------------
+    # FUND MANAGER – SOURCE VALUES
+    # -----------------------------
     fm_doc = frappe.get_doc("Fund Manager", fm_name)
-    remaining = total_allocated
  
-    total_allocatable = sum([flt(row.fixed or 0) - flt(row.allocated or 0) for row in fm_doc.details])
-    if remaining > total_allocatable:
-        frappe.throw(f"Total Allocated exceeds available fund. Available: {total_allocatable}")
+    total_fixed = sum(flt(row.fixed or 0) for row in fm_doc.details)
  
-    for row in fm_doc.details:
-        available_in_row = flt(row.fixed or 0) - flt(row.allocated or 0)
-        if available_in_row <= 0:
-            continue
+    total_previous_allocated = frappe.db.sql("""
+        SELECT COALESCE(SUM(total_allocated), 0)
+        FROM `tabClaim Payment List`
+        WHERE fund_manager = %s
+          AND docstatus = 1
+          AND name != %s
+    """, (fm_name, doc.name))[0][0]
  
-        allocate = min(available_in_row, remaining)
-        new_allocated = flt(row.allocated or 0) + allocate
-        new_allocatable = flt(row.fixed or 0) - new_allocated
-        new_paid = new_allocated
+    fund_available = total_fixed - total_previous_allocated
  
-        frappe.db.set_value("Fund Manager Details", row.name, {
-            "allocated": new_allocated,
-            "allocatable": new_allocatable,
-            "paid": new_paid
-        })
+    if total_allocated > fund_available:
+        frappe.throw(
+            f"Total Allocated ({total_allocated}) exceeds Available Fund ({fund_available})."
+        )
  
-        remaining -= allocate
-        if remaining <= 0:
-            break
+    # -----------------------------
+    # FREEZE BALANCE IN CPL
+    # -----------------------------
+    doc.balance = fund_available - total_allocated
+    # doc.db_set("balance", fund_available - total_allocated)
  
-    fm_doc.reload()
-    fm_doc.save(ignore_permissions=True)
  
-    available_after_allocation = sum([flt(row.fixed or 0) - flt(row.allocated or 0) for row in fm_doc.details])
- 
-    # Update doc
-    doc.total_allocated = total_allocated
-    doc.balance = available_after_allocation
     if hasattr(doc, "payment_status"):
         doc.payment_status = "Paid"
+ 
     if hasattr(doc, "proceedings_status"):
         doc.proceedings_status = "Paid"
  
-    doc.save(ignore_permissions=True)
-    frappe.db.commit()
+    # -----------------------------
+    # SAFE FUND MANAGER SYNC
+    # -----------------------------
+    remaining = total_allocated
+ 
+    for row in fm_doc.details:
+        # ✅ ONLY MATCHING OFFICE
+        if row.office != doc.office:
+            continue
+ 
+        fixed = flt(row.fixed or 0)
+        allocated = flt(row.allocated or 0)
+ 
+        available_in_row = fixed - allocated
+        if available_in_row <= 0:
+            frappe.throw(
+                f"No available fund for office {doc.office}"
+            )
+ 
+        consume = min(available_in_row, remaining)
+ 
+        row.allocated = allocated + consume
+        row.paid = flt(row.paid or 0) + consume
+        row.allocatable = fixed - row.allocated
+ 
+        remaining -= consume
+        break  # STOP after correct office
+ 
+    fm_doc.save(ignore_permissions=True)
+ 
     return True
- 
- 
-#✅get fund details by selecting record
-@frappe.whitelist()
-def get_fund_details(fund_manager, office):
-    """
-    Return fixed, allocated, available values, and office
-    for the selected Fund Manager + Office combination.
 
-    - fund_manager: Fund Manager docname (ID)
-    - office: Office name (Link value)
+# -------------------------------------------------
+# Get fund details (FOR UI)
+# -------------------------------------------------
+@frappe.whitelist()
+def get_fund_details(fund_manager, office=None):
     """
- 
+    Returns available fund for a specific Fund Manager and office.
+    If office is not provided, returns total fund across all offices.
+    """
     if not fund_manager:
-        return {
-            "fixed": 0,
-            "allocated": 0,
-            "available": 0,
-            "office": None,
-            "fund_date": None,
-            "approval_note": ""
-        }
+        return {}
  
     fm_doc = frappe.get_doc("Fund Manager", fund_manager)
-
-    # If no child rows at all, return empty stats
-    if not fm_doc.details:
-        return {
-            "fixed": 0,
-            "allocated": 0,
-            "available": 0,
-            "office": None,
-            "fund_date": fm_doc.get("date") or None,
-            "approval_note": fm_doc.approval_note or ""
-        }
-    
-    # Filter child rows by the given office (if provided)
-    if office:
-        office_rows = [row for row in fm_doc.details if row.office == office]
-    else:
-        # fallback: use all rows under this Fund Manager
-        office_rows = list(fm_doc.details)
-
-    # If no rows match the given office, treat as zero for that office
-    if not office_rows:
-        return {
-            "fixed": 0,
-            "allocated": 0,
-            "available": 0,
-            "office": office,
-            "fund_date": fm_doc.get("date") or None,
-            "approval_note": fm_doc.approval_note or ""
-        }
  
-    total_fixed = sum(flt(row.fixed or 0) for row in office_rows)
-    total_allocated = sum(flt(row.allocated or 0) for row in office_rows)
+    # Filter by office if provided
+    if office:
+        details = [d for d in fm_doc.details if d.office == office]
+    else:
+        details = fm_doc.details
+ 
+    total_fixed = sum(flt(d.fixed or 0) for d in details)
+ 
+    # Sum allocated amounts for submitted Claim Payment List for this fund manager and office
+    if office:
+        total_allocated = frappe.db.sql("""
+            SELECT COALESCE(SUM(total_allocated), 0)
+            FROM `tabClaim Payment List`
+            WHERE fund_manager = %s
+              AND office = %s
+              AND docstatus = 1
+        """, (fund_manager, office))[0][0]
+    else:
+        total_allocated = frappe.db.sql("""
+            SELECT COALESCE(SUM(total_allocated), 0)
+            FROM `tabClaim Payment List`
+            WHERE fund_manager = %s
+              AND docstatus = 1
+        """, fund_manager)[0][0]
+ 
     available = total_fixed - total_allocated
  
     return {
-        "fixed": total_fixed,
-        "allocated": total_allocated,
         "available": available,
-        "office": office,
-        "fund_date": fm_doc.get("date") or None,
+        "fund_date": fm_doc.get("date"),
         "approval_note": fm_doc.approval_note or ""
     }
- 
- 
- 
-# -------------------------------------------------------------
-#  REVERSE FUND ON CANCEL
-# -------------------------------------------------------------
+
+# -------------------------------------------------
+# Reverse fund on CPL cancel
+# -------------------------------------------------
 @frappe.whitelist()
-def reverse_fund_on_cancel(payment_list_name):
-    """Reverse allocated fund when Payment List is cancelled"""
+def reverse_fund_on_cancel(payment_list_name=None, doctype=None, name=None, **kwargs):
+    """
+    Reverse Fund Manager values when Claim Payment List or Claim Proceedings is cancelled
+    """
  
-    payment_doc = frappe.get_doc("Claim Payment List", payment_list_name)
-    office = payment_doc.office
-    refund_amount = flt(payment_doc.total_allocated or 0)
+    # Determine correct document name
+    docname = payment_list_name or name
+    if not docname:
+        return True
  
+    # Detect correct DocType
+    if doctype:
+        doc = frappe.get_doc(doctype, docname)
+    else:
+        doc = frappe.get_doc("Claim Payment List", docname)
+ 
+    refund_amount = flt(doc.total_allocated or 0)
     if refund_amount <= 0:
-        return True  # nothing to reverse
+        return True
  
-    # Get the latest submitted Fund Manager
-    fm_list = frappe.get_all(
-        "Fund Manager",
-        filters={"office": office, "docstatus": 1},
-        order_by="`tabFund Manager`.modified desc",
-        limit_page_length=1,
-        fields=["name"]
-    )
+    if not doc.fund_manager or not doc.office:
+        return True
  
-    if not fm_list:
-        frappe.throw("No submitted Fund Manager found to reverse allocation.")
+    fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
  
-    fm_doc = frappe.get_doc("Fund Manager", fm_list[0].name)
+    reversed_done = False
  
-    remaining = refund_amount
- 
-    # Reverse row-by-row
     for row in fm_doc.details:
- 
-        row_allocated = flt(row.allocated)
-        row_paid = flt(row.paid)
-        row_fixed = flt(row.fixed)
- 
-        if row_allocated <= 0:
+        if row.office != doc.office:
             continue
  
-        refund = min(row_allocated, remaining)
+        allocated = flt(row.allocated or 0)
+        if allocated <= 0:
+            continue
  
-        # Reverse values safely
-        new_allocated = row_allocated - refund
-        new_paid = row_paid - refund
-        new_allocatable = row_fixed - new_allocated
+        refund = min(allocated, refund_amount)
  
-        # Update DB
-        frappe.db.set_value("Fund Manager Details", row.name, {
-            "allocated": new_allocated,
-            "paid": new_paid,
-            "allocatable": new_allocatable
-        })
+        row.db_set("allocated", allocated - refund)
+        row.db_set("paid", flt(row.paid or 0) - refund)
+        row.db_set(
+            "allocatable",
+            flt(row.fixed or 0) - (allocated - refund)
+        )
  
-        remaining -= refund
-        if remaining <= 0:
-            break
+        reversed_done = True
+        break  #  office-wise safety
  
-    fm_doc.reload()
+    if not reversed_done:
+        frappe.log_error(
+            f"No allocation found to reverse for {doc.doctype} {doc.name}",
+            "Fund Reverse Warning"
+        )
+ 
     fm_doc.save(ignore_permissions=True)
-    frappe.db.commit()
+    fm_doc.reload()
  
     return True
  
+# -------------------------------------------------
+# Get available Fund Managers for office
+# -------------------------------------------------
 @frappe.whitelist()
-def get_available_fund_managers(doctype=None, txt=None, searchfield=None, start=0, page_len=20, filters=None, **kwargs):
-    """Return Fund Manager list for a given office where allocatable > 0"""
-    import json
-    if filters:
-        if isinstance(filters, str):
-            filters = json.loads(filters)
-    else:
-        filters = {}
+def get_available_fund_managers(doctype=None, txt=None, searchfield=None,
+                                start=0, page_len=20, filters=None, **kwargs):
  
-    office = filters.get("office")
+    import json
+    if filters and isinstance(filters, str):
+        filters = json.loads(filters)
+ 
+    office = filters.get("office") if filters else None
     if not office:
         return []
  
-    # Get all Fund Manager Details rows matching the office
     fm_details = frappe.get_all(
         "Fund Manager Details",
         filters={"office": office},
         fields=["parent"]
     )
  
-    # Get unique parent Fund Managers
-    fm_names = list(set([d.parent for d in fm_details]))
+    fm_names = list(set(d.parent for d in fm_details))
  
-    available_fms = []
+    result = []
     for fm_name in fm_names:
         fm_doc = frappe.get_doc("Fund Manager", fm_name)
-        # Check if total allocatable > 0
-        total_allocatable = sum([flt(row.fixed or 0) - flt(row.allocated or 0) for row in fm_doc.details])
+        total_allocatable = sum(
+            flt(row.fixed or 0) - flt(row.allocated or 0)
+            for row in fm_doc.details
+        )
         if total_allocatable > 0:
-            available_fms.append([fm_doc.name, fm_doc.get("date") or ""])
+            result.append([fm_doc.name, fm_doc.get("date") or ""])
  
-    return available_fms
+    return result

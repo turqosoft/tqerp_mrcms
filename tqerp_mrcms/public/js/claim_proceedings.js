@@ -46,29 +46,29 @@ frappe.ui.form.on('Claim Proceedings', {
         });
     },
 
-    refresh: function(frm) {
+    before_save: function(frm) {
         // Fetch Fund Manager details
-        if(frm.doc.fund_manager) {
-            frappe.call({
-                method: "tqerp_mrcms.api.get_fund_details",
-                args: { fund_manager: frm.doc.fund_manager, office: frm.doc.office },
-                callback: function(r) {
-                    if(r.message) {
-                        frm.set_value("available", r.message.available);
-                        frm.set_value("balance", r.message.available);
-                        frm.set_value("fund_date", r.message.fund_date);
+        // if(frm.doc.fund_manager) {
+        //     frappe.call({
+        //         method: "tqerp_mrcms.api.get_fund_details",
+        //         args: { fund_manager: frm.doc.fund_manager, office: frm.doc.office },
+        //         callback: function(r) {
+        //             if(r.message) {
+        //                 frm.set_value("available", r.message.available);
+        //                 frm.set_value("balance", r.message.available);
+        //                 frm.set_value("fund_date", r.message.fund_date);
 
-                        if(r.message.approval_note) {
-                            frm.set_value("approval_note", r.message.approval_note);
-                            frm.toggle_display("approval_note", true);
-                        } else {
-                            frm.set_value("approval_note", "");
-                            frm.toggle_display("approval_note", false);
-                        }
-                    }
-                }
-            });
-        }
+        //                 if(r.message.approval_note) {
+        //                     frm.set_value("approval_note", r.message.approval_note);
+        //                     frm.toggle_display("approval_note", true);
+        //                 } else {
+        //                     frm.set_value("approval_note", "");
+        //                     frm.toggle_display("approval_note", false);
+        //                 }
+        //             }
+        //         }
+        //     });
+        // }
 
         // ✅ Sum passed_amount from child table into total_allocated
         let total = 0;
