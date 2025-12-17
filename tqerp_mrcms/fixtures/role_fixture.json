@@ -1,0 +1,98 @@
+[
+    {
+        "doctype": "Role",
+        "name": "Director",
+        "role_name": "Director",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Director Section",
+        "role_name": "Director Section",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Deputy Director Homoeo",
+        "role_name": "Deputy Director Homoeo",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Deputy Director Homoeo Section",
+        "role_name": "Deputy Director Homoeo Section",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Deputy Director Ayurveda",
+        "role_name": "Deputy Director Ayurveda",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Deputy Director Ayurveda Section",
+        "role_name": "Deputy Director Ayurveda Section",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "JD",
+        "role_name": "JD",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "JD Section",
+        "role_name": "JD Section",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "JSSS",
+        "role_name": "JSSS",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "RDD",
+        "role_name": "RDD",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "RDD Section",
+        "role_name": "RDD Section",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "IMO",
+        "role_name": "IMO",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Head Clerk",
+        "role_name": "Hed Clerk",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Clerk",
+        "role_name": "Clerk",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "Cashier",
+        "role_name": "Cashier",
+        "desk_access":1
+    },
+    {
+        "doctype": "Role",
+        "name": "MRCMS Admin",
+        "role_name": "MRCMS Admin",
+        "desk_access":1
+    }
+]

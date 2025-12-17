@@ -1,0 +1,119 @@
+[
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 14:50:19.978018",
+        "name": "Director Section",
+        "style": "",
+        "workflow_state_name": "Director Section"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 14:56:51.367113",
+        "name": "Govt Review",
+        "style": "",
+        "workflow_state_name": "Govt Review"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 14:50:32.767781",
+        "name": "Director Review",
+        "style": "",
+        "workflow_state_name": "Director Review"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 12:53:52.738017",
+        "name": "Returned",
+        "style": "",
+        "workflow_state_name": "Returned"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 14:49:43.195895",
+        "name": "JD Section",
+        "style": "",
+        "workflow_state_name": "JD Section"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 14:22:49.553931",
+        "name": "RDD Section",
+        "style": "",
+        "workflow_state_name": "RDD Section"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-11-27 17:12:45.060632",
+        "name": "RDD Review",
+        "style": "",
+        "workflow_state_name": "RDD Review"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-12-04 14:49:54.028743",
+        "name": "JD Review",
+        "style": "",
+        "workflow_state_name": "JD Review"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-11-27 17:13:46.854353",
+        "name": "Sanctioned",
+        "style": "",
+        "workflow_state_name": "Sanctioned"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "remove",
+        "modified": "2025-11-10 19:59:30.657130",
+        "name": "Rejected",
+        "style": "Danger",
+        "workflow_state_name": "Rejected"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-11-27 17:09:42.701661",
+        "name": "Draft",
+        "style": "",
+        "workflow_state_name": "Draft"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-11-27 17:10:17.269510",
+        "name": "HC Review",
+        "style": "",
+        "workflow_state_name": "HC Review"
+    },
+    {
+        "docstatus": 0,
+        "doctype": "Workflow State",
+        "icon": "",
+        "modified": "2025-11-27 17:10:46.517830",
+        "name": "IMO Review",
+        "style": "",
+        "workflow_state_name": "IMO Review"
+    }
+]
