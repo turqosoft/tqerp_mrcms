@@ -13,18 +13,21 @@ frappe.ui.form.on("Claim Payment List", {
                     if (r && r.message) {
                         frm.set_value("office", r.message.office);
                         frm.refresh_field("office");
+                        // 🔹 Filter Fund Manager based on office
+                        frm.set_query("fund_manager", function() {
+                            return {
+                                query: "tqerp_mrcms.api.get_available_fund_managers",
+                                filters: { office: r.message.office, expired: 0 }
+                            };
+                        });
+                        // 🔹 Fetch fund details if already selected
+                        if (frm.doc.fund_manager && frm.doc.docstatus === 0) {
+                            fetch_fund_details(frm);
+                        }
                     }
                 }
             });
         }
-
-        frm.set_query("fund_manager", () => {
-            return {
-                filters: {
-                    expired: 0
-                }
-            };
-        });
     },
 
     before_save: function(frm) {

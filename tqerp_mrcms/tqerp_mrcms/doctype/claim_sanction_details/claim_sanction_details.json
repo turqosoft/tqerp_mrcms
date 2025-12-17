@@ -144,7 +144,8 @@
         },
         {
             "fieldname": "claim_bundle_no",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options":"Claim Bundle Management",
             "label": "Claim Bundle Number"
         },
         {

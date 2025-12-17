@@ -144,7 +144,8 @@
         },
         {
             "fieldname": "claim_sanction_no",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options":"Claim Sanction List",
             "label": "Claim Sanction Number"
         },
         {
