@@ -1,161 +1,101 @@
+frappe.ui.form.on("Claim Proceedings", {
+    refresh(frm) {
+        // Show Download button ONLY if submitted
+        if (frm.doc.docstatus === 1) {
+            // Add a single Download button
+            frm.add_custom_button(__('Download List'), function() {
+                // Show dialog to choose Excel or CSV
+                let d = new frappe.ui.Dialog({
+                    title: __('Download Payee List'),
+                    fields: [
+                        {
+                            fieldname: 'file_type',
+                            fieldtype: 'Select',
+                            label: 'File Type',
+                            options: ['Excel', 'CSV'],
+                            default: 'Excel',
+                            reqd: 1
+                        }
+                    ],
+                    primary_action_label: __('Download'),
+                    primary_action(values) {
+                        let method = values.file_type === 'CSV'
+                            ? "tqerp_mrcms.api.download_claim_details_csv"
+                            : "tqerp_mrcms.api.download_claim_details_excel";
 
-frappe.ui.form.on('Claim Proceedings', {
+                        frappe.call({
+                            method: method,
+                            args: { docname: frm.doc.name },
+                            callback: function(r) {
+                                if (r.message) window.open(r.message);
+                                else frappe.msgprint(__('No file available for download'));
+                            }
+                        });
 
-    // -------------------------------
-    // ONLOAD
-    // -------------------------------
-    onload: function(frm) {
-        // 🔹 Auto-set Office from logged-in user
-        frappe.call({
-            method: "frappe.client.get_value",
-            args: {
-                doctype: "User",
-                filters: { name: frappe.session.user },
-                fieldname: ["office"]
-            },
-            callback: function(r) {
-                if (r.message && r.message.office) {
-
-                    frm.set_value("office", r.message.office);
-
-                    // 🔹 Filter Fund Manager based on office
-                    frm.set_query("fund_manager", function() {
-                        return {
-                            query: "tqerp_mrcms.api.get_available_fund_managers",
-                            filters: { office: r.message.office, expired: 0 }
-                        };
-                    });
-
-                    // 🔹 Fetch fund details if already selected
-                    if (frm.doc.fund_manager && frm.doc.docstatus === 0) {
-                        fetch_fund_details(frm);
+                        d.hide();
                     }
-                }
-            }
-        });
-    },
+                });
+                d.show();
+            });
+        
 
-    // -------------------------------
-    // FUND MANAGER CHANGE (DRAFT ONLY)
-    // -------------------------------
-    fund_manager: function(frm) {
-        if (!frm.doc.fund_manager || frm.doc.docstatus === 1) return;
-        fetch_fund_details(frm);
-    },
 
-    // -------------------------------
-    // CHILD TABLE CHANGE
-    // -------------------------------
-    claim_proceedings_add: update_total,
-    claim_proceedings_remove: update_total,
+        // =====================================================
+            //  NEW: Upload Payment Excel/CSV button
+            // =====================================================
+            frm.add_custom_button(__('Upload Payment'), function () {
 
-    // -------------------------------
-    // REFRESH
-    // -------------------------------
-    refresh: function(frm) {
+                let d = new frappe.ui.Dialog({
+                    title: __('Upload Bank Payment File'),
+                    fields: [
+                        {
+                            fieldname: 'upload_file',
+                            fieldtype: 'Attach',
+                            label: 'Upload Excel/CSV',
+                            reqd: 1
+                        }
+                    ],
+                    primary_action_label: __('Process File'),
+                    primary_action(values) {
 
-        // 🔒 AFTER SUBMIT → NO UI LOGIC
-        if (frm.doc.docstatus === 1) return;
+                        frappe.call({
+                            method: "tqerp_mrcms.api.process_payment_file",
+                            args: {
+                                docname: frm.doc.name,
+                                file_url: values.upload_file
+                            },
+                            freeze: true,
+                            freeze_message: "Processing file...",
+                            callback: function (r) {
+                                if (!r.exc) {
+                                    let msg = `
+                                        <b>Updated Rows:</b> ${r.message.updated}<br>
+                                        <b>Unmatched Rows:</b> ${r.message.unmatched_count}<br>
+                                    `;
 
-        if (frm.doc.fund_manager && frm.doc.office) {
-            fetch_fund_details(frm);
+                                    if (r.message.mismatch_file_url) {
+                                        msg += `<br><b>Download Mismatch Report:</b> 
+                                                <a href="${r.message.mismatch_file_url}" target="_blank">${r.message.mismatch_file_url}</a>`;
+                                    }
+
+                                    frappe.msgprint({
+                                        title: __("Payment Upload Summary"),
+                                        indicator: r.message.unmatched_count ? "orange" : "green",
+                                        message: msg,
+                                    });
+
+                                    frm.reload_doc();
+                                }
+                            }
+                        });
+
+                        d.hide();
+                    }
+                });
+
+                d.show();
+
+            });
         }
-
-        update_total(frm);
-    },
-
-    // -------------------------------
-    // VALIDATION
-    // -------------------------------
-    validate: function(frm) {
-        if (
-            frm.doc.total_allocated &&
-            frm.doc.available &&
-            flt(frm.doc.total_allocated) > flt(frm.doc.available)
-        ) {
-            frappe.throw(
-                __("Total Allocated ({0}) cannot exceed Available Fund ({1})",
-                    [frm.doc.total_allocated, frm.doc.available])
-            );
-        }
-    },
-
-    // -------------------------------
-    // BEFORE SUBMIT
-    // -------------------------------
-    before_submit: function(frm) {
-
-        if (flt(frm.doc.total_allocated) > flt(frm.doc.available)) {
-            frappe.throw(
-                __("Cannot submit. Total Allocated ({0}) is greater than Available Fund ({1})",
-                    [frm.doc.total_allocated, frm.doc.available])
-            );
-        }
-
-        frappe.call({
-            method: "tqerp_mrcms.api.allocate_fund_on_submit",
-            args: {
-                docname: frm.doc.name,
-                doctype: "Claim Proceedings"
-            },
-            async: false
-        });
     }
 });
-
-
-// ======================================
-// HELPER FUNCTIONS
-// ======================================
-
-function update_total(frm) {
-
-    let total = 0;
-
-    if (frm.doc.claim_proceedings) {
-        frm.doc.claim_proceedings.forEach(row => {
-            total += flt(row.passed_amount || 0);
-        });
-    }
-
-    frm.set_value("total_allocated", total);
-
-    if (frm.doc.available) {
-        frm.set_value(
-            "balance",
-            flt(frm.doc.available) - flt(total)
-        );
-    }
-}
-
-function fetch_fund_details(frm) {
-
-    frappe.call({
-        method: "tqerp_mrcms.api.get_fund_details",
-        args: {
-            fund_manager: frm.doc.fund_manager,
-            office: frm.doc.office
-        },
-        callback: function(r) {
-
-            if (!r.message) return;
-
-            // 🔹 Source of truth
-            frm.set_value("available", r.message.available);
-
-            frm.set_value(
-                "balance",
-                flt(r.message.available) - flt(frm.doc.total_allocated || 0)
-            );
-
-            frm.set_value("fund_date", r.message.fund_date);
-
-            if (r.message.approval_note) {
-                frm.set_value("approval_note", r.message.approval_note);
-                frm.toggle_display("approval_note", true);
-            } else {
-                frm.toggle_display("approval_note", false);
-            }
-        }
-    });
-}
