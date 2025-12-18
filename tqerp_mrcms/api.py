@@ -1358,43 +1358,62 @@ def process_payment_file(docname, file_url):
     import os
     import pandas as pd
     from frappe.utils import getdate
-
+ 
     doc = frappe.get_doc("Claim Proceedings", docname)
-
+ 
     if doc.docstatus != 1:
         frappe.throw("Upload allowed only after submission.")
-
-    # ---------------------
-    # Resolve File Path
-    # ---------------------
+ 
+    if not file_url:
+        frappe.throw("No file selected. Please upload a payment file.")
+ 
     filename = file_url.split("/files/")[-1]
-    file_path = frappe.get_site_path("public", "files", filename)
-
-    if not os.path.exists(file_path):
-        frappe.throw(f"File not found: {file_path}")
-
-    ext = file_path.split(".")[-1].lower()
-
-    if ext in ("xlsx", "xls"):
-        df = pd.read_excel(file_path)
+ 
+    # Build paths
+    public_path = frappe.get_site_path("public", "files", filename)
+    private_path = frappe.get_site_path("private", "files", filename)
+ 
+    # Detect actual path
+    if os.path.exists(public_path):
+        file_path = public_path
+    elif os.path.exists(private_path):
+        file_path = private_path
     else:
-        df = pd.read_csv(file_path)
-
+        frappe.throw(f"""
+            File not found:<br><br>
+            <b>Public:</b> {public_path}<br>
+            <b>Private:</b> {private_path}<br><br>
+            Ensure the file is uploaded correctly.
+        """)
+ 
+    # ---------------------
+    # Read Excel/CSV File
+    # ---------------------
+    ext = file_path.split(".")[-1].lower()
+ 
+    try:
+        if ext in ("xlsx", "xls"):
+            df = pd.read_excel(file_path)
+        else:
+            df = pd.read_csv(file_path)
+    except Exception as e:
+        frappe.throw(f"Failed to read the file: {e}")
+ 
     df.columns = [
         c.strip().lower().replace(" ", "_").replace(".", "")
         for c in df.columns
     ]
-
+ 
     required_cols = ["account_no", "amount", "credit_date", "credit_status", "utr_number"]
     for col in required_cols:
         if col not in df.columns:
             frappe.throw(f"Missing column: {col}")
-
+ 
     rows = df.to_dict("records")
-
+ 
     updated = 0
     unmatched = []
-
+ 
     for row in doc.claim_proceedings:
         matched = False
         for rec in rows:
@@ -1402,28 +1421,28 @@ def process_payment_file(docname, file_url):
                 str(rec.get("account_no") or "").strip()
                 and float(row.passed_amount) ==
                     float(rec.get("amount") or 0)):
-
+ 
                 row.credit_amount = rec.get("amount")
                 row.credit_status = rec.get("credit_status")
                 row.utr_number = rec.get("utr_number")
                 row.credit_date = getdate(rec.get("credit_date"))
                 row._highlight = "green"
-
+ 
                 # -----------------------
                 # Update Claims to To Paid
                 # -----------------------
                 frappe.db.set_value("Claim", row.claim_no, "claim_status", "Paid")
-
+ 
                 updated += 1
                 matched = True
                 break
-
+ 
         if not matched:
             unmatched.append({
                 "bank_account_no": row.bank_account_no,
                 "passed_amount": row.passed_amount
             })
-
+ 
     # -----------------------
     # Generate Mismatch Excel
     # -----------------------
@@ -1434,29 +1453,19 @@ def process_payment_file(docname, file_url):
         mismatch_path = frappe.get_site_path("public", "files", mismatch_filename)
         mismatch_df.to_excel(mismatch_path, index=False)
         mismatch_file_url = f"/files/{mismatch_filename}"
-
-    # -----------------------
-    # Log Upload History
-    # -----------------------
-    # doc.append("upload_history", {
-    #     "file_name": filename,
-    #     "file_url": file_url,
-    #     "uploaded_on": frappe.utils.now(),
-    #     "processed_by": frappe.session.user,
-    #     "updated_count": updated,
-    #     "unmatched_count": len(unmatched),
-    # })
-
+ 
+    
+ 
     # -----------------------
     # Auto Move To Paid
     # -----------------------
     if all([r.credit_status and str(r.credit_status).lower() == "delivered"
             for r in doc.claim_proceedings]):
         doc.proceedings_status = "Paid"
-
+ 
     doc.save(ignore_permissions=True)
     frappe.db.commit()
-
+ 
     return {
         "updated": updated,
         "unmatched": unmatched,
