@@ -60,8 +60,8 @@ frappe.ui.form.on("Claim Payment List", {
                     primary_action_label: __('Download'),
                     primary_action(values) {
                         let method = values.file_type === 'CSV'
-                            ? "tqerp_mrcms.api.download_payment_details_csv"
-                            : "tqerp_mrcms.api.download_payment_details_excel";
+                            ? "tqerp_mrcms.api.download_claim_details_csv"
+                            : "tqerp_mrcms.api.download_claim_details_excel";
 
                         frappe.call({
                             method: method,

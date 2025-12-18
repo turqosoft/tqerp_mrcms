@@ -1141,6 +1141,61 @@ def download_claim_details_excel(docname):
     wb.save(filepath)
     return f"/files/{filename}"
 
+import pandas as pd
+import frappe
+from frappe.utils import get_site_path
+ 
+@frappe.whitelist()
+def download_claim_details_csv(docname):
+    """
+    Download CSV for Claim Proceedings with fields:
+    claim_no, name1, ip_no, phone, ifsc, bank_account_no, passed_amount, claim_date
+    """
+ 
+    doc = frappe.get_doc("Claim Proceedings", docname)  # Parent DocType
+ 
+    filename = f"{docname}_claim_details.csv"
+    filepath = get_site_path("public", "files", filename)
+ 
+    data = []
+ 
+    total_passed_amount = 0.0
+ 
+    # Header row
+    headers = [
+        "Claim No", "Name", "IP No", "Phone",
+        "IFSC", "Bank Account No", "Passed Amount", "Claim Date"
+    ]
+ 
+    # Populate rows
+    for row in doc.claim_proceedings:
+        passed_amount = float(row.passed_amount or 0)
+ 
+        data.append([
+            row.claim_no or "",
+            row.name1 or "",
+            row.ip_no or "",
+            row.phone or "",
+            row.ifsc or "",
+            row.bank_account_no or "",
+            passed_amount,
+            row.claim_date.strftime("%d-%m-%Y") if row.claim_date else ""
+        ])
+ 
+        total_passed_amount += passed_amount
+ 
+    # Add total row
+    data.append(["", "", "", "", "", "TOTAL", total_passed_amount, ""])
+ 
+    # Create DataFrame
+    df = pd.DataFrame(data, columns=headers)
+ 
+    # Save CSV
+    df.to_csv(filepath, index=False)
+ 
+    return f"/files/{filename}"
+
+
 def update_claim_status_on_submit(doc, method=None):
     """
     On submit of Claim Proceedings:
