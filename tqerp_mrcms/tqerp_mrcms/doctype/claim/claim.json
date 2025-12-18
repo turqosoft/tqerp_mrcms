@@ -79,7 +79,8 @@
             "in_standard_filter":1,
             "options": "\nData Entry\nRegistered\nProcessing\nSanctioned\nPaid\nRejected\nReturned\nClosed",
             "default": "Data Entry",
-            "read_only": 1
+            "read_only": 1,
+            "in_list_view":1
         },
         {
             "fieldname": "dispensary",
