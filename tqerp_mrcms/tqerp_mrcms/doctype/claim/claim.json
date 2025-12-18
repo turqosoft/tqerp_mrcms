@@ -105,7 +105,8 @@
             "fieldname": "claim_date",
             "label": "Date",
             "fieldtype": "Date",
-            "default": "Today"
+            "default": "Today",
+            "in_list_view":1
         },
         {
             "fieldname": "section_break_eeuj",

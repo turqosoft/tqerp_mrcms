@@ -1918,7 +1918,7 @@ def download_payment_details_csv(docname):
     doc = frappe.get_doc("Claim Payment List", docname)
  
     # Prepare file path
-    filename = f"{docname}_payment_details.xlsx"
+    filename = f"{docname}_payment_details.csv"
     filepath = get_site_path("public", "files", filename)
  
     data = []
