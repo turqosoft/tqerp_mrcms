@@ -87,7 +87,8 @@
             "fieldtype": "Data",
             "fetch_from:": "ip_no.dispensary",
             "reqd": 1,
-            "read_only": 1
+            "read_only": 1,
+            "in_list_view":1
         },
         {
             "fieldname": "column_break_eeuj",
@@ -121,7 +122,8 @@
             "label": "Insurance Number",
             "fieldtype": "Link",
             "options": "Insured Person",
-            "reqd":1,
+            "reqd":1,,
+            "in_list_view":1,
             "description": "ഇൻഷുറൻസ് നമ്പറോ ഫോൺ നമ്പറോ വെച്ചു തിരയാവുന്നതാണ്"
         },
         {
@@ -133,7 +135,8 @@
             "fieldname": "ip_name",
             "label": "IP Name (ഇൻഷുർ ചെയ്‌ത തൊഴിലാളിയുടെ പേര്)",
             "fieldtype": "Data",
-            "reqd":1
+            "reqd":1,
+            "in_list_view":1
         },
         {
             "fieldname": "address",
@@ -210,7 +213,8 @@
             "fieldname": "amount_claimed",
             "label": "Claim Amount",
             "fieldtype": "Float",
-            "reqd":1
+            "reqd":1,
+            "in_list_view":1
         },
         {
             "fieldname": "bank_name",
