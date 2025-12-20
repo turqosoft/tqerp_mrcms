@@ -276,73 +276,75 @@ doc_events = {
 }
 
 fixtures = [
-    # 1) Workflow definition for Claim
-    {
-        "doctype": "Workflow",
-        "filters": [
-            # ["document_type", "=", "Claim"]
-            ["name", "=", "Claim Processing v3"]
-        ]
-    },
+    # # 1) Workflow definition for Claim
+    # {
+    #     "doctype": "Workflow",
+    #     "filters": [
+    #         # ["document_type", "=", "Claim"]
+    #         ["name", "=", "Claim Processing v3"]
+    #     ]
+    # },
 
-    # 2) Workflow States used by this workflow (optional but recommended)
-    {
-        "doctype": "Workflow State",
-        "filters": [
-            ["name", "in", [
-                "Draft",
-                "Returned",
-                "HC Review",
-                "IMO Review",
-                "Sanctioned",
-                "RD Section",
-                "RD Review",
-                "Rejected",
-                "JD Section",
-                "JD Review",
-                "DIR Section",
-                "DIR Review",
-                "Govt Review"
-            ]]
-        ]
-    },
+    # # 2) Workflow States used by this workflow (optional but recommended)
+    # {
+    #     "doctype": "Workflow State",
+    #     "filters": [
+    #         ["name", "in", [
+    #             "Draft",
+    #             "Returned",
+    #             "HC Review",
+    #             "IMO Review",
+    #             "Sanctioned",
+    #             "RD Section",
+    #             "RD Review",
+    #             "Rejected",
+    #             "JD Section",
+    #             "JD Review",
+    #             "DIR Section",
+    #             "DIR Review",
+    #             "Govt Review"
+    #         ]]
+    #     ]
+    # },
 
-    # 3) Workflow Actions used (only if you created custom ones)
-    {
-        "doctype": "Workflow Action Master",
-        "filters": [
-            ["name", "in", [
-                "Approve",
-                "Objection",
-                "Reject",
-                "Review"
-            ]]
-        ]
-    },
+    # # 3) Workflow Actions used (only if you created custom ones)
+    # {
+    #     "doctype": "Workflow Action Master",
+    #     "filters": [
+    #         ["name", "in", [
+    #             "Approve",
+    #             "Objection",
+    #             "Reject",
+    #             "Review"
+    #         ]]
+    #     ]
+    # },
     # Role Permission Manager
-    {
-        "doctype": "Custom DocPerm",
-        "filters": [
-            ["parent", "in", [
-                "Claim",
-                "Claim Proceedings",
-                "Claim Category",
-                "Fund Manager",
-                "Insured Person",
-                "Mrcms Settings",
-                "Claim Checklist",
-                "Relation",
-                "Office",
-                "Bank",
-                "District",
-                "Authority",
-                "Claim Bundle Management",
-                "Claim Sanction List",
-                "Local Office",
-                "Claim Payment List"
-                # add any other doctypes for which you've customised permissions
-            ]]
-        ]
-    },
+    # {
+    #     "doctype": "Custom DocPerm",
+    #     "filters": [
+    #         ["parent", "in", [
+    #             "Claim",
+    #             "Claim Proceedings",
+    #             "Claim Category",
+    #             "Fund Manager",
+    #             "Insured Person",
+    #             "Mrcms Settings",
+    #             "Claim Checklist",
+    #             "Relation",
+    #             "Office",
+    #             "Bank",
+    #             "District",
+    #             "Authority",
+    #             "Claim Bundle Management",
+    #             "Claim Sanction List",
+    #             "Local Office",
+    #             "Claim Payment List",
+    #             "Workflow",
+    #             "Organisation"
+    #             # add any other doctypes for which you've customised permissions
+    #         ]]
+    #     ]
+    # },
 ]
 
