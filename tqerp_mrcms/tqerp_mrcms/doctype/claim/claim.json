@@ -70,6 +70,8 @@
 
         "section_break_rate_type",
         "heading_rate_type",
+
+
         "package_rate",
         "package_rate_items",
         "section_break_rt1",
@@ -306,24 +308,8 @@
             "label": "Rate Type",
             "fieldtype": "Heading"
         },
-        {
-            "fieldname": "non_package_rate",
-            "label": "Non-Package Rate",
-            "fieldtype": "Check"
-        },
-        {
-            "fieldname": "non_package_rate_items",
-            "label": "Items",
-            "fieldtype": "Table",
-            "options": "Non Package Rate Item"
-        },
-        {
-            "fieldname": "total_non_package_rate",
-            "fieldtype": "Float",
-            "label": "Total Non Package Rate",
-            "read_only": 1,
-            "in_list_view": 1
-          },
+
+
         {
             "fieldname": "package_rate",
             "label": "Package Rate",
@@ -333,15 +319,40 @@
             "fieldname": "package_rate_items",
             "label": "Items",
             "fieldtype": "Table",
-            "options": "Package Rate Item"
+            "options": "Package Rate Item",
+            "depends_on":"eval:doc.package_rate==1"
         },
         {
             "fieldname": "total_package_rate",
             "fieldtype": "Float",
             "label": "Total Package Rate",
             "read_only": 1,
-            "in_list_view": 1
+            "in_list_view": 1,
+            "depends_on":"eval:doc.package_rate==1"
+        },
+
+
+        {
+            "fieldname": "non_package_rate",
+            "label": "Non-Package Rate",
+            "fieldtype": "Check"
+        },
+        {
+            "fieldname": "non_package_rate_items",
+            "label": "Items",
+            "fieldtype": "Table",
+            "options": "Non Package Rate Item",
+            "depends_on":"eval:doc.non_package_rate==1"
+        },
+        {
+            "fieldname": "total_non_package_rate",
+            "fieldtype": "Float",
+            "label": "Total Non Package Rate",
+            "read_only": 1,
+            "in_list_view": 1,
+            "depends_on":"eval:doc.non_package_rate==1"
           },
+        
         
         {
             "fieldname": "passed_amount",
