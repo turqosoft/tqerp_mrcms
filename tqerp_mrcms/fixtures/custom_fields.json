@@ -14,23 +14,23 @@
         "doctype":"Custom Field",
         "dt" : "User",
         "module":"Tqerp Mrcms",
-        "name": "organisation in User",
-        "fieldname":"organisation",
+        "name": "Organisation Type in User",
+        "fieldname":"organisation_type",
         "fieldtype":"Link",
-        "options":"Organisation",
-        "label":"Organisation",
+        "options":"Organisation Type",
+        "label":"Organisation Type",
         "insert_after":"authority"
     },
     {
         "doctype":"Custom Field",
         "dt" : "User",
         "module":"Tqerp Mrcms",
-        "name": "Office in User",
-        "fieldname":"office",
+        "name": "organisation in User",
+        "fieldname":"organisation",
         "fieldtype":"Link",
-        "options":"Office",
-        "label":"Office",
-        "insert_after":"organisation"
+        "options":"Organisation",
+        "label":"Organisation",
+        "insert_after":"organisation_type"
     }
 ] 
     

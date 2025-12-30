@@ -11,6 +11,7 @@
         "section_break_embe",
         "claim_status",
         "dispensary",
+        "organisation_code",
         "column_break_eeuj",
         "naming_series",
         "claim_date",
@@ -35,17 +36,14 @@
         "branch",
         "bank_account_no",
         "ifs_code",
+        
         "column_break_peuj",
         "heading_hospital_category",
         "nabh",
         "non_nabh",
-        "heading_rate_type",
-        "package_rate",
-        "non_package_rate",
-        "heading_amount",
-        "passed_amount",
-        "rupees",
-        "claim_category",
+
+
+
         "bill_details",
         "bill_total",
         "heading_objections",
@@ -59,10 +57,44 @@
         "esi_identity_proofepehechen",
         "others",
         "remarks",
+
+        "section_break_ipcom",
         "ip_communication",
+
+        "section_break_crd",
+        "claim_required_documents",
+
         "section_break_ct",
         "claim_templates",
         "claim_checklist",
+
+        "section_break_rate_type",
+        "heading_rate_type",
+        "package_rate",
+        "package_rate_items",
+        "section_break_rt1",
+        "column_break_rt1",
+        "column_break_rt2",
+        "total_package_rate",
+
+        "section_break_rt2",
+        "non_package_rate",
+        "non_package_rate_items",
+        "section_break_rt3",
+        "column_break_rt3",
+        "column_break_rt4",
+        "total_non_package_rate",
+
+
+        "section_break_am",
+        "passed_amount",
+        "column_break_cr1",
+        "rupees",
+        "column_break_cr2",
+        "claim_category",
+
+        "section_break_cr",
+        "claim_remarks",
         "claim_process"
     ],
     "fields": [
@@ -85,12 +117,19 @@
         {
             "fieldname": "dispensary",
             "label": "ESI Dispensary",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options":"Organisation",
             "fetch_from:": "ip_no.dispensary",
             "reqd": 1,
             "read_only": 1,
             "in_list_view":1
         },
+        {
+            "fieldname": "organisation_code",
+            "label": "Organisation Code",
+            "fieldtype": "Data",
+            "hidden": 1
+        },        
         {
             "fieldname": "column_break_eeuj",
             "fieldtype": "Column Break"
@@ -273,15 +312,37 @@
             "fieldtype": "Check"
         },
         {
+            "fieldname": "non_package_rate_items",
+            "label": "Items",
+            "fieldtype": "Table",
+            "options": "Non Package Rate Item"
+        },
+        {
+            "fieldname": "total_non_package_rate",
+            "fieldtype": "Float",
+            "label": "Total Non Package Rate",
+            "read_only": 1,
+            "in_list_view": 1
+          },
+        {
             "fieldname": "package_rate",
             "label": "Package Rate",
             "fieldtype": "Check"
         },
         {
-            "fieldname": "heading_amount",
-            "label": "Amount",
-            "fieldtype": "Heading"
+            "fieldname": "package_rate_items",
+            "label": "Items",
+            "fieldtype": "Table",
+            "options": "Package Rate Item"
         },
+        {
+            "fieldname": "total_package_rate",
+            "fieldtype": "Float",
+            "label": "Total Package Rate",
+            "read_only": 1,
+            "in_list_view": 1
+          },
+        
         {
             "fieldname": "passed_amount",
             "label": "Passed Amount",
@@ -440,6 +501,76 @@
             "allow_on_submit":1,
             "read_only":1,
             "depends_on":"eval:doc.claim_status=='Paid' || doc.claim_status=='Closed'"
+        },
+        {
+            "fieldname": "claim_remarks",
+            "fieldtype": "Table",
+            "options": "Claim Remarks",
+            "label":"Claim Remarks"
+        },
+        {
+            "fieldname": "section_break_ipcom",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_crd",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "claim_required_documents",
+            "fieldtype": "Table",
+            "options": "Claim Required Documents",
+            "label":"Claim Required Documents"
+        },
+        {
+            "fieldname": "section_break_rate_type",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_cr",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_rt1",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "column_break_rt1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_rt2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "section_break_rt2",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_rt3",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "column_break_rt3",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_rt4",
+            "fieldtype": "Column Break"
+        },
+        
+        {
+            "fieldname": "section_break_am",
+            "fieldtype": "Section Break",
+            "label":"Amount"
+        },
+        {
+            "fieldname": "column_break_cr1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_cr2",
+            "fieldtype": "Column Break"
         }
     ],
     "is_submittable": 1,

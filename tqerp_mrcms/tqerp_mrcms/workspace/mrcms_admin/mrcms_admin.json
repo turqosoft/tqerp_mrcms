@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Nu7BNOUEqB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">MRCMS Admin</span>\",\"col\":12}},{\"id\":\"WWrtvvcMDQ\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"id\":\"EK6hJDFSnI\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"8v15eIEZlr\",\"type\":\"card\",\"data\":{\"card_name\":\"Account\",\"col\":4}}]",
+ "content": "[{\"id\":\"Nu7BNOUEqB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">MRCMS Admin</span>\",\"col\":12}},{\"id\":\"WWrtvvcMDQ\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"id\":\"CThB8f4kb3\",\"type\":\"card\",\"data\":{\"card_name\":\"Rate Management\",\"col\":4}},{\"id\":\"EK6hJDFSnI\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"id\":\"8v15eIEZlr\",\"type\":\"card\",\"data\":{\"card_name\":\"Account\",\"col\":4}}]",
  "creation": "2025-12-03 22:03:47.613109",
  "custom_blocks": [],
  "docstatus": 0,
@@ -55,7 +55,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Masters",
-   "link_count": 8,
+   "link_count": 11,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -103,9 +103,29 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Organization Type",
+   "link_count": 0,
+   "link_to": "Organisation Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Organisation",
    "link_count": 0,
    "link_to": "Organisation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "MRC Region",
+   "link_count": 0,
+   "link_to": "MRC Region",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -123,9 +143,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Office",
+   "label": "Local Office",
    "link_count": 0,
-   "link_to": "Office",
+   "link_to": "Local Office",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -133,15 +153,84 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Local Office",
+   "label": "Claim Documents",
    "link_count": 0,
-   "link_to": "Local Office",
+   "link_to": "Claim Document Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Claim Document Rule",
+   "link_count": 0,
+   "link_to": "Claim Document Rule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rate Management",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Unit",
+   "link_count": 0,
+   "link_to": "Unit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Category",
+   "link_count": 0,
+   "link_to": "Item Category",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rate List",
+   "link_count": 0,
+   "link_to": "Rate List",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Rate",
+   "link_count": 0,
+   "link_to": "Item Rate",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-12-15 00:24:33.131537",
+ "modified": "2025-12-28 00:11:58.559180",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS Admin",

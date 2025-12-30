@@ -1,0 +1,139 @@
+{
+  "actions": [],
+  "allow_import": 1,
+  "autoname": "hash",
+  "creation": "2025-11-28 16:40:10.281765",
+  "description": "Log the chargeable rate of an Item",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "rate_list",
+    "type",
+    "cb_item_rate1",
+    "effective_from",
+    "valid_till",
+    "sb_rate_list",
+    "item_code",
+    "item_name",
+    "treatment_category",
+    "unit",
+    "cb_item_rate2",
+    "rate",
+    "remarks"
+  ],
+  "fields": [
+    {
+      "fieldname": "rate_list",
+      "fieldtype": "Link",
+      "label": "Rate List",
+      "options": "Rate List",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "type",
+      "fieldtype": "Data",
+      "label": "Type",
+      "fetch_from": "rate_list.type",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "effective_from",
+      "fieldtype": "Date",
+      "label": "Effective From",
+      "default": "Today"
+    },
+    {
+      "fieldname": "valid_till",
+      "fieldtype": "Date",
+      "label": "Valid Till"
+    },
+    {
+      "fieldname": "sb_rate_list",
+      "fieldtype": "Section Break",
+      "label": "Item Details"
+    },
+    {
+      "fieldname": "item_code",
+      "fieldtype": "Link",
+      "label": "Item Code",
+      "options": "Item",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "item_name",
+      "fetch_from": "item_code.item_name",
+      "fieldtype": "Data",
+      "label": "Item Name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "unit",
+      "fetch_from": "item_code.unit",
+      "fieldtype": "Data",
+      "read_only": 1,
+      "label": "Unit"
+    },
+    {
+      "fieldname": "treatment_category",
+      "fetch_from": "item_code.item_category",
+      "fieldtype": "Data",
+      "label": "Treatment Category",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "rate",
+      "fieldtype": "Currency",
+      "label": "Rate",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks"
+    },
+    {
+      "fieldname": "cb_item_rate1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "cb_item_rate2",
+      "fieldtype": "Column Break"
+    }
+  ],
+  "icon": "fa fa-flag",
+  "idx": 1,
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2025-11-28 16:40:10.281765",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Item Rate",
+  "naming_rule": "Random",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "import": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "quick_entry": 1,
+  "sort_field": "modified",
+  "sort_order": "ASC",
+  "states": [],
+  "title_field": "item_name",
+  "track_changes": 1
+}

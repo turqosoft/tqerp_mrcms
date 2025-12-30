@@ -1,0 +1,89 @@
+{
+    "actions": [],
+    "allow_import": 1,
+    "autoname": "field:item_code",
+    "creation": "2024-04-17 11:07:50.835604",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "item_code",
+        "item_name",
+        "item_category",
+        "unit",
+        "aux_code",
+        "item_description",
+        "enabled"
+    ],
+    "fields": [
+        {
+            "fieldname": "item_code",
+            "label": "Item Code",
+            "fieldtype": "Data",
+            "description": "Unique code to identify the item, Use the CGHS Code",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "aux_code",
+            "label": "Auxiliary Code",
+            "fieldtype": "Data",
+            "description": "Auxiliary  code to identify the item"
+        },
+        {
+            "fieldname": "item_name",
+            "label": "Item Name",
+            "fieldtype": "Data",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "item_description",
+            "label": "Item Description",
+            "fieldtype": "Small Text"
+        },
+        {
+            "fieldname": "unit",
+            "label": "Unit",
+            "fieldtype": "Link",
+            "options": "Unit",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "item_category",
+            "label": "Item Category",
+            "fieldtype": "Link",
+            "options": "Item Category",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "enabled",
+            "label": "Enabled",
+            "fieldtype": "Check",
+            "default": 1
+        }
+    ],
+    "is_submittable": 0,
+    "links": [],
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Item",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}

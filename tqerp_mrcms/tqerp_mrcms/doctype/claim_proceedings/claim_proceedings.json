@@ -63,10 +63,10 @@
       "default": "Un Paid"
     },
     {
-      "fieldname": "office",
+      "fieldname": "organisation",
       "fieldtype": "Link",
-      "label": "Office",
-      "options": "Office",
+      "label": "Organisation",
+      "options": "Organisation",
       "read_only": 1
     },
     {

@@ -1,0 +1,122 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "field:document_name",
+  "creation": "2025-11-28 16:40:10.281765",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "document_name",
+    "description",
+    "allowed_file_types",
+    "file_type_jpg",
+    "cb_c1",
+    "file_type_jpeg",
+    "cb_c2",
+    "file_type_png",
+    "cb_c3",
+    "file_type_gif",
+    "cb_c4",
+    "file_type_pdf",
+    "sb_c2",
+    "is_active"
+  ],
+  "fields": [
+    {
+      "fieldname": "document_name",
+      "fieldtype": "Data",
+      "label": "Document Name",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description"
+    },
+    {
+      "fieldname": "allowed_file_types",
+      "fieldtype": "Section Break",
+      "label": "Allowed File Types"
+    },
+    {
+      "fieldname": "file_type_jpg",
+      "fieldtype": "Check",
+      "label": "jpg"
+    },
+    {
+      "fieldname": "cb_c1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "file_type_jpeg",
+      "fieldtype": "Check",
+      "label": "jpeg"
+    },
+    {
+      "fieldname": "cb_c2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "file_type_png",
+      "fieldtype": "Check",
+      "label": "png"
+    },
+    {
+      "fieldname": "cb_c3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "file_type_gif",
+      "fieldtype": "Check",
+      "label": "gif"
+    },
+    {
+      "fieldname": "cb_c4",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "file_type_pdf",
+      "fieldtype": "Check",
+      "label": "pdf"
+    },
+    {
+      "fieldname": "sb_c2",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Active",
+      "allow_on_submit": 1,
+      "default": 1
+    }
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "is_submittable": 0,
+  "links": [],
+  "modified": "2025-11-28 16:40:10.281765",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Claim Document Master",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "import": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "row_format": "Dynamic",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

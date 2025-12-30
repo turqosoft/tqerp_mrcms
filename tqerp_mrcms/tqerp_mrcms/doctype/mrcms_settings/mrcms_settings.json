@@ -5,14 +5,14 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "dispensary_organisation"
+  "dispensary_organisation_type"
  ],
  "fields": [
   {
-   "fieldname": "dispensary_organisation",
+   "fieldname": "dispensary_organisation_type",
    "fieldtype": "Link",
-   "label": "Dispensary Organisation",
-   "options":"Organisation"
+   "label": "Dispensary Organisation Type",
+   "options":"Organisation Type"
   },
   {
    "fieldname": "default_claim_checklist",

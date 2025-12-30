@@ -1,0 +1,78 @@
+{
+  "actions": [],
+  "allow_rename": 1,
+  "creation": "2025-11-19 13:15:09.607919",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "claim_doc_master",
+    "claim_doc_name",
+    "mandatory",
+    "uploaded_file",
+    "remarks",
+    "uploaded_by",
+    "uploaded_on"
+  ],
+  "fields": [
+    {
+      "fieldname": "claim_doc_master",
+      "fieldtype": "Link",
+      "options": "Claim Document Master",
+      "in_list_view": 1,
+      "label": "Document"
+    },
+    {
+      "fieldname": "claim_doc_name",
+      "fetch_from": "claim_doc_master.document_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Claim Document Name"
+    },
+    {
+      "fieldname": "mandatory",
+      "fetch_from": "claim_doc_master.is_mandatory",
+      "fieldtype": "Select",
+      "options": "Yes\nNo",
+      "in_list_view": 1,
+      "label": "Mandatory"
+    },
+    {
+      "fieldname": "uploaded_file",
+      "fieldtype": "Attach",
+      "in_list_view": 1,
+      "label": "Uploaded File"
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "in_list_view": 1,
+      "label": "Remarks/File Info"
+    },
+    {
+      "fieldname": "uploaded_by",
+      "fieldtype": "Link",
+      "options": "User",
+      "in_list_view": 1,
+      "label": "Uploaded By"
+    },
+    {
+      "fieldname": "uploaded_on",
+      "fieldtype": "Datetime",
+      "label": "Uploaded On",
+      "in_list_view": 1
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "istable": 1,
+  "links": [],
+  "modified": "2025-11-20 13:12:16.197263",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Claim Required Documents",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

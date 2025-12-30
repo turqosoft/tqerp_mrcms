@@ -117,7 +117,6 @@ permission_query_conditions = {
 	"Claim": "tqerp_mrcms.tqerp_mrcms.doctype.claim.claim.get_permission_query_conditions",
     "Claim Proceedings": "tqerp_mrcms.tqerp_mrcms.doctype.claim_proceedings.claim_proceedings.get_permission_query_conditions",
     "Claim Bundle Management": "tqerp_mrcms.tqerp_mrcms.doctype.claim_bundle_management.claim_bundle_management.get_permission_query_conditions",
-    "Claim Sanction List": "tqerp_mrcms.tqerp_mrcms.doctype.claim_sanction_list.claim_sanction_list.get_permission_query_conditions",
     "Claim Payment List": "tqerp_mrcms.tqerp_mrcms.doctype.claim_payment_list.claim_payment_list.get_permission_query_conditions",
 }
 
@@ -272,6 +271,9 @@ doc_events = {
     },
     "Claim Payment List": {
         "validate": "tqerp_mrcms.api.validate"
+    },
+    "Claim": {
+        "on_submit": "tqerp_mrcms.api.auto_add_claim_to_bundle"
     }
 }
 

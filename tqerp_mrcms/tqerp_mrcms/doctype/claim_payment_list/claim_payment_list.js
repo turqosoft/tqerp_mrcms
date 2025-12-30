@@ -1,35 +1,56 @@
 frappe.ui.form.on("Claim Payment List", {
+    // onload: function(frm) {
+    //     // Auto-set Office from logged-in user
+    //     if (!frm.doc.office) {
+    //         frappe.call({
+    //             method: "frappe.client.get_value",
+    //             args: {
+    //                 doctype: "User",
+    //                 filters: { name: frappe.session.user },
+    //                 fieldname: "office"
+    //             },
+    //             callback: function(r) {
+    //                 if (r && r.message) {
+    //                     frm.set_value("office", r.message.office);
+    //                     frm.refresh_field("office");
+    //                     // 🔹 Filter Fund Manager based on office
+    //                     frm.set_query("fund_manager", function() {
+    //                         return {
+    //                             query: "tqerp_mrcms.api.get_available_fund_managers",
+    //                             filters: { office: r.message.office, expired: 0 }
+    //                         };
+    //                     });
+    //                     // 🔹 Fetch fund details if already selected
+    //                     if (frm.doc.fund_manager && frm.doc.docstatus === 0) {
+    //                         fetch_fund_details(frm);
+    //                     }
+    //                 }
+    //             }
+    //         });
+    //     }
+    // },
     onload: function(frm) {
-        // Auto-set Office from logged-in user
-        if (!frm.doc.office) {
+        // Set Organisation field of logged in user automatically only if empty
+        if (!frm.doc.organisation) {
             frappe.call({
                 method: "frappe.client.get_value",
                 args: {
                     doctype: "User",
                     filters: { name: frappe.session.user },
-                    fieldname: "office"
+                    fieldname: "organisation"  
                 },
                 callback: function(r) {
                     if (r && r.message) {
-                        frm.set_value("office", r.message.office);
-                        frm.refresh_field("office");
+                        frm.set_value("organisation", r.message.organisation);  
+                        frm.refresh_field("organisation");
+
                         // 🔹 Filter Fund Manager based on office
-                        frm.set_query("fund_manager", function() {
-                            return {
-                                query: "tqerp_mrcms.api.get_available_fund_managers",
-                                filters: { office: r.message.office, expired: 0 }
-                            };
-                        });
-                        // 🔹 Fetch fund details if already selected
-                        if (frm.doc.fund_manager && frm.doc.docstatus === 0) {
-                            fetch_fund_details(frm);
-                        }
+                        // Is this required. Check the commented function above
                     }
                 }
             });
         }
     },
-
     before_save: function(frm) {
         // Calculate total of passed_amount from child table
         let total = 0;

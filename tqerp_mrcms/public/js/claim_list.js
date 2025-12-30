@@ -1,10 +1,10 @@
 // -----------------------------------------------------
-// Recursive function to get all child offices
+// Recursive function to get all child organisations
 // -----------------------------------------------------
-async function getChildOfficesRecursive(parent_office) {
-    let children = await frappe.db.get_list("Office", {
+async function getChildOrganisationsRecursive(parent_organisation) {
+    let children = await frappe.db.get_list("Organisation", {
         fields: ["name", "is_group"],
-        filters: { parent_office: parent_office }
+        filters: { parent_organisation: parent_organisation }
     });
 
     let result = [];
@@ -12,12 +12,36 @@ async function getChildOfficesRecursive(parent_office) {
         result.push(child.name);
 
         if (child.is_group) {
-            let sub_children = await getChildOfficesRecursive(child.name);
+            let sub_children = await getChildOrganisationsRecursive(child.name);
             result = result.concat(sub_children);
         }
     }
     return result;
 }
+
+// Added on 25/12/2025 - Is this correct
+// -----------------------------------------------------
+//  Organisation Based Filter
+// -----------------------------------------------------
+let user_res = frappe.db.get_value("User", frappe.session.user, "organisation");
+let user_organisation = user_res?.message?.organisation;
+
+if (!user_organisation) return;
+
+let child_organisations = getChildOrganisationsRecursive(user_organisation);
+let allowed_organisations = [user_organisation, ...child_organisations];
+
+let ips = frappe.db.get_list("Insured Person", {
+    fields: ["name"],
+    filters: [["local_organisation", "in", allowed_organisations]],
+    limit: 0
+});
+
+let allowed_ips = ips.map(ip => ip.name);
+
+listview.filter_area.add([
+    ["Claim", "ip_no", "in", allowed_ips]
+]);
 
 
 
@@ -91,7 +115,7 @@ frappe.listview_settings['Claim'] = {
 
             // if (!user_office) return;
 
-            // let child_offices = await getChildOfficesRecursive(user_office);
+            // let child_offices = await getChildOrganisationsRecursive(user_office);
             // let allowed_offices = [user_office, ...child_offices];
 
             // let ips = await frappe.db.get_list("Insured Person", {
@@ -164,21 +188,21 @@ frappe.listview_settings['Claim'] = {
             //  Add Action Button — Claim Bundle Management
             // -----------------------------------------------------
             listview.page.add_action_item(__('Claim Bundle Management'), async function () {
- 
+
                 let selected_docs = listview.get_checked_items();
                 if (!selected_docs.length) {
                     frappe.msgprint(__('Please select at least one claim.'));
                     return;
                 }
-           
+
                 let sanctioned_claims = [];
-           
+
                 for (let doc of selected_docs) {
                     let full_doc = await frappe.db.get_doc('Claim', doc.name);
-           
+
                     if (full_doc.claim_status === "Sanctioned") {
                         sanctioned_claims.push({
-                            claim_no: full_doc.name,                            
+                            claim_no: full_doc.name,
                             claim_date: full_doc.claim_date || "",
                             ip_name: full_doc.ip_name || "",
                             ip_no: full_doc.ip_no || "",
@@ -187,30 +211,30 @@ frappe.listview_settings['Claim'] = {
                             claim_status: full_doc.claim_status || "",
                             amount_claimed: full_doc.amount_claimed || 0,
                             passed_amount: full_doc.passed_amount || 0,
-                            ifs_code:full_doc.ifs_code || 0,
-                            bank_account_no:full_doc.bank_account_no || 0,
-                            bank_name:full_doc.bank_name || 0
-                           
+                            ifs_code: full_doc.ifs_code || 0,
+                            bank_account_no: full_doc.bank_account_no || 0,
+                            bank_name: full_doc.bank_name || 0
+
                         });
                     }
                 }
-           
+
                 if (!sanctioned_claims.length) {
                     frappe.msgprint(__('No selected claims are sanctioned.'));
                     return;
                 }
-           
+
                 try {
                     let r = await frappe.call({
                         method: "tqerp_mrcms.api.create_claim_bundle_management",
                         args: { claims_data: JSON.stringify(sanctioned_claims) }
                     });
-           
+
                     if (r.message?.name) {
                         frappe.set_route("Form", "Claim Bundle Management", r.message.name);
                         frappe.msgprint(__('Claim Bundle Management created.'));
                     }
-           
+
                 } catch (err) {
                     frappe.msgprint(__('Error: {0}', [err.message]));
                 }

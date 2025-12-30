@@ -8,6 +8,12 @@ frappe.ui.form.on('Claim', {
         frm.set_query("name_of_patient", () => ({}));
         // Remember current value on load/refresh
         frm._last_passed_amount = frm.doc.passed_amount;
+        // make custom remakrs field read-only so that previous remarks should not be edited.
+        apply_readonly_to_comments(frm);
+
+        // Claim Management
+        // toggle_claim_rate_tables(frm);
+
     },
 
     validate(frm) {
@@ -25,31 +31,39 @@ frappe.ui.form.on('Claim', {
         }
     },
 
-    onload(frm) {
+onload(frm) {
         frm.set_df_property("name_of_patient", "read_only", 0);
-
+ 
         if (frm.doc.workflow_state !== 'IMO Review') {
             frm.set_df_property("passed_amount", "read_only", 1);
             frm.set_df_property("rupees", "read_only", 1);
+            frm.set_df_property("package_rate", "read_only", 1);
+            frm.set_df_property("non_package_rate", "read_only", 1);
+           
         } else {
             frm.set_df_property('passed_amount', 'read_only', 0);
             frm.set_df_property('rupees', 'read_only', 0);
+            frm.set_df_property("package_rate", "read_only", 0);
+            frm.set_df_property("non_package_rate", "read_only", 0);
         }
-
+ 
         if (frm.doc.ip_no) {
             fetch_family_members(frm);
             fetch_ip_details(frm);
         }
-
+ 
         if (!frm.doc.claim_templates) load_claim_checklist(frm, true);
-
+ 
         setTimeout(() => make_claim_checklist_readonly(frm), 500);
-
+ 
         const opts = frappe.route_options || {};
         if (opts.ip_no) frm.set_value("ip_no", opts.ip_no);
         if (opts.ip_name) frm.set_value("ip_name", opts.ip_name);
+ 
+        // make custom remakrs field read-only so that previous remarks should not be edited.
+        apply_readonly_to_comments(frm);
+        frm.set_df_property('organisation_code', 'read_only', 1);
     },
-
     ip_no(frm) {
         [
             "name_of_patient", "relation", "age_of_patient",
@@ -60,6 +74,18 @@ frappe.ui.form.on('Claim', {
         if (frm.doc.ip_no) {
             fetch_family_members(frm);
             fetch_ip_details(frm);
+        }
+    },
+    dispensary: function(frm) {
+        if (frm.doc.dispensary) {
+            frappe.db.get_value('Organisation', frm.doc.dispensary, 'organisation_code')
+                .then(r => {
+                    if (r.message) {
+                        frm.set_value('organisation_code', r.message.organisation_code);
+                    }
+                });
+        } else {
+            frm.set_value('organisation_code', '');
         }
     },
 
@@ -199,43 +225,119 @@ frappe.ui.form.on('Claim', {
     // ------------------------------
     // CLAIM STATUS PROGRESS LOGGER
     // ------------------------------
+    // ------------------------------
+    // CLAIM STATUS PROGRESS LOGGER
+    // ------------------------------
     claim_status(frm) {
         if (!frm.doc.claim_status) return;
-
+ 
         const rows = frm.doc.claim_process || [];
         const last_row = rows.length ? rows[rows.length - 1] : null;
-
+ 
         if (last_row && last_row.activity === `Claim status changed to "${frm.doc.claim_status}"`) {
             console.log("Duplicate status change ignored.");
             return;
         }
-
+ 
         frappe.call({
             method: "frappe.client.get_value",
             args: {
                 doctype: "User",
                 filters: { name: frappe.session.user },
-                fieldname: "office"
+                fieldname: "organisation"
             },
             callback(r) {
-                let office = r.message?.office || "Not Set";
-
+                let organisation = r.message?.organisation || "Not Set";
+ 
                 frm.add_child("claim_process", {
                     user: frappe.session.user,
                     activity: `Claim status changed to "${frm.doc.claim_status}"`,
-                    office: office,
+                    organisation: organisation,
                     date: frappe.datetime.now_datetime()
                 });
-
+ 
                 frm.refresh_field("claim_process");
-
+ 
                 frappe.show_alert({
                     message: "Claim progress updated",
                     indicator: "green"
                 });
             }
         });
-    }
+    },
+    amount_claimed(frm) {
+        if (!frm.doc.amount_claimed) return;
+
+        frappe.call({
+            method: "tqerp_mrcms.tqerp_mrcms.doctype.claim.claim.get_required_documents",
+            args: {
+                amount_claimed: frm.doc.amount_claimed
+            },
+            callback(r) {
+                if (!r.message) return;
+
+                frm.set_value("claim_category", r.message.claim_category);
+                frm.clear_table("claim_required_documents");
+
+                r.message.documents.forEach(d => {
+                    let row = frm.add_child("claim_required_documents");
+                    row.claim_doc_master = d.claim_doc_master;
+                    row.mandatory = d.mandatory;
+                });
+
+                frm.refresh_field("claim_required_documents");
+            }
+        });
+    },
+    claim_remarks_add(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+
+        // Auto-fill current user, status, date
+        frappe.model.set_value(cdt, cdn, "comment_by", frappe.session.user);
+        frappe.model.set_value(cdt, cdn, "claim_status", frm.doc.claim_status);
+        frappe.model.set_value(cdt, cdn, "date", frappe.datetime.now_datetime());
+
+        // Lock rows not owned by current user
+        apply_readonly_to_comments(frm);
+    },
+
+    claim_remarks_comment(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+        if (row.comment_by !== frappe.session.user || row.is_locked) {
+            frappe.msgprint("You cannot edit remarks by other users or locked remarks.");
+            frm.refresh_field("claim_remarks");
+        }
+    },
+    // RATE MANAGEMENT
+    // package_rate(frm) {
+    //     toggle_claim_rate_tables(frm);
+    //     // populate_rate_item_fields(frm, 'Package');
+    // },
+    // non_package_rate(frm) {
+    //     toggle_claim_rate_tables(frm);
+    //     // populate_rate_item_fields(frm, 'Non-Package');
+    // },
+    setup(frm) {
+        frm.fields_dict['package_rate_items'].grid.get_field('rate_item_name').get_query = function () {
+            return {
+                query: "tqerp_mrcms.api.rate_item_link_query",
+                filters: {
+                    item_type: "Package",
+                    is_active: 1
+                }
+            };
+        };
+        frm.fields_dict['non_package_rate_items'].grid.get_field('rate_item_name').get_query = function () {
+            return {
+                query: "tqerp_mrcms.api.rate_item_link_query",
+                filters: {
+                    item_type: "Non-Package",
+                    is_active: 1
+                }
+            };
+        };
+    },
+    // RATE MANAGEMENT ENDS HERE
 });
 
 
@@ -411,4 +513,244 @@ function make_claim_checklist_readonly(frm) {
             console.error("Error hiding grid elements:", e);
         }
     }, 200);
+}
+
+// Helper function to make comments read-only for others
+function apply_readonly_to_comments(frm) {
+    const grid = frm.fields_dict.claim_remarks.grid;    
+
+//     grid.grid_rows.forEach(row => {
+//         const doc = locals['Claim Remarks'][row.docname];
+
+//         if (doc.comment_by !== frappe.session.user || doc.is_locked) {
+//             row.toggle_enable('comment', false);
+//         } else {
+//             row.toggle_enable('comment', true);
+//         }
+//     });
+}
+
+frappe.ui.form.on('Claim Required Documents', {
+ 
+    // Trigger when document master is selected
+    claim_doc_master: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.claim_doc_master) return;
+ 
+        frappe.db.get_list('Claim Document Rule Details', {
+            filters: { claim_doc_master: row.claim_doc_master },
+            fields: ['mandatory'],
+            limit_page_length: 1
+        }).then(rule_details => {
+            if (rule_details && rule_details.length) {
+                frappe.model.set_value(
+                    cdt,
+                    cdn,
+                    'mandatory',
+                    rule_details[0].mandatory
+                );
+                frm.refresh_field('claim_required_documents');
+            }
+        });
+    },
+ 
+    // Trigger when file is uploaded
+    uploaded_file: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.uploaded_file || !row.claim_doc_master) return;
+ 
+        // ---- GET SETTINGS (FILE SIZE) ----
+        frappe.db.get_doc('Mrcms Settings', 'Mrcms Settings').then(settings => {
+            let max_size = settings.upload_file_size || 0;
+            let unit = settings.upload_file_size_unit || 'MB';
+ 
+            let max_bytes = unit === 'KB'
+                ? max_size * 1024
+                : max_size * 1024 * 1024;
+ 
+            // ---- GET FILE INFO ----
+            frappe.db.get_value(
+                'File',
+                { file_url: row.uploaded_file },
+                ['file_size', 'file_name']
+            ).then(r => {
+                if (!r || !r.message) return;
+ 
+                let file_size = r.message.file_size || 0;
+                let filename = r.message.file_name;
+                let ext = filename.split('.').pop().toLowerCase();
+ 
+                // ---- GET DOCUMENT MASTER ----
+                frappe.db.get_doc('Claim Document Master', row.claim_doc_master)
+                    .then(doc_master => {
+ 
+                        // ---- EXTENSION CHECK ----
+                        let allowed_extensions = [];
+                        if (doc_master.file_type_jpg) allowed_extensions.push('jpg');
+                        if (doc_master.file_type_jpeg) allowed_extensions.push('jpeg');
+                        if (doc_master.file_type_png) allowed_extensions.push('png');
+                        if (doc_master.file_type_gif) allowed_extensions.push('gif');
+                        if (doc_master.file_type_pdf) allowed_extensions.push('pdf');
+ 
+                        if (!allowed_extensions.includes(ext)) {
+                            frappe.msgprint({
+                                title: 'Invalid File Type',
+                                indicator: 'red',
+                                message: 'Allowed types: jpg, jpeg, png, gif, pdf'
+                            });
+                            frappe.model.set_value(cdt, cdn, 'uploaded_file', null);
+                            return;
+                        }
+ 
+                        // ---- FILE SIZE CHECK (ADDED) ----
+                        if (file_size > max_bytes) {
+                            frappe.msgprint({
+                                title: 'File Size Exceeded',
+                                indicator: 'red',
+                                message: `Maximum allowed size is ${max_size} ${unit}`
+                            });
+                            frappe.model.set_value(cdt, cdn, 'uploaded_file', null);
+                            return;
+                        }
+ 
+                        // ---- SET META FIELDS ----
+                        frappe.model.set_value(
+                            cdt,
+                            cdn,
+                            'uploaded_on',
+                            frappe.datetime.now_datetime()
+                        );
+                        frappe.model.set_value(
+                            cdt,
+                            cdn,
+                            'uploaded_by',
+                            frappe.session.user
+                        );
+ 
+                        frm.refresh_field('claim_required_documents');
+                    });
+            });
+        });
+    }
+});
+
+// RATE MANAGEMENT
+function toggle_claim_rate_tables(frm) {
+    frm.toggle_display('package_rate_items', frm.doc.package_rate);
+    frm.toggle_display('non_package_rate_items', frm.doc.non_package_rate);
+}
+
+function populate_rate_item_fields(cdt, cdn) {
+    const row = locals[cdt][cdn];
+    if (!row.rate_item_name) return;
+ 
+    //  Item Code
+    frappe.model.set_value(cdt, cdn, "item_code", row.rate_item_name);
+ 
+    // Item Name (from Item master)
+    frappe.db.get_value("Item", row.rate_item_name, "item_name")
+        .then(r => {
+            if (r && r.message) {
+                frappe.model.set_value(cdt,cdn,
+                    "item_name",
+                    r.message.item_name
+                );
+            }
+        });
+ 
+    // Rate (from Item Rate)
+    frappe.call({
+        method: "tqerp_mrcms.api.get_latest_rate_for_item",
+        args: {
+            item_code: row.rate_item_name
+        },
+        callback(r) {
+            if (!r.message) return;
+            frappe.model.set_value(cdt, cdn, "rate", r.message.rate);
+        }
+    });
+}
+
+frappe.ui.form.on('Package Rate Item', {
+ 
+   
+ 
+    rate_item_name(frm, cdt, cdn) {
+        populate_rate_item_fields(cdt, cdn, frm);
+    },
+    rate: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        calculate_row_total(row);
+        calculate_table_totals(frm);
+        calculate_passed_amount(frm);
+        frm.refresh_field('package_rate_items');
+    },
+    qty: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        calculate_row_total(row);
+        calculate_table_totals(frm);
+        calculate_passed_amount(frm);
+        frm.refresh_field('package_rate_items');
+    },
+    admissible_percentage: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        calculate_row_total(row);
+        calculate_table_totals(frm);
+        calculate_passed_amount(frm);
+        frm.refresh_field('package_rate_items');
+    }
+});
+ 
+frappe.ui.form.on('Non Package Rate Item', {
+    rate_item_name(frm, cdt, cdn) {
+        populate_rate_item_fields(cdt, cdn);
+    },
+    rate: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        calculate_row_total(row);
+        calculate_table_totals(frm);
+        calculate_passed_amount(frm);
+        frm.refresh_field('non_package_rate_items');
+    },
+    qty: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        calculate_row_total(row);
+        calculate_table_totals(frm);
+        calculate_passed_amount(frm);
+        frm.refresh_field('non_package_rate_items');
+    },
+    admissible_percentage: function (frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        calculate_row_total(row);
+        calculate_table_totals(frm);
+        calculate_passed_amount(frm);
+        frm.refresh_field('non_package_rate_items');
+    }
+});
+
+// Calculate table totals and overall passed_amount
+function calculate_table_totals(frm) {
+    let package_total = 0;
+    let non_package_total = 0;
+ 
+    // Only calculate package total if package_rate is selected
+    if (frm.doc.package_rate) {
+        (frm.doc.package_rate_items || []).forEach(row => package_total += row.total || 0);
+        frm.set_value("total_package_rate", package_total);
+    } else {
+        frm.set_value("total_package_rate", null);
+    }
+ 
+    // Only calculate non-package total if non_package_rate is selected
+    if (frm.doc.non_package_rate) {
+        (frm.doc.non_package_rate_items || []).forEach(row => non_package_total += row.total || 0);
+        frm.set_value("total_non_package_rate", non_package_total);
+    } else {
+        frm.set_value("total_non_package_rate", null);
+    }
+ 
+    // Update overall passed_amount using only selected rates
+    let passed_amount = (frm.doc.package_rate ? package_total : 0) +
+                        (frm.doc.non_package_rate ? non_package_total : 0);
+    frm.set_value("passed_amount", passed_amount);
 }

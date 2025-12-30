@@ -9,7 +9,7 @@
     "naming_series",
     "payment_status",
     "claim_payment_no",
-    "office",
+    "organisation",
     "cb_break_cpl1",
     "payment_date",
     "remarks",
@@ -36,9 +36,10 @@
       "label": "Claim payment Number"
     },
     {
-      "fieldname": "office",
-      "fieldtype": "Data",
-      "label": "Office",
+      "fieldname": "organisation",
+      "fieldtype": "Link",
+      "options": "Organisation",
+      "label": "Organisation",
       "read_only": 1
     },
     {

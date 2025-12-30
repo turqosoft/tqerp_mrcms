@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRCMS | Medical Reimbursement Claim Management System</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/tqerp_mrcms/css/landing.css">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- ===== Header ===== -->
+    <header class="portal-header sticky-top">
+        <nav class="container d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="logo-container">
+                    <i class="fas fa-heartbeat fa-2x text-primary"></i>
+                </div>
+                <div>
+                    <h4 class="mb-0 fw-bold text-primary">MRCMS</h4>
+                    <small class="text-muted">{{ intro_text or "Medical Reimbursement Portal" }}</small>
+                </div>
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                {% if frappe.session.user != 'Guest' %}
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fw-semibold text-dark">
+                        <i class="fas fa-user-circle text-primary me-1"></i>
+                        {{ frappe.get_fullname(frappe.session.user) }}
+                    </span>
+                    <a href="/app" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        App <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% else %}
+                <a href="/login" class="btn btn-primary rounded-pill px-4">
+                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- ... (unchanged) ... -->
+
+
+    <!-- ===== Hero ===== -->
+    <section class="hero-section position-relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="hero-bg-elements">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+        </div>
+
+        <div class="container position-relative">
+            <div class="row align-items-center min-vh-80">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h6 class="text-primary fw-semibold mb-3">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                            <i class="fas fa-bolt me-2"></i>Streamlined Process
+                        </span>
+                    </h6>
+                    <h1 class="display-4 fw-bold mb-4">
+                        Medical Reimbursement
+                        <span class="text-gradient">Claim Management</span>
+                        Made Simple
+                    </h1>
+                    <p class="lead text-muted mb-5">
+                        A centralized digital platform for seamless submission, processing,
+                        and settlement of medical reimbursement claims with complete transparency.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/login" class="btn btn-primary btn-lg px-4 py-3 d-flex align-items-center gap-2">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login to Portal
+                        </a>
+                        <a href="#features" class="btn btn-outline-primary btn-lg px-4 py-3">
+                            Explore Features
+                        </a>
+                    </div>
+                    <div class="mt-5">
+                        <p class="text-muted small mb-2">Trusted by healthcare organizations</p>
+                        <div class="d-flex gap-4 opacity-75">
+                            <i class="fas fa-hospital fa-2x text-primary"></i>
+                            <i class="fas fa-clinic-medical fa-2x text-primary"></i>
+                            <i class="fas fa-user-md fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                    <div class="hero-illustration">
+                        <div class="card illustration-card shadow-lg border-0">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Live Dashboard</h5>
+                                        <p class="text-muted small mb-0">Real-time statistics</p>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill px-3">
+                                        <i class="fas fa-chart-line me-1"></i> Live
+                                    </span>
+                                </div>
+                                <div class="dashboard-preview">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <div class="preview-item">
+                                            <div class="preview-label">Total Claims</div>
+                                            <div class="preview-value">{{ stats.total_claims or 0 }}</div>
+                                        </div>
+                                        <div class="preview-item">
+                                            <div class="preview-label">In Progress</div>
+                                            <div class="preview-value">{{ stats.pending or 0 }}</div>
+                                        </div>
+                                    </div>
+                                    {% if stats.total_claims > 0 %}
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        {% set approval_rate = ((stats.approved or 0) / stats.total_claims * 100) %}
+                                        <div class="progress-bar bg-success" style="width: {{ approval_rate }}%"></div>
+                                    </div>
+                                    {% else %}
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: 0%"></div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="text-center">
+                                        <small class="text-muted">
+                                            {% if stats.total_claims > 0 %}
+                                            {{ "{:.1f}%".format((stats.approved or 0) / stats.total_claims * 100) }}
+                                            approval rate
+                                            {% else %}
+                                            No claims processed yet
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+            <a href="#statistics" class="text-decoration-none">
+                <div class="mouse">
+                    <div class="wheel"></div>
+                </div>
+                <div class="arrow">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== Statistics ===== -->
+    <section class="py-6 bg-light-subtle" id="statistics">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">System Overview</h2>
+                <p class="lead text-muted max-w-600 mx-auto">
+                    Comprehensive statistics showcasing our platform's efficiency and reliability
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary-subtle">
+                            <i class="fas fa-file-invoice text-primary"></i>
+                        </div>
+                        <h3 class="stat-number">{{ stats.total_claims or 0 }}</h3>
+                        <p class="stat-label">Total Claims</p>
+                        {% if status_counts %}
+                        <div class="stat-trend text-primary">
+                            <i class="fas fa-chart-bar me-1"></i> Active
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success-subtle">
+                            <i class="fas fa-check-circle text-success"></i>
+                        </div>
+                        <h3 class="stat-number">{{ stats.approved or 0 }}</h3>
+                        <p class="stat-label">Approved Claims</p>
+                        {% if stats.total_claims and stats.total_claims > 0 %}
+                        <div class="stat-trend text-success">
+                            {{ "{:.0f}%".format((stats.approved or 0) / stats.total_claims * 100) }} success rate
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info-subtle">
+                            <i class="fas fa-indian-rupee-sign text-info"></i>
+                        </div>
+                        {% if financial and financial.total_processed %}
+                        <h3 class="stat-number">₹{{ "{:,.0f}".format(financial.total_processed) }}</h3>
+                        {% else %}
+                        <h3 class="stat-number">₹0</h3>
+                        {% endif %}
+                        <p class="stat-label">Amount Processed</p>
+                        {% if financial and financial.total_processed and financial.total_processed > 0 %}
+                        <div class="stat-trend text-info">
+                            <i class="fas fa-chart-line me-1"></i> Processed
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning-subtle">
+                            <i class="fas fa-clock text-warning"></i>
+                        </div>
+                        <h3 class="stat-number">{{ stats.pending or 0 }}</h3>
+                        <p class="stat-label">In Progress</p>
+                        {% if stats.pending and stats.pending > 0 %}
+                        <div class="stat-trend text-warning">
+                            <i class="fas fa-sync-alt me-1"></i> Active
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if status_counts %}
+            <!-- Additional status breakdown -->
+            <div class="row mt-5 g-4">
+                <div class="col-lg-12" data-aos="fade-up">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-transparent border-0">
+                            <h5 class="mb-0 fw-bold">Claim Status Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                {% for status, count in status_counts.items() %}
+                                {% if status != 'total' %}
+                                <div class="col-md-3 col-6">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div
+                                            class="status-indicator bg-{{ status|lower|replace(' ', '-') }}-subtle rounded-circle p-2">
+                                            <i class="fas 
+                        {% if status == 'Approved' %}fa-check-circle text-success
+                        {% elif status == 'Pending' %}fa-clock text-warning
+                        {% elif status == 'Paid' %}fa-rupee-sign text-success
+                        {% elif status == 'Rejected' %}fa-times-circle text-danger
+                        {% else %}fa-file text-primary{% endif %}
+                      "></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ count }}</h6>
+                                            <small class="text-muted">{{ status }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if financial %}
+            <div class="text-center mt-6" data-aos="fade-up">
+                <div
+                    class="alert alert-primary bg-primary-subtle border-primary-subtle d-inline-flex align-items-center gap-3 px-4 py-3">
+                    <i class="fas fa-chart-bar fa-2x text-primary"></i>
+                    <div class="text-start">
+                        <h5 class="mb-1">Total Amount Processed</h5>
+                        <h3 class="mb-0 text-primary">₹ {{ "{:,.2f}".format(financial.total_processed) }}</h3>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ===== Charts Section ===== -->
+    <section class="py-6 bg-white" id="charts">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Analytics & Trends</h2>
+                <p class="lead text-muted max-w-600 mx-auto">
+                    Visual insights into claim processing and financial distributions
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Claim Status Chart -->
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="chart-card">
+                        <h5 class="chart-title">Claim Status Overview</h5>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Summary Chart -->
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="chart-card">
+                        <h5 class="chart-title">Financial Summary</h5>
+                        <div class="chart-container">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trend Chart -->
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="chart-card">
+                        <h5 class="chart-title">Claim Submission Trends</h5>
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribution Chart -->
+                <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="chart-card">
+                        <h5 class="chart-title">Reimbursement Distribution</h5>
+                        <div class="chart-container">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing Time Chart -->
+                <div class="col-md-12" data-aos="fade-up" data-aos-delay="500">
+                    <div class="chart-card">
+                        <h5 class="chart-title">Average Processing Time by Stage</h5>
+                        <div class="chart-container">
+                            <canvas id="processingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Features ===== -->
+    <section class="py-6 bg-light-subtle" id="features">
+        <!-- ... rest of features section ... -->
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Why Choose MRCMS?</h2>
+
+                <p class="lead text-muted max-w-600 mx-auto">
+                    Experience seamless medical claim management with our comprehensive features
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h4 class="feature-title">Digital Submission</h4>
+                        <p class="feature-desc">
+                            Submit claims digitally with document upload. Real-time validation ensures completeness.
+                        </p>
+                        <ul class="feature-list">
+                            <li>Document scanning</li>
+                            <li>Auto-validation</li>
+                            <li>Instant receipt</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4 class="feature-title">Real-time Tracking</h4>
+                        <p class="feature-desc">
+                            Track claim status in real-time with notifications at every stage of processing.
+                        </p>
+                        <ul class="feature-list">
+                            <li>Status updates</li>
+                            <li>Email/SMS alerts</li>
+                            <li>Processing timeline</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card h-100">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4 class="feature-title">Secure Processing</h4>
+                        <p class="feature-desc">
+                            Bank-level security with encrypted data and compliance with healthcare regulations.
+                        </p>
+                        <ul class="feature-list">
+                            <li>256-bit encryption</li>
+                            <li>HIPAA compliant</li>
+                            <li>Audit trails</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Process Flow ===== -->
+    <section class="py-6 bg-light-subtle">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Simple 4-Step Process</h2>
+                <p class="lead text-muted max-w-600 mx-auto">
+                    From submission to settlement - streamlined for your convenience
+                </p>
+            </div>
+
+            <div class="process-flow" data-aos="fade-up">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h5>Submit Claim</h5>
+                        <p>Upload bills and submit claim online</p>
+                    </div>
+                </div>
+
+                <div class="process-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h5>Review & Verification</h5>
+                        <p>Automated validation and manual review</p>
+                    </div>
+                </div>
+
+                <div class="process-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h5>Approval</h5>
+                        <p>Multi-level approval workflow</p>
+                    </div>
+                </div>
+
+                <div class="process-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h5>Settlement</h5>
+                        <p>Direct bank transfer or cheque</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Manuals ===== -->
+    <section class="py-6" id="manuals">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Resources & Documentation</h2>
+                <p class="lead text-muted max-w-600 mx-auto">
+                    Download user manuals and guides to get started with MRCMS
+                </p>
+            </div>
+
+            {% if manuals and manuals|length > 0 %}
+            <div class="row g-4 justify-content-center" data-aos="fade-up">
+                {% for m in manuals %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="resource-card">
+                        <div class="resource-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="resource-content">
+                            <h5 class="resource-title">{{ m.title }}</h5>
+                            <p class="resource-desc">Download user guide</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge bg-secondary">PDF</span>
+                                <a href="{{ m.file_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-download me-1"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5" data-aos="fade-up">
+                <div class="empty-state">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h4>No Resources Available</h4>
+                    <p class="text-muted">Manuals will be uploaded soon</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="py-6 bg-primary text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8" data-aos="fade-right">
+                    <h2 class="display-6 fw-bold mb-3">Ready to Get Started?</h2>
+                    <p class="lead mb-4 opacity-90">
+                        Join healthcare professionals using MRCMS for efficient claim management.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/login" class="btn btn-light btn-lg px-4 py-3 fw-semibold">
+                            <i class="fas fa-sign-in-alt me-2"></i> Login Now
+                        </a>
+                        <a href="#contact" class="btn btn-outline-light btn-lg px-4 py-3">
+                            Contact Support
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center" data-aos="fade-left">
+                    <div class="cta-illustration">
+                        <i class="fas fa-rocket fa-6x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="portal-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="fas fa-heartbeat fa-2x text-primary"></i>
+                            <h4 class="fw-bold text-white mb-0">MRCMS</h4>
+                        </div>
+                        <p class="text-white-50 mb-0">
+                            Medical Reimbursement Claim Management System - Streamlining healthcare reimbursements.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <h5 class="text-white mb-4">Quick Links</h5>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="/login" class="footer-link">Portal Login</a>
+                        <a href="#features" class="footer-link">Features</a>
+                        <a href="#manuals" class="footer-link">Resources</a>
+                        <a href="#contact" class="footer-link">Support</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <h5 class="text-white mb-4">Contact Info</h5>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <span class="text-white-50">support@mrcms.com</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-phone text-primary"></i>
+                            <span class="text-white-50">+91 1800-123-4567</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-clock text-primary"></i>
+                            <span class="text-white-50">Mon-Fri: 9AM-6PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 border-secondary">
+
+            <div class="text-center">
+                <p class="mb-0 text-white-50">
+                    © {{ now.year }} MRCMS. All rights reserved. |
+                    <a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a> |
+                    <a href="#" class="text-white-50 text-decoration-none">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize Charts
+        document.addEventListener("DOMContentLoaded", function () {
+            const dashboardData = {{ dashboard_data_json| safe
+        }};
+        if (!dashboardData) return;
+
+        // 1. Status Chart (Doughnut)
+        new Chart(document.getElementById("statusChart"), {
+            type: 'doughnut',
+            data: {
+                labels: dashboardData.status_overview.labels,
+                datasets: [{
+                    data: dashboardData.status_overview.values,
+                    backgroundColor: [
+                        '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                },
+                layout: { padding: 20 }
+            }
+        });
+
+        // 2. Financial Chart (Bar)
+        new Chart(document.getElementById("financialChart"), {
+            type: 'bar',
+            data: {
+                labels: ["Total Processed", "Avg per Claim", "Outstanding"],
+                datasets: [{
+                    label: 'Amount (₹)',
+                    data: [
+                        dashboardData.financial.total_processed,
+                        dashboardData.financial.avg_processed,
+                        dashboardData.financial.outstanding
+                    ],
+                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
+            }
+        });
+
+        // 3. Trends Chart (Line)
+        new Chart(document.getElementById("trendChart"), {
+            type: 'line',
+            data: {
+                labels: dashboardData.trend.labels,
+                datasets: [{
+                    label: 'Claims Submitted',
+                    data: dashboardData.trend.values,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
+            }
+        });
+
+        // 4. Distribution Chart (Bar)
+        new Chart(document.getElementById("distributionChart"), {
+            type: 'bar',
+            data: {
+                labels: dashboardData.distribution.labels,
+                datasets: [{
+                    label: 'Claims Count',
+                    data: dashboardData.distribution.values,
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
+            }
+        });
+
+        // 5. Processing Time Chart (Bar)
+        new Chart(document.getElementById("processingChart"), {
+            type: 'bar',
+            data: {
+                labels: ["Submission → Review", "Review → Sanction", "Review → Rejection"],
+                datasets: [{
+                    label: 'Days',
+                    data: [
+                        dashboardData.processing_time.sub_to_review,
+                        dashboardData.processing_time.review_to_sanction,
+                        dashboardData.processing_time.review_to_reject
+                    ],
+                    backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
+            }
+        });
+    });
+    </script>
+ </body>
+
+</html>

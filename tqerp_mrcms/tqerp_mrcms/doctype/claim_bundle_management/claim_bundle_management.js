@@ -3,19 +3,19 @@
 // -------------------------------
 frappe.ui.form.on("Claim Bundle Management", {
     onload: function(frm) {
-        // Set Office field automatically only if empty
-        if (!frm.doc.office) {
+        // Set Organisation field automatically only if empty
+        if (!frm.doc.organisation) {
             frappe.call({
                 method: "frappe.client.get_value",
                 args: {
                     doctype: "User",
                     filters: { name: frappe.session.user },
-                    fieldname: "office"
+                    fieldname: "organisation"  
                 },
                 callback: function(r) {
                     if (r && r.message) {
-                        frm.set_value("office", r.message.office);
-                        frm.refresh_field("office");
+                        frm.set_value("organisation", r.message.organisation);  
+                        frm.refresh_field("organisation");  
                     }
                 }
             });

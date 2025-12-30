@@ -1,6 +1,7 @@
 {
     "actions": [],
     "allow_import": 1,
+    "allow_copy": 1,
     "allow_rename": 1,
     "autoname": "field:organisation_name",
     "creation": "2024-04-17 11:07:50.835604",
@@ -10,14 +11,41 @@
     "engine": "InnoDB",
     "field_order": [
         "organisation_name",
+        "type",
+        "is_group",
+        "organisation_code",
+        "column_break_deuj",
         "parent_organisation",
-        "is_group"
+        "district",
+        "address"
     ],
     "fields": [
         {
             "fieldname": "organisation_name",
-            "label": "Organisation Name",
+            "label": "Organisation",
             "fieldtype": "Data",
+            "reqd": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "is_group",
+            "label": "Is Group",
+            "fieldtype": "Check",
+            "default": 0,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "enabled",
+            "label": "Enabled",
+            "fieldtype": "Check",
+            "default": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "type",
+            "label": "Type",
+            "fieldtype": "Link",
+            "options": "Organisation Type",
             "reqd": 1,
             "in_list_view": 1
         },
@@ -29,11 +57,27 @@
             "in_list_view": 1
         },
         {
-            "fieldname": "is_group",
-            "label": "Is Group",
-            "fieldtype": "Check",
-            "default": 0,
+            "fieldname": "organisation_code",
+            "label": "Organisation Code",
+            "fieldtype": "Data",
             "in_list_view": 1
+        },
+        {
+            "fieldname": "address",
+            "label": "Adress",
+            "fieldtype": "Small Text",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "district",
+            "label": "District",
+            "fieldtype": "Link",
+            "options": "District",
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "column_break_deuj",
+            "fieldtype": "Column Break"
         }
     ],
     "is_tree": 1,
@@ -59,5 +103,6 @@
     ],
     "sort_field": "modified",
     "sort_order": "DESC",
-    "states": []
+    "states": [],
+    "track_changes": 1
 }

@@ -9,7 +9,7 @@
     "naming_series",
     "bundle_status",
     "physical_bundle_no",
-    "office",
+    "organisation",
     "cb_break_cbm1",
     "bundle_date",
     "remarks",
@@ -24,9 +24,10 @@
       "label": "Physical Bundle Number"
     },
     {
-      "fieldname": "office",
-      "fieldtype": "Data",
-      "label": "Office",
+      "fieldname": "organisation",
+      "fieldtype": "Link",
+      "options": "Organisation",
+      "label": "Organisation",
       "read_only": 1
     },
     {

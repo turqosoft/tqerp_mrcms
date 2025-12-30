@@ -16,10 +16,11 @@
     "fields": [
         {
             "fieldname": "name_of_nominee",
-            "fieldtype": "Data",
+            "fieldtype": "Select",
             "in_list_view": 1,
             "reqd": 1,
-            "label": "Name Of Nominee"
+            "label": "Name Of Nominee",
+            "options": ""
         },
         {
             "fieldname": "relation_with_ip",

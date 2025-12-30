@@ -1,4 +1,4 @@
-frappe.ui.form.on('Office', {
+frappe.ui.form.on('Claim Document Master', {
     refresh:function(frm){
         
     }
