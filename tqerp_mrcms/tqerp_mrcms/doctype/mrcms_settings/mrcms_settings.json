@@ -1,47 +1,75 @@
 {
- "actions": [],
- "allow_rename": 1,
- "creation": "2025-11-12 12:47:38.158831",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "dispensary_organisation_type"
- ],
- "fields": [
-  {
-   "fieldname": "dispensary_organisation_type",
-   "fieldtype": "Link",
-   "label": "Dispensary Organisation Type",
-   "options":"Organisation Type"
-  },
-  {
-   "fieldname": "default_claim_checklist",
-   "fieldtype": "Link",
-   "label": "Claim checklist",
-   "options":"Claim Checklist"
-  }
- ],
- "index_web_pages_for_search": 1,
- "issingle": 1,
- "links": [],
- "modified": "2025-11-12 12:48:22.926208",
- "modified_by": "Administrator",
- "module": "Tqerp Mrcms",
- "name": "Mrcms Settings",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
-}
+    "actions": [],
+    "allow_rename": 1,
+    "creation": "2025-11-12 12:47:38.158831",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+     "dispensary_organisation",
+     "default_claim_checklist",
+     "cb_mrcms1",
+     "upload_file_size",
+     "upload_file_size_unit",
+     "max_claims_per_bundle"
+   
+    ],
+    "fields": [
+     {
+      "fieldname": "dispensary_organisation",
+      "fieldtype": "Link",
+      "label": "Dispensary Organisation",
+      "options":"Organisation"
+     },
+     {
+      "fieldname": "default_claim_checklist",
+      "fieldtype": "Link",
+      "label": "Claim checklist",
+      "options":"Claim Checklist"
+     },
+     {
+       "fieldname": "cb_mrcms1",
+       "fieldtype": "Column Break"
+      },
+      {
+       "fieldname": "upload_file_size",
+       "fieldtype": "Int",
+       "label": "Maximum File Upload Size"   },
+      {
+       "fieldname": "upload_file_size_unit",
+       "fieldtype": "Select",
+       "label": "Unit",
+       "options": "KB\nMB",
+       "default": "MB"
+     },
+     {
+       "fieldname": "max_claims_per_bundle",
+       "fieldtype": "Int",
+       "label": "Maximum Claims per Bundle",
+       "description": "Maximum number of claims allowed in a single claim bundle"
+     }
+     
+    ],
+    "index_web_pages_for_search": 1,
+    "issingle": 1,
+    "links": [],
+    "modified": "2025-11-12 12:48:22.926208",
+    "modified_by": "Administrator",
+    "module": "Tqerp Mrcms",
+    "name": "Mrcms Settings",
+    "owner": "Administrator",
+    "permissions": [
+     {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+     }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+   }
