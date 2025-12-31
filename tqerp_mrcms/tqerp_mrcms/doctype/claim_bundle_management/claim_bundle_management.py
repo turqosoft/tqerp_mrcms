@@ -3,7 +3,8 @@ from frappe.utils import now_datetime
 from frappe.model.document import Document
 
 class ClaimBundleManagement(Document):
-	def get_child_offices(root_office):
+	pass
+def get_child_organisations(root_office):
 		"""Return root_office + all its descendants using parent_organisation."""
 		to_visit = [root_office]
 		all_offices = set()
@@ -24,7 +25,7 @@ class ClaimBundleManagement(Document):
 
 		return list(all_offices)
 	
-	def get_permission_query_conditions(user):
+def get_permission_query_conditions(user):
 		if not user:
 			user = frappe.session.user
 
