@@ -1,6 +1,7 @@
 {
     "actions": [],
     "allow_import": 1,
+    "allow_rename": 1,
     "autoname": "field:item_code",
     "creation": "2024-04-17 11:07:50.835604",
     "doctype": "DocType",
