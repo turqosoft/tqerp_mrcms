@@ -5,7 +5,7 @@
     "doctype": "DocType",
     "engine": "InnoDB",
     "field_order": [
-     "dispensary_organisation",
+     "disp_organisation_type",
      "default_claim_checklist",
      "cb_mrcms1",
      "upload_file_size",
@@ -15,10 +15,10 @@
     ],
     "fields": [
      {
-      "fieldname": "dispensary_organisation",
+      "fieldname": "disp_organisation_type",
       "fieldtype": "Link",
-      "label": "Dispensary Organisation",
-      "options":"Organisation"
+      "label": "Dispensary Organisation Type",
+      "options":"Organisation Type"
      },
      {
       "fieldname": "default_claim_checklist",
