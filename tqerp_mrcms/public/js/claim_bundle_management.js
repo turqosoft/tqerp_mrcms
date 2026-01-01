@@ -1,7 +1,7 @@
 frappe.listview_settings['Claim Bundle Management'] = {
     onload: function(listview) {
 
-        listview.page.add_action_item(__('Create Claim Sanction List'), async function () {
+        listview.page.add_action_item(__('Create Claim Payment List'), async function () {
 
             let selected_docs = listview.get_checked_items();
             if (!selected_docs.length) {
@@ -25,13 +25,15 @@ frappe.listview_settings['Claim Bundle Management'] = {
 
                 // BLOCK if bundle_status != Sanctioned
                 if (d.bundle_status !== "Sanctioned") {
-                    frappe.msgprint(`Bundle <b>${d.name}</b> is not Sanctioned. Cannot create sanction list.`);
+                    frappe.msgprint(
+                        `Bundle <b>${d.name}</b> is not Sanctioned. Cannot create payment list.`
+                    );
                     return;
                 }
 
                 for (let child of d.details) {
                     claims_to_send.push({
-                        claim_bundle_no: d.name,  // <-- assign correct CBM
+                        claim_bundle_no: d.name,
                         claim_no: child.claim_no,
                         claim_date: child.claim_date || "",
                         ip_name: child.ip_name || "",
@@ -41,9 +43,9 @@ frappe.listview_settings['Claim Bundle Management'] = {
                         claim_status: child.claim_status || "",
                         amount_claimed: child.amount_claimed || 0,
                         passed_amount: child.passed_amount || 0,
-                        ifs_code:child.ifs_code || 0,
-                        bank_account_no:child.bank_account_no || 0,
-                        bank_name:child.bank_name || 0
+                        ifs_code: child.ifs_code || "",
+                        bank_account_no: child.bank_account_no || "",
+                        bank_name: child.bank_name || ""
                     });
                 }
             }
@@ -55,13 +57,15 @@ frappe.listview_settings['Claim Bundle Management'] = {
 
             try {
                 let r = await frappe.call({
-                    method: "tqerp_mrcms.api.create_claim_sanction_list",
-                    args: { claims_data: JSON.stringify(claims_to_send) }
+                    method: "tqerp_mrcms.api.create_claim_payment_list",
+                    args: {
+                        claims_data: JSON.stringify(claims_to_send)
+                    }
                 });
 
                 if (r.message?.name) {
-                    frappe.msgprint(__('Claim Sanction List created.'));
-                    frappe.set_route("Form", "Claim Sanction List", r.message.name);
+                    frappe.msgprint(__('Claim Payment List created successfully.'));
+                    frappe.set_route("Form", "Claim Payment List", r.message.name);
                 }
 
             } catch (err) {

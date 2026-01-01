@@ -1009,97 +1009,7 @@ def get_claim_dates_for_print(claim_name):
         return {"earliest": earliest, "latest": latest}
     else:
         return {"earliest": None, "latest": None}
-
-
-import openpyxl
-from openpyxl.styles import Font, Alignment, PatternFill
-from frappe.utils import get_site_path
-import frappe
-
-# @frappe.whitelist()
-# def download_claim_details_excel(docname):
-#     """
-#     Download Excel for Claim Proceedings with fields:
-#     claim_no, name1, ip_no, phone, ifsc, bank_account_no, passed_amount, claim_date
-#     """
-#     doc = frappe.get_doc("Claim Proceedings", docname)  # Parent DocType
-
-#     filename = f"{docname}_claim_details.xlsx"
-#     filepath = get_site_path("public", "files", filename)
-
-#     wb = openpyxl.Workbook()
-#     ws = wb.active
-#     ws.title = "Claim Details"
-
-#     # Styles
-#     grey_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
-#     bold_font = Font(bold=True)
-
-#     # Row 1: Company heading
-#     ws.merge_cells('A1:H1')
-#     ws['A1'] = "MRCMS"
-#     ws['A1'].font = Font(bold=True, size=14)
-#     ws['A1'].alignment = Alignment(horizontal="center", vertical="center")
-#     ws['A1'].fill = grey_fill
-
-#     # Row 2: Report Heading
-#     ws.merge_cells('A2:H2')
-#     ws['A2'] = "Claim Proceedings Details"
-#     ws['A2'].font = Font(bold=True, size=12)
-#     ws['A2'].alignment = Alignment(horizontal="center", vertical="center")
-#     ws['A2'].fill = grey_fill
-
-#     ws.append([])  # Blank row
-
-#     # Optional: Parent-level info (if any)
-#     ws.append(["Document Name", doc.name])
-#     ws.append(["Generated On", frappe.utils.now_datetime().strftime("%d-%m-%Y %H:%M")])
-#     ws.append([])
-
-#     # Headers
-#     headers = ["Claim No", "Name", "IP No", "Phone", "IFSC", "Bank Account No", "Passed Amount", "Claim Date"]
-#     ws.append(headers)
-
-#     # Style header row
-#     for cell in ws[ws.max_row]:
-#         cell.fill = grey_fill
-#         cell.font = bold_font
-#         cell.alignment = Alignment(horizontal="center")
-
-#     # Populate data
-#     total_passed_amount = 0.0
-#     for row in doc.claim_proceedings:
-#         ws.append([
-#             row.claim_no or "",
-#             row.name1 or "",
-#             row.ip_no or "",
-#             row.phone or "",
-#             row.ifsc or "",
-#             row.bank_account_no or "",
-#             float(row.passed_amount or 0),
-#             row.claim_date.strftime("%d-%m-%Y") if row.claim_date else ""
-#         ])
-#         total_passed_amount += float(row.passed_amount or 0)
-
-#     ws.append([])
-
-#     # Total row
-#     ws.append(["", "", "", "", "", "TOTAL", total_passed_amount, ""])
-#     for cell in ws[ws.max_row]:
-#         cell.font = bold_font
-#         if cell.column_letter == "G":
-#             cell.alignment = Alignment(horizontal="right")
-
-#     # Column widths
-#     column_widths = {
-#         "A": 15, "B": 30, "C": 15, "D": 15,
-#         "E": 15, "F": 20, "G": 15, "H": 15
-#     }
-#     for col_letter, width in column_widths.items():
-#         ws.column_dimensions[col_letter].width = width
-
-#     wb.save(filepath)
-#     return f"/files/{filename}"
+    
 
 import csv
 from frappe.utils import get_site_path, now_datetime
@@ -1543,309 +1453,212 @@ def number_to_words_indian(num):
 # -----Claim Bundle Management------
 @frappe.whitelist()
 def create_claim_bundle_management(claims_data=None):
-    """
-    Automatically assign sanctioned claims to claim bundles.
-    If the current open bundle reaches max limit, close it and create a new bundle.
-    """
-    import json
-    import frappe
- 
     if not claims_data:
-        frappe.throw("⚠️ No claims selected. Please select at least one claim.")
+        frappe.throw("⚠️ No claims selected.")
  
     if isinstance(claims_data, str):
         claims_data = json.loads(claims_data)
  
-    # Get max claims per bundle from settings
-    max_claims = frappe.db.get_single_value("Mrcms Settings", "max_claims_per_bundle") or 10
-    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")  
+    max_claims = frappe.db.get_single_value("Mrcms Settings", "max_claims_per_bundle") or 5
+    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
  
-    duplicate_claims = []
-    valid_claims = []
+    created_bundles = []
  
-    # Filter valid claims (sanctioned and not already in submitted bundle)
     for claim in claims_data:
         claim_no = claim.get("claim_no")
+        claim_category = claim.get("claim_category")
  
-        bundles = frappe.get_all(
-            "Claim Bundle Details",
-            filters={"claim_no": claim_no},
-            fields=["parent"]
-        )
+        # Skip if already bundled
+        if frappe.db.exists("Claim Bundle Details", {"claim_no": claim_no}):
+            continue
  
-        is_submitted = any(
-            frappe.db.get_value("Claim Bundle Management", b.parent, "docstatus") == 1
-            for b in bundles
-        )
- 
-        if is_submitted:
-            duplicate_claims.append(claim_no)
-        else:
-            valid_claims.append(claim)
- 
-    if duplicate_claims:
-        frappe.msgprint(
-            f"⚠️ The following claim(s) are already submitted in a Claim Bundle: {', '.join(duplicate_claims)}",
-            title="Duplicate Claims",
-            indicator="red"
-        )
- 
-    if not valid_claims:
-        return
- 
-    # Process each valid claim
-    for claim in valid_claims:
-        # Find last open bundle for this organisation
+        # Find the latest open bundle for this category
         open_bundle = frappe.get_all(
             "Claim Bundle Management",
-            filters={"organisation": user_org, "bundle_status": "Open"},  
+            filters={
+                "organisation": user_org,
+                "bundle_status": "Open",
+                "claim_category": claim_category
+            },
             order_by="creation desc",
             limit=1
         )
  
         if open_bundle:
             cbm = frappe.get_doc("Claim Bundle Management", open_bundle[0].name)
-            current_count = len(cbm.details)
+            # Check if bundle reached max_claims
+            if len(cbm.details) >= max_claims:
+                cbm.bundle_status = "Closed"
+                cbm.save(ignore_permissions=True)
+                cbm = None
         else:
-            cbm = frappe.get_doc({
-                "doctype": "Claim Bundle Management",
-                "organisation": user_org, 
-                "bundle_status": "Open",
-                "details": []
-            })
-            current_count = 0
+            cbm = None
  
-        # Close bundle if full
-        if current_count >= max_claims:
-            cbm.bundle_status = "Closed"
-            cbm.save()
-            frappe.db.commit()
- 
-            cbm = frappe.get_doc({
-                "doctype": "Claim Bundle Management",
-                "organisation": user_org, 
-                "bundle_status": "Open",
-                "details": []
-            })
+        # If no valid open bundle, create new one
+        if not cbm:
+            cbm = frappe.new_doc("Claim Bundle Management")
+            cbm.organisation = user_org
+            cbm.bundle_status = "Open"
+            cbm.claim_category = claim_category
  
         # Add claim to bundle
         cbm.append("details", {
-            "claim_no": claim.get("claim_no"),
-            "claim_date": claim.get("claim_date", ""),
-            "ip_no": claim.get("ip_no", ""),
-            "ip_name": claim.get("ip_name", ""),
-            "name_of_patient": claim.get("name_of_patient", ""),
-            "phone": claim.get("phone", ""),
-            "dispensary": claim.get("dispensary", ""),
+            "claim_no": claim_no,
+            "claim_date": claim.get("claim_date"),
+            "ip_no": claim.get("ip_no"),
+            "ip_name": claim.get("ip_name"),
+            "name_of_patient": claim.get("name_of_patient"),
+            "phone": claim.get("phone"),
+            "dispensary": claim.get("dispensary"),
             "claim_status": claim.get("claim_status"),
-            "amount_claimed": claim.get("amount_claimed", 0),
-            "passed_amount": claim.get("passed_amount", 0),
-            "ifs_code": claim.get("ifs_code", 0),
-            "bank_account_no": claim.get("bank_account_no", 0),
-            "bank_name": claim.get("bank_name", 0)
+            "amount_claimed": claim.get("amount_claimed"),
+            "passed_amount": claim.get("passed_amount"),
+            "ifs_code": claim.get("ifs_code"),
+            "bank_account_no": claim.get("bank_account_no"),
+            "bank_name": claim.get("bank_name")
         })
  
-        cbm.insert(ignore_permissions=True)
-        frappe.db.commit()
+        # Save existing bundle instead of insert
+        if cbm.get("__islocal"):
+            cbm.insert(ignore_permissions=True)  # only insert if new
+        else:
+            cbm.save(ignore_permissions=True)    # update existing
  
-        # Optional: mark claim as added to bundle if field exists
-        if "in_bundle" in [d.fieldname for d in frappe.get_meta("Claim").fields]:
-            frappe.db.set_value("Claim", claim.get("claim_no"), "in_bundle", 1)
+        created_bundles.append(cbm.name)
  
-    frappe.msgprint(
-        f"✅ Claims added to Claim Bundle(s) successfully!",
-        title="Success",
-        indicator="green"
-    )
+    frappe.db.commit()
  
-# -----claim Sanction list------
-@frappe.whitelist()
-def create_claim_sanction_list(claims_data):
+    if created_bundles:
+        bundle_list = "\n".join(list(set(created_bundles)))
+        frappe.msgprint(
+            f"✅ Claim Bundles created/updated successfully!\n\nBundle Numbers:\n{bundle_list}",
+            indicator="green"
+        )
+        frappe.logger().info(f"Claim Bundles created/updated: {created_bundles}")
+    else:
+        frappe.msgprint(
+            "⚠️ No new claim bundles were created (all claims may already be bundled).",
+            indicator="orange"
+        )
+       
+import frappe
+from tqerp_mrcms.api import create_claim_bundle_management
+ 
+def auto_add_claim_to_bundle(doc, method):
     """
-    claims_data: list of claim details, each with claim_bundle_no (from parent CBM)
+    Automatically add a sanctioned claim to a Claim Bundle.
+    Only for Category C1,C2 and D.
+    """
+ 
+    if doc.claim_status != "Sanctioned":
+        return
+ 
+    if doc.claim_category not in ["Category C1", "Category C2", "Category D"]:
+        return
+ 
+    claim_data = [{
+        "claim_no": doc.name,
+        "claim_category": doc.claim_category,  # important for separate bundles
+        "claim_date": doc.claim_date or "",
+        "ip_no": doc.ip_no or "",
+        "ip_name": doc.ip_name or "",
+        "name_of_patient": doc.name_of_patient or "",
+        "phone": doc.phone or "",
+        "dispensary": doc.dispensary or "",
+        "claim_status": doc.claim_status,
+        "amount_claimed": doc.amount_claimed or 0,
+        "passed_amount": doc.passed_amount or 0,
+        "ifs_code": doc.ifs_code or "",
+        "bank_account_no": doc.bank_account_no or "",
+        "bank_name": doc.bank_name or ""
+    }]
+ 
+    create_claim_bundle_management(claims_data=claim_data)
+ 
+ 
+# -----claim Payment List-------
+@frappe.whitelist()
+def create_claim_payment_list(claims_data):
+    """
+    Create ONE Claim Payment List document
+    with multiple rows in Payment Details child table
+    and skip claims already included in a submitted Payment List
     """
     import json
+    import frappe
  
     if not claims_data:
-        frappe.throw("⚠️ No claim bundle rows selected.")
+        frappe.throw("⚠️ No payment rows received.")
  
+    # Convert JSON string to list
     if isinstance(claims_data, str):
         claims_data = json.loads(claims_data)
  
     duplicate_claims = []
     valid_claims = []
  
-    # --- VALIDATION: Skip claims whose Claim Bundle is already in a submitted CSL ---
+    # --- VALIDATION: Skip claims already in submitted CPL ---
     for row in claims_data:
         claim_no = row.get("claim_no")
-        claim_bundle_no = row.get("claim_bundle_no")
  
         if not claim_no:
-            frappe.throw("Claim No missing for some row.")
+            frappe.throw("Claim No missing for some rows.")
  
-        # Check if this claim_bundle_no is already in a submitted Claim Sanction List
         existing_rows = frappe.get_all(
-            "Claim Sanction Details",  
-            filters={"claim_bundle_no": claim_bundle_no, "claim_no": claim_no},
+            "Claim Payment Details",
+            filters={"claim_no": claim_no},
             fields=["parent"]
         )
  
         is_submitted = False
         for er in existing_rows:
-            status = frappe.db.get_value("Claim Sanction List", er.parent, "docstatus")
-            if status == 1:  # Submitted
+            if frappe.db.get_value("Claim Payment List", er.parent, "docstatus") == 1:
                 is_submitted = True
                 break
  
         if is_submitted:
-            duplicate_claims.append(claim_bundle_no)  # <-- store bundle number instead of claim no
+            duplicate_claims.append(claim_no)
         else:
             valid_claims.append(row)
  
-    # Show message for duplicate claims (displaying bundle numbers)
     if duplicate_claims:
         duplicate_str = ", ".join([f"<b>{d}</b>" for d in duplicate_claims])
         frappe.msgprint(
-            f"⚠️ The following Claim Bundle(s) are already submitted in a Claim Sanction List: {duplicate_str}",
-            title="Duplicate Claim Bundles",
+            f"⚠️ The following Claim(s) are already included in a submitted "
+            f"Claim Payment List:<br>{duplicate_str}",
+            title="Duplicate Claims",
             indicator="red"
         )
  
-    # Stop if no valid claims
     if not valid_claims:
         return
  
-    # Get logged-in user's office
-    user_office = frappe.db.get_value("User", frappe.session.user, "office")
+    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
  
-    # Create parent Claim Sanction List
-    csl = frappe.get_doc({
-        "doctype": "Claim Sanction List",
-        "office": user_office,
-        "details": []  # child table
+    cpl = frappe.get_doc({
+        "doctype": "Claim Payment List",
+        "organisation": user_org,
+        "details": []
     })
  
-    # Append only valid claims
     for row in valid_claims:
-        csl.append("details", {
+        cpl.append("details", {
             "claim_bundle_no": row.get("claim_bundle_no"),
             "claim_no": row.get("claim_no"),
             "claim_date": row.get("claim_date", ""),
             "ip_no": row.get("ip_no", ""),
             "ip_name": row.get("ip_name", ""),
-            "phone": row.get("phone", ""),
             "name_of_patient": row.get("name_of_patient", ""),
             "dispensary": row.get("dispensary", ""),
             "claim_status": row.get("claim_status", ""),
             "amount_claimed": row.get("amount_claimed", 0),
             "passed_amount": row.get("passed_amount", 0),
-            "ifs_code": row.get("ifs_code", 0),
-            "bank_account_no": row.get("bank_account_no", 0),
-            "bank_name": row.get("bank_name", 0)
+            "ifs_code": row.get("ifs_code", ""),
+            "bank_account_no": row.get("bank_account_no", ""),
+            "bank_name": row.get("bank_name", "")
         })
  
-    csl.insert(ignore_permissions=True)
  
-    frappe.msgprint(
-        f"✅ Claim Sanction List <b>{csl.name}</b> created successfully!",
-        title="Success",
-        indicator="green"
-    )
- 
-    # Redirect to the new CSL
-    return {
-        "name": csl.name,
-        "redirect_to": f"/app/claim-sanction-list/{csl.name}"
-    }
- 
-# -----claim Payment List-------
-def create_claim_payment_list(payments_data):
-    """
-    Create ONE Claim Payment List document
-    with multiple rows in Payment Details child table
-    and skip already submitted claims
-    """
-    import json
- 
-    if not payments_data:
-        frappe.throw("⚠️ No claim sanction rows selected.")
- 
-    # Convert JSON string to list
-    if isinstance(payments_data, str):
-        payments_data = json.loads(payments_data)
- 
-    duplicate_claims = []
-    valid_claims = []
- 
-    # --- VALIDATION: Skip claims whose Claim Sanction is already in a submitted CPL ---
-    for row in payments_data:
-        claim_sanction_no = row.get("claim_sanction_no")
- 
-        if not claim_sanction_no:
-            frappe.throw("Claim Sanction No missing for some row.")
- 
-        # Check if this claim_sanction_no is already in any submitted CPL
-        existing_rows = frappe.get_all(
-            "Claim Payment Details",  # child table of Claim Payment List
-            filters={"claim_sanction_no": claim_sanction_no},
-            fields=["parent"]
-        )
- 
-        is_submitted = False
-        for er in existing_rows:
-            status = frappe.db.get_value("Claim Payment List", er.parent, "docstatus")
-            if status == 1:  # Submitted
-                is_submitted = True
-                break
- 
-        if is_submitted:
-            duplicate_claims.append(claim_sanction_no)
-        else:
-            valid_claims.append(row)
- 
-    # Show message for duplicate claims
-    if duplicate_claims:
-        duplicate_str = ", ".join([f"<b>{d}</b>" for d in duplicate_claims])
-        frappe.msgprint(
-            f"⚠️ The following Claim Sanction(s) are already submitted in a Claim Payment List: {duplicate_str}",
-            title="Duplicate Claims",
-            indicator="red"
-        )
- 
-    # Stop if no valid claims
-    if not valid_claims:
-        return
- 
-    # Logged-in user's organisation
-    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
- 
-    # Create parent document
-    cpl = frappe.get_doc({
-        "doctype": "Claim Payment List",
-        "organisation": user_org,
-        "details": []  
-    })
- 
-    # Add only valid claims
-    for row in valid_claims:
-        cpl.append("details", {
-            "claim_no": row.get("claim_no") or "",
-            "claim_date": row.get("claim_date", ""),
-            "ip_no": row.get("ip_no", ""),
-            "ip_name": row.get("ip_name", ""),
-            "name_of_patient": row.get("name_of_patient", ""),
-            "phone": row.get("phone", ""),
-            "dispensary": row.get("dispensary", ""),
-            "claim_status": row.get("claim_status", ""),
-            "amount_claimed": row.get("amount_claimed", 0),
-            "passed_amount": row.get("passed_amount", 0),
-            "ifs_code":row.get("ifs_code", 0),
-            "bank_account_no": row.get("bank_account_no", 0),
-            "bank_name": row.get("bank_name", 0),
-            "claim_sanction_no": row.get("claim_sanction_no", 0)
-        })
- 
-    # Save document
     cpl.insert(ignore_permissions=True)
  
     frappe.msgprint(
@@ -1859,36 +1672,7 @@ def create_claim_payment_list(payments_data):
         "redirect_to": f"/app/claim-payment-list/{cpl.name}"
     }
    
-def validate_fund_availability(doc):
-    if not doc.fund_manager:
-        return
- 
-    total_allocated = flt(doc.total_allocated or 0)
- 
-    fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
- 
-    total_fixed = sum(flt(row.fixed or 0) for row in fm_doc.details)
- 
-    total_previous_allocated = frappe.db.sql("""
-        SELECT COALESCE(SUM(total_allocated), 0)
-        FROM `tabClaim Payment List`
-        WHERE fund_manager = %s
-          AND docstatus = 1
-          AND name != %s
-    """, (doc.fund_manager, doc.name))[0][0]
- 
-    fund_available = total_fixed - total_previous_allocated
- 
-    if total_allocated > fund_available:
-        frappe.throw(
-            f"Total Allocated ({total_allocated}) exceeds current Available Fund ({fund_available})."
-        )
-   
-def validate(doc, method):
-    if doc.doctype not in ("Claim Payment List", "Claim Proceedings"):
-        return
- 
-    validate_fund_availability(doc)
+
 
 #download payment list as excel
 import frappe
@@ -2178,12 +1962,47 @@ def get_claim_category_by_amount(passed_amount):
  
     return None
 
+# #############################
+# FUND MANAGEMENT
+# #############################
 # -------------------------------------------------
-# Allocate fund on CPL submit (SAFE SYNC)
+# VALIDATION : Fund Availability (ORGANISATION-WISE)
+# -------------------------------------------------
+def validate_fund_availability(doc):
+ 
+    if not doc.fund_manager or not doc.organisation:
+        return
+ 
+    total_allocated = flt(doc.total_allocated or 0)
+ 
+    fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
+ 
+    # ✅ SOURCE OF TRUTH: Fund Manager Details
+    fund_available = sum(
+        flt(row.fixed or 0) - flt(row.allocated or 0)
+        for row in fm_doc.details
+        if row.organisation == doc.organisation
+    )
+ 
+    if total_allocated > fund_available:
+        frappe.throw(
+            f"Total Allocated ({total_allocated}) exceeds "
+            f"Available Fund ({fund_available}) for this organisation."
+        )
+ 
+ 
+def validate(doc, method):
+    if doc.doctype not in ("Claim Payment List", "Claim Proceedings"):
+        return
+ 
+    validate_fund_availability(doc)
+ 
+ 
+# -------------------------------------------------
+# Allocate fund on CPL submit
 # -------------------------------------------------
 @frappe.whitelist()
 def allocate_fund_on_submit(docname, doctype=None):
-    """Freeze CPL balance and safely sync Fund Manager"""
  
     if not doctype:
         doctype = "Claim Payment List"
@@ -2192,35 +2011,53 @@ def allocate_fund_on_submit(docname, doctype=None):
  
     validate_fund_availability(doc)
  
-    fm_name = doc.fund_manager
+    if not doc.fund_manager:
+        frappe.throw("Please select a Fund Manager.")
+ 
+    if not doc.organisation:
+        frappe.throw("Organisation is required.")
+ 
     total_allocated = flt(doc.total_allocated or 0)
- 
-    if not fm_name:
-        frappe.throw("Please select a Fund Manager before submitting.")
- 
     if total_allocated <= 0:
-        frappe.throw("Total Allocated must be greater than 0")
+        frappe.throw("Total Allocated must be greater than 0.")
  
-    fm_doc = frappe.get_doc("Fund Manager", fm_name)
+    fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
  
-    total_fixed = sum(flt(row.fixed or 0) for row in fm_doc.details)
+    remaining = total_allocated
+    allocated_done = False
  
-    total_previous_allocated = frappe.db.sql("""
-        SELECT COALESCE(SUM(total_allocated), 0)
-        FROM `tabClaim Payment List`
-        WHERE fund_manager = %s
-          AND docstatus = 1
-          AND name != %s
-    """, (fm_name, doc.name))[0][0]
+    for row in fm_doc.details:
  
-    fund_available = total_fixed - total_previous_allocated
+        # ✅ ONLY MATCHING ORGANISATION
+        if row.organisation != doc.organisation:
+            continue
  
-    if total_allocated > fund_available:
+        fixed = flt(row.fixed or 0)
+        allocated = flt(row.allocated or 0)
+        available = fixed - allocated
+ 
+        if available <= 0:
+            frappe.throw(
+                f"No available fund for organisation {doc.organisation}"
+            )
+ 
+        consume = min(available, remaining)
+ 
+        row.allocated = allocated + consume
+        row.paid = flt(row.paid or 0) + consume
+        row.allocatable = fixed - row.allocated
+ 
+        remaining -= consume
+        allocated_done = True
+        break  # ✅ Organisation-wise safety
+ 
+    if not allocated_done:
         frappe.throw(
-            f"Total Allocated ({total_allocated}) exceeds Available Fund ({fund_available})."
+            f"No fund row found for organisation {doc.organisation}"
         )
  
-    doc.balance = fund_available - total_allocated
+    # Freeze balance in CPL
+    doc.balance = available - consume
  
     if hasattr(doc, "payment_status"):
         doc.payment_status = "Paid"
@@ -2228,73 +2065,29 @@ def allocate_fund_on_submit(docname, doctype=None):
     if hasattr(doc, "proceedings_status"):
         doc.proceedings_status = "Paid"
  
-    remaining = total_allocated
- 
-    for row in fm_doc.details:
-        # ✅ ONLY MATCHING ORGANISATION
-        if row.organisation != doc.organisation:
-            continue
- 
-        fixed = flt(row.fixed or 0)
-        allocated = flt(row.allocated or 0)
- 
-        available_in_row = fixed - allocated
-        if available_in_row <= 0:
-            frappe.throw(
-                f"No available fund for organisation {doc.organisation}"
-            )
- 
-        consume = min(available_in_row, remaining)
- 
-        row.allocated = allocated + consume
-        row.paid = flt(row.paid or 0) + consume
-        row.allocatable = fixed - row.allocated
- 
-        remaining -= consume
-        break  # STOP after correct organisation
- 
     fm_doc.save(ignore_permissions=True)
  
     return True
-
+ 
+ 
 # -------------------------------------------------
-# Get fund details (FOR UI)
+# UI Helper : Get Available Fund (LIVE)
 # -------------------------------------------------
 @frappe.whitelist()
 def get_fund_details(fund_manager, organisation=None):
-    """
-    Returns available fund for a specific Fund Manager and organisation.
-    If organisation is not provided, returns total fund across all organisations.
-    """
+ 
     if not fund_manager:
         return {}
  
     fm_doc = frappe.get_doc("Fund Manager", fund_manager)
  
-    # Filter by organisation if provided
-    if organisation:
-        details = [d for d in fm_doc.details if d.organisation == organisation]
-    else:
-        details = fm_doc.details
+    details = (
+        [d for d in fm_doc.details if d.organisation == organisation]
+        if organisation else fm_doc.details
+    )
  
     total_fixed = sum(flt(d.fixed or 0) for d in details)
- 
-    # Sum allocated amounts for submitted Claim Payment List for this fund manager and organisation
-    if organisation:
-        total_allocated = frappe.db.sql("""
-            SELECT COALESCE(SUM(total_allocated), 0)
-            FROM `tabClaim Payment List`
-            WHERE fund_manager = %s
-              AND organisation = %s
-              AND docstatus = 1
-        """, (fund_manager, organisation))[0][0]
-    else:
-        total_allocated = frappe.db.sql("""
-            SELECT COALESCE(SUM(total_allocated), 0)
-            FROM `tabClaim Payment List`
-            WHERE fund_manager = %s
-              AND docstatus = 1
-        """, fund_manager)[0][0]
+    total_allocated = sum(flt(d.allocated or 0) for d in details)
  
     available = total_fixed - total_allocated
  
@@ -2303,30 +2096,25 @@ def get_fund_details(fund_manager, organisation=None):
         "fund_date": fm_doc.get("date"),
         "approval_note": fm_doc.approval_note or ""
     }
-
+ 
+ 
 # -------------------------------------------------
-# Reverse fund on CPL cancel
+# Reverse fund on cancel
 # -------------------------------------------------
 @frappe.whitelist()
 def reverse_fund_on_cancel(payment_list_name=None, doctype=None, name=None, **kwargs):
-    """
-    Reverse Fund Manager values when Claim Payment List or Claim Proceedings is cancelled
-    """
  
     docname = payment_list_name or name
     if not docname:
         return True
  
-    if doctype:
-        doc = frappe.get_doc(doctype, docname)
-    else:
-        doc = frappe.get_doc("Claim Payment List", docname)
+    doc = frappe.get_doc(doctype or "Claim Payment List", docname)
  
     refund_amount = flt(doc.total_allocated or 0)
     if refund_amount <= 0:
         return True
  
-    if not doc.fund_manager or not getattr(doc, "organisation", None):
+    if not doc.fund_manager or not doc.organisation:
         return True
  
     fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
@@ -2334,24 +2122,27 @@ def reverse_fund_on_cancel(payment_list_name=None, doctype=None, name=None, **kw
     reversed_done = False
  
     for row in fm_doc.details:
+ 
         if row.organisation != doc.organisation:
             continue
  
-        allocated = flt(row.allocated or 0)
+        # ✅ FORCE FLOAT CONVERSION
+        allocated = flt(row.allocated)
+        fixed = flt(row.fixed)
+        paid = flt(row.paid)
+ 
         if allocated <= 0:
             continue
  
         refund = min(allocated, refund_amount)
  
-        row.db_set("allocated", allocated - refund)
-        row.db_set("paid", flt(row.paid or 0) - refund)
-        row.db_set(
-            "allocatable",
-            flt(row.fixed or 0) - (allocated - refund)
-        )
+        # ✅ SAFE FLOAT ASSIGNMENT
+        row.allocated = allocated - refund
+        row.paid = paid - refund
+        row.allocatable = fixed - row.allocated
  
         reversed_done = True
-        break  # organisation-wise safety
+        break
  
     if not reversed_done:
         frappe.log_error(
@@ -2363,9 +2154,10 @@ def reverse_fund_on_cancel(payment_list_name=None, doctype=None, name=None, **kw
     fm_doc.reload()
  
     return True
-
+ 
+ 
 # -------------------------------------------------
-# Get available Fund Managers for organisation
+# Get available Fund Managers for Organisation
 # -------------------------------------------------
 @frappe.whitelist()
 def get_available_fund_managers(doctype=None, txt=None, searchfield=None,
@@ -2386,21 +2178,25 @@ def get_available_fund_managers(doctype=None, txt=None, searchfield=None,
     )
  
     fm_names = list(set(d.parent for d in fm_details))
- 
     result = []
+ 
     for fm_name in fm_names:
         fm_doc = frappe.get_doc("Fund Manager", fm_name)
+ 
         total_allocatable = sum(
             flt(row.fixed or 0) - flt(row.allocated or 0)
             for row in fm_doc.details
+            if row.organisation == organisation
         )
+ 
         if total_allocatable > 0:
             result.append([fm_doc.name, fm_doc.get("date") or ""])
  
     return result
 
-
+# #############################
 # RATE MANAGEMENT
+# #############################
 # 25/12/2025
 # Updated 29/12/2025
 @frappe.whitelist()
@@ -2419,7 +2215,8 @@ def rate_item_link_query(doctype, txt, searchfield, start, page_len, filters):
         INNER JOIN `tabItem Rate` ir
             ON ir.item_code = i.name
         WHERE
-            i.disabled = 0
+            i.enabled = 1
+                         
             AND ir.type = %(rate_type)s
             AND (
                 i.name LIKE %(txt)s
@@ -2433,6 +2230,7 @@ def rate_item_link_query(doctype, txt, searchfield, start, page_len, filters):
         "start": start,
         "page_len": page_len
     })
+
 @frappe.whitelist()
 def get_latest_rate_for_item(item_code, posting_date=None):
     if not item_code:
@@ -2504,7 +2302,7 @@ def item_code_with_name(doctype, txt, searchfield, start, page_len, filters):
             CONCAT(item_name) AS label
         FROM `tabItem`
         WHERE
-            disabled = 0
+            enabled = 1
             AND (
                 name LIKE %(txt)s
                 OR item_name LIKE %(txt)s
@@ -2516,3 +2314,25 @@ def item_code_with_name(doctype, txt, searchfield, start, page_len, filters):
         "start": start,
         "page_len": page_len
     })
+
+# @frappe.whitelist()
+# def item_code_with_name(doctype, txt, searchfield, start, page_len, filters):
+#     txt = (txt or "").strip()
+
+#     return frappe.get_all(
+#         "Item",
+#         filters={
+#             "enabled": 1
+#         },
+#         or_filters={
+#             "name": ["like", f"%{txt}%"],
+#             "item_name": ["like", f"%{txt}%"]
+#         },
+#         fields=[
+#             "name",
+#             "item_name as label"
+#         ],
+#         order_by="item_name asc",
+#         limit_start=start,
+#         limit_page_length=page_len
+#     )

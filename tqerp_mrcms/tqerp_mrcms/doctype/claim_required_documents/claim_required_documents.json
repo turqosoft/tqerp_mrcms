@@ -31,7 +31,7 @@
     },
     {
       "fieldname": "mandatory",
-      "fetch_from": "claim_doc_master.is_mandatory",
+      "fetch_from": "claim_document_rule_details.mandatory",
       "fieldtype": "Check",
       "label": "Mandatory",
       "default": 0,

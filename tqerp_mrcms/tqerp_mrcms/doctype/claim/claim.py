@@ -1,7 +1,7 @@
 from frappe.model.document import Document
 import frappe
 from frappe.utils import now_datetime, nowdate
-from frappe.utils import getdate, add_days
+from frappe.utils import getdate, add_days, cint
 import os, urllib
 
 class Claim(Document):
@@ -349,7 +349,7 @@ class Claim(Document):
         if not self.claim_category:
             return
  
-        # Clear existing docs
+        # Clear existing rows
         self.set("claim_required_documents", [])
  
         rules = frappe.get_all(
@@ -373,20 +373,21 @@ class Claim(Document):
                 if not r.claim_doc_master or r.claim_doc_master in added:
                     continue
  
-                # 🔹 Fetch document name from master
-                doc_name,is_mandatory = frappe.db.get_value(
+                # Fetch document name ONLY from master
+                doc_name = frappe.db.get_value(
                     "Claim Document Master",
                     r.claim_doc_master,
-                     ["document_name", "is_mandatory"]
+                    "document_name"
                 )
  
+                # Mandatory MUST come from rule details
                 self.append("claim_required_documents", {
                     "claim_doc_master": r.claim_doc_master,
-                    "claim_doc_name": doc_name,   # ✅ explicitly set
-                    "mandatory": "Yes" if is_mandatory and is_mandatory.lower() == "yes" else "No"
+                    "claim_doc_name": doc_name,
+                    "mandatory": int(r.mandatory)  
                 })
  
-                added.add(r.claim_doc_master)
+            added.add(r.claim_doc_master)
 
     # ---------------------------
     # COMMENT META (auto user)
@@ -434,34 +435,15 @@ class Claim(Document):
         prev = self.get_doc_before_save()
  
         missing = []
-        upload_happened = False
  
         for row in self.claim_required_documents:
-            if row.mandatory == "Yes":
-                # Check missing
+            if cint(row.mandatory):
                 if not row.uploaded_file or not str(row.uploaded_file).strip():
                     missing.append(row.claim_doc_name or row.claim_doc_master)
  
-            # Detect NEW upload in this save
-            if prev:
-                prev_row = next(
-                    (r for r in prev.claim_required_documents
-                    if r.name == row.name),
-                    None
-                )
-                if prev_row:
-                    if not prev_row.uploaded_file and row.uploaded_file:
-                        upload_happened = True
-            else:
-                # New doc, first upload
-                if row.uploaded_file:
-                    upload_happened = True
- 
-        # BLOCK save if:
-        # mandatory docs missing
-        if missing and not upload_happened:
+        if missing:
             frappe.throw(
-                "Please upload all mandatory documents before saving or approving.<br><br>"
+                "Please upload all mandatory documents before approval.<br><br>"
                 "<b>Missing documents:</b><br>"
                 + "<br>".join(missing),
                 title="Mandatory Documents Required"

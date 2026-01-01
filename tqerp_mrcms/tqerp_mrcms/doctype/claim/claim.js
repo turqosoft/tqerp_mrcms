@@ -131,17 +131,14 @@ frappe.ui.form.on('Claim', {
         }
     },
     passed_amount(frm) {
-        console.log("Passed Amount event fired:", frm.doc.passed_amount);
 
         // 1) Do nothing for already finalised claims
         if (["Sanctioned", "Paid", "Closed"].includes(frm.doc.claim_status)) {
-            console.log("Claim is final status, skipping passed_amount logic.");
             return;
         }
 
         // 2) Ignore auto-trigger on form load / unchanged value
         if (frm._last_passed_amount === frm.doc.passed_amount) {
-            console.log("passed_amount unchanged from last value, skipping.");
             return;
         }
 
@@ -149,7 +146,6 @@ frappe.ui.form.on('Claim', {
         frm._last_passed_amount = frm.doc.passed_amount;
 
         const val = Number(frm.doc.passed_amount || 0);
-        console.log("Passed Amount (number):", val);
 
         // 3) If zero/empty → clear and exit
         if (!val || val === 0) {
@@ -172,7 +168,6 @@ frappe.ui.form.on('Claim', {
                 num: val
             },
             callback: function (r) {
-                console.log("API Response (Words):", r.message);
 
                 if (r.message) {
                     const currentWords = String(frm.doc.rupees || "");
@@ -198,7 +193,6 @@ frappe.ui.form.on('Claim', {
                 passed_amount: val
             },
             callback: function (r) {
-                console.log("API Response (Category):", r.message);
 
                 if (r.message) {
                     const currentCat = String(frm.doc.claim_category || "");
@@ -235,7 +229,6 @@ frappe.ui.form.on('Claim', {
         const last_row = rows.length ? rows[rows.length - 1] : null;
 
         if (last_row && last_row.activity === `Claim status changed to "${frm.doc.claim_status}"`) {
-            console.log("Duplicate status change ignored.");
             return;
         }
 
@@ -275,7 +268,6 @@ frappe.ui.form.on('Claim', {
             },
             callback(r) {
                 if (!r.message) return;
-                console.log("API Response (Documents):", r.message);
                 frm.set_value("claim_category", r.message.claim_category);
                 frm.clear_table("claim_required_documents");
 
@@ -695,9 +687,6 @@ function populate_rate_item_fields(cdt, cdn) {
 }
 
 frappe.ui.form.on('Package Rate Item', {
-
-
-
     rate_item_name(frm, cdt, cdn) {
         populate_rate_item_fields(cdt, cdn, frm);
     },
@@ -750,6 +739,25 @@ frappe.ui.form.on('Non Package Rate Item', {
         frm.refresh_field('non_package_rate_items');
     }
 });
+
+// Utility functions
+function calculate_row_total(row) {
+    let rate = row.rate || 0;
+    let qty = row.qty || 1;
+    let perc = row.admissible_percentage || 100;
+    row.total = (rate * qty * perc / 100);
+}
+
+function calculate_passed_amount(frm) {
+    let total = 0;
+    if(frm.doc.package_rate) {
+        (frm.doc.package_rate_items || []).forEach(row => total += row.total || 0);
+    }
+    if(frm.doc.non_package_rate) {
+        (frm.doc.non_package_rate_items || []).forEach(row => total += row.total || 0);
+    }
+    frm.set_value("passed_amount", total);
+}
 
 // Calculate table totals and overall passed_amount
 function calculate_table_totals(frm) {

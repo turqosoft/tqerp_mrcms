@@ -24,7 +24,7 @@
         "credit_status",
         "utr_number",
         "credit_amount",
-        "claim_sanction_no"
+        "claim_bundle_no"
     ],
     "fields": [
         {
@@ -142,11 +142,11 @@
             "default": 0,
             "allow_on_submit": 1
         },
-        {
-            "fieldname": "claim_sanction_no",
+       {
+            "fieldname": "claim_bundle_no",
             "fieldtype": "Link",
-            "options":"Claim Sanction List",
-            "label": "Claim Sanction Number"
+            "options":"Claim Bundle Management",
+            "label": "Claim Bundle Number"
         },
         {
             "fieldname": "phone",
