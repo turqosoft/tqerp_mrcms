@@ -10,7 +10,9 @@
         "activity",
         "user",
         "office",
-        "duration_seconds"
+        "duration_seconds",
+        "user_full_name",
+        "user_authority"
     ],
     "fields": [
         {
@@ -42,7 +44,17 @@
             "fieldtype": "Int",
             "label": "Duration (Seconds)",
             "allow_on_submit": 1
-        }
+        },
+        {
+            "fieldname": "user_full_name",
+            "fieldtype": "Data",
+            "label": "Full Name"
+          },
+          {
+            "fieldname": "user_authority",
+            "fieldtype": "Data",
+            "label": "Authority"
+          }
     ],
     "index_web_pages_for_search": 1,
     "istable": 1,

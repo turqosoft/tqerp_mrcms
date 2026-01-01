@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MRC Sanction Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      margin: 20px;
+      line-height: 1.5;
+      color: #000;
+    }
+
+    .container {
+      border: 1px solid #000;
+      padding: 15px;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    h2, h3 {
+      text-align: center;
+      margin: 5px 0;
+    }
+
+    .center-bold {
+      text-align: center;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .underline {
+      text-decoration: underline;
+    }
+
+    p {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+
+    .left-paragraph {
+      text-align: left;
+      margin-left: 25px;
+      margin-bottom: 12px;
+      text-indent: 25px;
+      line-height: 1.5;
+     
+      
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    .footer-left {
+      text-align: left;
+      font-weight: bold;
+      
+    }
+
+    .footer-right {
+      text-align: right;
+      font-weight: bold;
+    }
+
+    /* Print-specific styles */
+    @media print {
+      body {
+        font-size: 13px;
+        margin: 10mm;
+        line-height: 1.4;
+      }
+
+      .container {
+        width: 100%;
+        padding: 15px;
+        border-width: 1px;
+        page-break-inside: avoid;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      h3 {
+        font-size: 18px;
+      }
+
+      .center-bold {
+        font-size: 13px;
+      }
+
+      .footer p {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>PROCEEDINGS OF THE DIRECTOR OF INSURANCE MEDICAL SERVICES,</h2>
+    <h3>THIRUVANANTHAPURAM-14</h3><br><br>
+
+    <p class="center-bold">Sub:- MRC in respect of {{doc.ip_name}}, IP No.{{doc.ip_no}}, {{doc.dispensary}} of Rs. {{doc.passed_amount}}/- Sanction orders issued</p> <br>
+    <p class="center-bold">Ref:- Letter No A 75/2025, dated: {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }}, {{doc.dispensary}}</p> <br>
+
+    <p class="center-bold underline">ORDER NO. {{doc.name}}, Dated: {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }}</p> <br>
+
+    <!-- Left-aligned paragraph blocks with spacing -->
+    <p class="left-paragraph">Sanction is accorded for the reimbursement of Rs. {{doc.passed_amount}}/- ( Rupees {{doc.rupees}}), to Sri {{doc.ip_name}}, {{doc.dispensary}} being the cost of medicines purchased by him/her for the treatment of {{doc.diseases}}.</p>
+
+    <p class="left-paragraph">The treatment was availed by his/her {{doc.relation}} during the period from {{ frappe.utils.formatdate(doc.from_date, "dd-mm-yyyy") }} to {{ frappe.utils.formatdate(doc.to_date, "dd-mm-yyyy") }} from {{doc.hospital}}.</p>
+
+    <p class="left-paragraph">The expenditure in this regard will be met from the Head of Account 2210-01-102-96-03-SST.</p>
+
+    <!-- Footer section with left and right -->
+    <!-- Footer section with left and right -->
+<div class="footer">
+  <div class="footer-left">
+    <p>To</p>
+    <p>S1 - Section</p> 
+    <br>
+    <p>Copy to:-</p>
+    <p>The Insurance Medical Officer</p>
+    <p>{{ doc.dispensary }}</p>
+  </div>
+
+  <div class="footer-right">
+    {% set submitted_logs = doc.claim_process 
+        | selectattr("activity", "equalto", "Submitted") 
+        | list %}
+    
+    {% if submitted_logs %}
+        {% set last_log = submitted_logs | last %}
+        <p class="bold">{{ last_log.user_full_name }}</p>
+        <p>{{ last_log.user_authority }}</p>
+    {% else %}
+        <p class="bold">--</p>
+        <p>--</p>
+    {% endif %}
+    
+    <br>
+    <p>Forwarded by Order</p>
+    <p>Superintendent</p>
+  </div>
+</div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<style>
+  .print-box {
+    border: 2px solid #000;
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .center { text-align: center; }
+  .bold { font-weight: bold; }
+  .section { margin-top: 15px; }
+  .section1 { font-size: 13px;text-align: justify; }
+  .indent { text-indent: 5px; }
+
+  .main-heading {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+
+  td {
+    border: 1px solid #000;
+    padding: 6px;
+    vertical-align: top;
+  }
+
+  /* IP DETAILS TABLE – COMPACT */
+  .ip-details-table {
+    font-size: 11px;
+  }
+
+  .ip-details-table td {
+    padding: 3px 4px;
+    line-height:0.4;
+  }
+ 
+  table.remarks-table td, 
+  table.remarks-table th, 
+  table.remarks-table tr {
+    line-height: 0.9!important; /* reasonable compact spacing */
+    padding: 2px 4px !important;
+    font-size: 11px !important;
+  }
+
+  /* CHECKLIST */
+  .check-table td {
+    border: 1px solid #000;
+    font-size: 12px;
+    padding: 3px;
+    line-height: 0.3;
+  }
+
+  /* APPROVAL NOTES */
+  .approval-notes td {
+    border: none;
+    padding: 4px;
+    font-size: 14px;
+    
+  }
+</style>
+
+<div class="print-box">
+
+  <!-- HEADER -->
+  <div class="center bold main-heading">
+    MEDICAL REIMBURSEMENT – NOTE
+  </div>
+
+  <!-- FILE NO -->
+  <div class="section bold">
+    {{ doc.name }}
+  </div>
+
+  <!-- SUBJECT -->
+  <div class="section center bold">
+    Sub:- MRC in respect of {{ doc.ip_name }},
+    IP No. {{ doc.ip_no }},
+    {{ doc.dispensary }},
+    of Rs. {{ doc.amount_claimed }}/-
+  </div>
+
+  <!-- REFERENCE -->
+  <div class="section center bold">
+    Ref:- Letter No A 75/2025, dated:
+    {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }},
+    {{ doc.dispensary }}
+  </div><br>
+
+  <!-- BODY -->
+  <div class="section1">
+    <p>Reference may please be seen. The Insurance Medical Officer, {{ doc.dispensary }} 
+      has forwarded the Medical Reimbursement claim in respect of {{ doc.ip_name }},
+      IP No. {{ doc.ip_no }} for Rs. {{ doc.amount_claimed }}/-.</p>
+
+    <p>The charges of treatment were availed by the IP for his/her {{ doc.relation }}.</p>
+
+    <p>The treatment was availed during the period from 
+      {{ frappe.utils.formatdate(doc.from_date, "dd-mm-yyyy") }} to 
+      {{ frappe.utils.formatdate(doc.to_date, "dd-mm-yyyy") }} for the treatment of 
+      {{ doc.diseases }} from {{ doc.hospital }}.</p>
+      
+  </div>
+
+  
+
+  <!-- CHECKLIST -->
+  <div class="section indent bold">
+    The following points are noted:
+  </div>
+
+  <div class="section">
+    <table class="check-table">
+      {% for row in doc.claim_checklist %}
+      <tr>
+        <td style="width:85%;">{{ row.criteria }}</td>
+        <td style="width:15%; text-align:center; font-weight:bold;">
+          {% if row.required == "Yes" %} ✔ {% else %} ✖ {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <!-- 🔹 ENTITLEMENT & SANCTION DETAILS -->
+<div class="section bold center">
+  ENTITLEMENT & SANCTION DETAILS
+</div>
+
+<!-- 🔹 ENTITLEMENT / PASSED AMOUNT TABLE -->
+<div class="section">
+  <table class="ip-details-table">
+    <tr class="bold center">
+      <td>Entitled Period</td>
+      <td>Treatment Period</td>
+      <td>IMO Passed Amount</td>
+    </tr>
+    <tr class="center">
+      <td>
+        {{ doc.entitled_periods|safe }}
+      </td>
+
+      <td>
+        {{ frappe.utils.formatdate(doc.from_date, "dd-mm-yyyy") }} to
+        {{ frappe.utils.formatdate(doc.to_date, "dd-mm-yyyy") }}
+      </td>
+
+      <td class="bold">
+        Rs. {{ doc.passed_amount }}/-
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- 🔹 CLAIM REMARKS TABLE -->
+<div class="section">
+  <table class="ip-details-table remarks-table">
+    <tr class="bold center">
+      <td style="width:15%;">Date</td>
+      <td style="width:35%;">Officer</td>
+      <td style="width:30%;">Remarks</td>
+      <td style="width:20%;">Claim Status</td>
+    </tr>
+
+    {% if doc.claim_remarks %}
+      {% for row in doc.claim_remarks %}
+        <tr>
+          <td class="center">
+            {{ frappe.utils.formatdate(row.date, "dd-mm-yyyy") }}
+          </td>
+
+          <td>
+            {{ row.comment_by_full_name or row.comment_by }}, {{ row.comment_by_authority }}
+          </td>
+
+          <td>
+            {{ row.comment }}
+          </td>
+
+          <td class="center">
+            {{ row.claim_status }}
+          </td>
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="4" class="center bold">
+          No remarks recorded
+        </td>
+      </tr>
+    {% endif %}
+  </table>
+</div>
+
+
+
+</div>

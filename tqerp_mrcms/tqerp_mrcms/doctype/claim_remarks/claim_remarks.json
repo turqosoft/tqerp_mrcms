@@ -11,7 +11,9 @@
         "comment_by",
         "comment",
         "is_seen",
-        "is_locked"
+        "is_locked",
+        "comment_by_full_name",
+        "comment_by_authority"
     ],
     "fields": [
         {
@@ -21,48 +23,61 @@
             "in_list_view": 1,
             "read_only": 1,
             "default": "now"
-           },
-           {
+        },
+        {
             "fieldname": "claim_status",
             "fieldtype": "Data",
             "label": "Claim Status",
             "in_list_view": 1,
             "read_only": 1
-           },
-           {
+        },
+        {
             "fieldname": "comment_by",
             "fieldtype": "Link",
             "options": "User",
             "label": "Comment By",
             "in_list_view": 1,
             "read_only": 1
-           },
-           {
+        },
+        {
             "fieldname": "comment",
             "fieldtype": "Text Editor",
             "label": "Remarks",
             "in_list_view": 1,
             "reqd": 1
-           },
-           {
+        },
+        {
             "fieldname": "is_seen",
             "fieldtype": "Check",
             "label": "Seen by Next Authority",
             "default": 0,
             "read_only": 1
-           },
-           {
+        },
+        {
             "fieldname": "is_locked",
             "fieldtype": "Check",
             "label": "Locked",
             "default": 0,
             "read_only": 1
-           }
-   
+        },
+        {
+            "fieldname": "comment_by_full_name",
+            "fieldtype": "Data",
+            "label": "Full Name",
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "comment_by_authority",
+            "fieldtype": "Data",
+            "label": "Authority",
+            "read_only": 1,
+            "in_list_view": 1
+        }
     ],
     "index_web_pages_for_search": 1,
     "istable": 1,
-    "track_changes":1,
+    "track_changes": 1,
     "links": [],
     "modified": "2025-12-19 13:12:16.197263",
     "modified_by": "Administrator",
@@ -73,4 +88,4 @@
     "sort_field": "modified",
     "sort_order": "DESC",
     "states": []
-   }
+}

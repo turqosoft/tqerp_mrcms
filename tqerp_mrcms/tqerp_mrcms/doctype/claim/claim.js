@@ -31,35 +31,35 @@ frappe.ui.form.on('Claim', {
         }
     },
 
-onload(frm) {
+    onload(frm) {
         frm.set_df_property("name_of_patient", "read_only", 0);
- 
+
         if (frm.doc.workflow_state !== 'IMO Review') {
             frm.set_df_property("passed_amount", "read_only", 1);
             frm.set_df_property("rupees", "read_only", 1);
             frm.set_df_property("package_rate", "read_only", 1);
             frm.set_df_property("non_package_rate", "read_only", 1);
-           
+
         } else {
             frm.set_df_property('passed_amount', 'read_only', 0);
             frm.set_df_property('rupees', 'read_only', 0);
             frm.set_df_property("package_rate", "read_only", 0);
             frm.set_df_property("non_package_rate", "read_only", 0);
         }
- 
+
         if (frm.doc.ip_no) {
             fetch_family_members(frm);
             fetch_ip_details(frm);
         }
- 
+
         if (!frm.doc.claim_templates) load_claim_checklist(frm, true);
- 
+
         setTimeout(() => make_claim_checklist_readonly(frm), 500);
- 
+
         const opts = frappe.route_options || {};
         if (opts.ip_no) frm.set_value("ip_no", opts.ip_no);
         if (opts.ip_name) frm.set_value("ip_name", opts.ip_name);
- 
+
         // make custom remakrs field read-only so that previous remarks should not be edited.
         apply_readonly_to_comments(frm);
         frm.set_df_property('organisation_code', 'read_only', 1);
@@ -76,7 +76,7 @@ onload(frm) {
             fetch_ip_details(frm);
         }
     },
-    dispensary: function(frm) {
+    dispensary: function (frm) {
         if (frm.doc.dispensary) {
             frappe.db.get_value('Organisation', frm.doc.dispensary, 'organisation_code')
                 .then(r => {
@@ -230,15 +230,15 @@ onload(frm) {
     // ------------------------------
     claim_status(frm) {
         if (!frm.doc.claim_status) return;
- 
+
         const rows = frm.doc.claim_process || [];
         const last_row = rows.length ? rows[rows.length - 1] : null;
- 
+
         if (last_row && last_row.activity === `Claim status changed to "${frm.doc.claim_status}"`) {
             console.log("Duplicate status change ignored.");
             return;
         }
- 
+
         frappe.call({
             method: "frappe.client.get_value",
             args: {
@@ -248,16 +248,16 @@ onload(frm) {
             },
             callback(r) {
                 let organisation = r.message?.organisation || "Not Set";
- 
+
                 frm.add_child("claim_process", {
                     user: frappe.session.user,
                     activity: `Claim status changed to "${frm.doc.claim_status}"`,
                     organisation: organisation,
                     date: frappe.datetime.now_datetime()
                 });
- 
+
                 frm.refresh_field("claim_process");
- 
+
                 frappe.show_alert({
                     message: "Claim progress updated",
                     indicator: "green"
@@ -275,7 +275,7 @@ onload(frm) {
             },
             callback(r) {
                 if (!r.message) return;
-
+                console.log("API Response (Documents):", r.message);
                 frm.set_value("claim_category", r.message.claim_category);
                 frm.clear_table("claim_required_documents");
 
@@ -292,12 +292,35 @@ onload(frm) {
     claim_remarks_add(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
 
-        // Auto-fill current user, status, date
         frappe.model.set_value(cdt, cdn, "comment_by", frappe.session.user);
         frappe.model.set_value(cdt, cdn, "claim_status", frm.doc.claim_status);
         frappe.model.set_value(cdt, cdn, "date", frappe.datetime.now_datetime());
 
-        // Lock rows not owned by current user
+        frappe.call({
+            method: "frappe.db.get_value",
+            args: {
+                doctype: "User",
+                filters: { name: frappe.session.user },
+                fieldname: ["full_name", "authority"]
+            },
+            callback: function (r) {
+                if (r.message) {
+                    frappe.model.set_value(
+                        cdt,
+                        cdn,
+                        "comment_by_full_name",
+                        r.message.full_name || frappe.session.user
+                    );
+                    frappe.model.set_value(
+                        cdt,
+                        cdn,
+                        "comment_by_authority",
+                        r.message.authority || ""
+                    );
+                }
+            }
+        });
+
         apply_readonly_to_comments(frm);
     },
 
@@ -517,26 +540,26 @@ function make_claim_checklist_readonly(frm) {
 
 // Helper function to make comments read-only for others
 function apply_readonly_to_comments(frm) {
-    const grid = frm.fields_dict.claim_remarks.grid;    
+    const grid = frm.fields_dict.claim_remarks.grid;
 
-//     grid.grid_rows.forEach(row => {
-//         const doc = locals['Claim Remarks'][row.docname];
+    //     grid.grid_rows.forEach(row => {
+    //         const doc = locals['Claim Remarks'][row.docname];
 
-//         if (doc.comment_by !== frappe.session.user || doc.is_locked) {
-//             row.toggle_enable('comment', false);
-//         } else {
-//             row.toggle_enable('comment', true);
-//         }
-//     });
+    //         if (doc.comment_by !== frappe.session.user || doc.is_locked) {
+    //             row.toggle_enable('comment', false);
+    //         } else {
+    //             row.toggle_enable('comment', true);
+    //         }
+    //     });
 }
 
 frappe.ui.form.on('Claim Required Documents', {
- 
+
     // Trigger when document master is selected
     claim_doc_master: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
         if (!row.claim_doc_master) return;
- 
+
         frappe.db.get_list('Claim Document Rule Details', {
             filters: { claim_doc_master: row.claim_doc_master },
             fields: ['mandatory'],
@@ -553,21 +576,21 @@ frappe.ui.form.on('Claim Required Documents', {
             }
         });
     },
- 
+
     // Trigger when file is uploaded
     uploaded_file: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
         if (!row.uploaded_file || !row.claim_doc_master) return;
- 
+
         // ---- GET SETTINGS (FILE SIZE) ----
         frappe.db.get_doc('Mrcms Settings', 'Mrcms Settings').then(settings => {
             let max_size = settings.upload_file_size || 0;
             let unit = settings.upload_file_size_unit || 'MB';
- 
+
             let max_bytes = unit === 'KB'
                 ? max_size * 1024
                 : max_size * 1024 * 1024;
- 
+
             // ---- GET FILE INFO ----
             frappe.db.get_value(
                 'File',
@@ -575,15 +598,15 @@ frappe.ui.form.on('Claim Required Documents', {
                 ['file_size', 'file_name']
             ).then(r => {
                 if (!r || !r.message) return;
- 
+
                 let file_size = r.message.file_size || 0;
                 let filename = r.message.file_name;
                 let ext = filename.split('.').pop().toLowerCase();
- 
+
                 // ---- GET DOCUMENT MASTER ----
                 frappe.db.get_doc('Claim Document Master', row.claim_doc_master)
                     .then(doc_master => {
- 
+
                         // ---- EXTENSION CHECK ----
                         let allowed_extensions = [];
                         if (doc_master.file_type_jpg) allowed_extensions.push('jpg');
@@ -591,7 +614,7 @@ frappe.ui.form.on('Claim Required Documents', {
                         if (doc_master.file_type_png) allowed_extensions.push('png');
                         if (doc_master.file_type_gif) allowed_extensions.push('gif');
                         if (doc_master.file_type_pdf) allowed_extensions.push('pdf');
- 
+
                         if (!allowed_extensions.includes(ext)) {
                             frappe.msgprint({
                                 title: 'Invalid File Type',
@@ -601,7 +624,7 @@ frappe.ui.form.on('Claim Required Documents', {
                             frappe.model.set_value(cdt, cdn, 'uploaded_file', null);
                             return;
                         }
- 
+
                         // ---- FILE SIZE CHECK (ADDED) ----
                         if (file_size > max_bytes) {
                             frappe.msgprint({
@@ -612,7 +635,7 @@ frappe.ui.form.on('Claim Required Documents', {
                             frappe.model.set_value(cdt, cdn, 'uploaded_file', null);
                             return;
                         }
- 
+
                         // ---- SET META FIELDS ----
                         frappe.model.set_value(
                             cdt,
@@ -626,7 +649,7 @@ frappe.ui.form.on('Claim Required Documents', {
                             'uploaded_by',
                             frappe.session.user
                         );
- 
+
                         frm.refresh_field('claim_required_documents');
                     });
             });
@@ -643,21 +666,21 @@ function toggle_claim_rate_tables(frm) {
 function populate_rate_item_fields(cdt, cdn) {
     const row = locals[cdt][cdn];
     if (!row.rate_item_name) return;
- 
+
     //  Item Code
     frappe.model.set_value(cdt, cdn, "item_code", row.rate_item_name);
- 
+
     // Item Name (from Item master)
     frappe.db.get_value("Item", row.rate_item_name, "item_name")
         .then(r => {
             if (r && r.message) {
-                frappe.model.set_value(cdt,cdn,
+                frappe.model.set_value(cdt, cdn,
                     "item_name",
                     r.message.item_name
                 );
             }
         });
- 
+
     // Rate (from Item Rate)
     frappe.call({
         method: "tqerp_mrcms.api.get_latest_rate_for_item",
@@ -672,9 +695,9 @@ function populate_rate_item_fields(cdt, cdn) {
 }
 
 frappe.ui.form.on('Package Rate Item', {
- 
-   
- 
+
+
+
     rate_item_name(frm, cdt, cdn) {
         populate_rate_item_fields(cdt, cdn, frm);
     },
@@ -700,7 +723,7 @@ frappe.ui.form.on('Package Rate Item', {
         frm.refresh_field('package_rate_items');
     }
 });
- 
+
 frappe.ui.form.on('Non Package Rate Item', {
     rate_item_name(frm, cdt, cdn) {
         populate_rate_item_fields(cdt, cdn);
@@ -732,7 +755,7 @@ frappe.ui.form.on('Non Package Rate Item', {
 function calculate_table_totals(frm) {
     let package_total = 0;
     let non_package_total = 0;
- 
+
     // Only calculate package total if package_rate is selected
     if (frm.doc.package_rate) {
         (frm.doc.package_rate_items || []).forEach(row => package_total += row.total || 0);
@@ -740,7 +763,7 @@ function calculate_table_totals(frm) {
     } else {
         frm.set_value("total_package_rate", null);
     }
- 
+
     // Only calculate non-package total if non_package_rate is selected
     if (frm.doc.non_package_rate) {
         (frm.doc.non_package_rate_items || []).forEach(row => non_package_total += row.total || 0);
@@ -748,9 +771,9 @@ function calculate_table_totals(frm) {
     } else {
         frm.set_value("total_non_package_rate", null);
     }
- 
+
     // Update overall passed_amount using only selected rates
     let passed_amount = (frm.doc.package_rate ? package_total : 0) +
-                        (frm.doc.non_package_rate ? non_package_total : 0);
+        (frm.doc.non_package_rate ? non_package_total : 0);
     frm.set_value("passed_amount", passed_amount);
 }

@@ -34,14 +34,14 @@
         {
             "fieldname": "min_amount",
             "label": "Minimum Amount",
-            "fieldtype": "Data",
+            "fieldtype": "Float",
             "required":1,
             "in_list_view":1
         },
         {
             "fieldname": "max_amount",
             "label": "Maximum Amount",
-            "fieldtype": "Data",
+            "fieldtype": "Float",
             "in_list_view":1
         },
         {

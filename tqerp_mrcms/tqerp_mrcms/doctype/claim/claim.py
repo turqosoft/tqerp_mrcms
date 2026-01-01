@@ -49,8 +49,15 @@ class Claim(Document):
             self.populate_required_documents()
 
     def before_save(self):
-        previous_doc = self.get_doc_before_save()
-        self.validate_entitlement_period()
+        for row in self.claim_remarks:
+            if row.comment_by and not row.comment_by_full_name:
+                user = frappe.get_doc("User", row.comment_by)
+                row.comment_by_full_name = user.full_name
+                row.comment_by_authority = user.authority
+ 
+ 
+            previous_doc = self.get_doc_before_save()
+            self.validate_entitlement_period()
  
         # ------------------------------
         # Fetch active rule for category
@@ -95,8 +102,11 @@ class Claim(Document):
         # ------------------------------
         for row in self.claim_required_documents:
  
+            # -------------------
             # Set mandatory from rule
-            row.mandatory = rule_map.get(row.claim_doc_master, 0)
+            # -------------------
+            if row.claim_doc_master:
+                row.mandatory = int(rule_map.get(row.claim_doc_master, 0))
  
             if row.uploaded_file:
                 if not row.uploaded_on:
@@ -104,9 +114,7 @@ class Claim(Document):
                 if not row.uploaded_by:
                     row.uploaded_by = frappe.session.user
  
-                # ------------------------------
-                # GET FILE SIZE (ADDED)
-                # ------------------------------
+                # FILE SIZE CHECK
                 file_doc = frappe.get_all(
                     "File",
                     filters={"file_url": row.uploaded_file},
@@ -121,14 +129,8 @@ class Claim(Document):
                             f"{size} {unit} for {row.claim_doc_master}"
                         )
  
-                # ------------------------------
-                # File validation (existing)
-                # ------------------------------
-                doc_master = frappe.get_doc(
-                    "Claim Document Master",
-                    row.claim_doc_master
-                )
- 
+                # FILE EXTENSION CHECK
+                doc_master = frappe.get_doc("Claim Document Master", row.claim_doc_master)
                 allowed_extensions = []
                 if doc_master.file_type_jpg: allowed_extensions.append("jpg")
                 if doc_master.file_type_jpeg: allowed_extensions.append("jpeg")
@@ -136,10 +138,7 @@ class Claim(Document):
                 if doc_master.file_type_gif: allowed_extensions.append("gif")
                 if doc_master.file_type_pdf: allowed_extensions.append("pdf")
  
-                filename = os.path.basename(
-                    urllib.parse.unquote(row.uploaded_file)
-                ).strip()
- 
+                filename = os.path.basename(urllib.parse.unquote(row.uploaded_file)).strip()
                 ext = filename.split('.')[-1].lower()
  
                 if ext not in allowed_extensions:
@@ -148,6 +147,30 @@ class Claim(Document):
                         f"Allowed types: {', '.join(allowed_extensions)}"
                     )
 
+    # Fetch all entitlement periods for this IP
+    def before_print(self, print_settings=None):
+   
+        entitlements = frappe.get_all(
+            "Entitlement",
+            filters={
+                "parent": self.ip_no,
+                "parenttype": "Insured Person"
+            },
+            fields=["start_date", "end_date"],
+            order_by="start_date asc"  
+        )
+ 
+        if entitlements:
+           
+            periods = [
+                f"{frappe.utils.formatdate(e.start_date, 'dd-mm-yyyy')} to {frappe.utils.formatdate(e.end_date, 'dd-mm-yyyy')}"
+                for e in entitlements
+            ]
+            # Join multiple periods with line breaks for HTML
+            self.entitled_periods = ",<br><br><br>".join(periods)
+        else:
+            self.entitled_periods = "--"
+            
     def on_submit(self):
         """Log submission of the Claim"""
         self.log_claim_process("Submitted")
@@ -240,12 +263,18 @@ class Claim(Document):
 
 
     def log_claim_process(self, action, user=None, organisation=None):
-        """Append an entry to Claim Process child table"""
+        """Append an entry to Claim Process child table with full name and authority"""
+        from frappe.utils import now_datetime
+ 
         if not user:
             user = frappe.session.user
         if not organisation:
             organisation = frappe.db.get_value("User", user, "organisation")
  
+        # Get user details
+        user_doc = frappe.get_doc("User", user)
+        full_name = user_doc.full_name or user
+        authority = user_doc.authority or ""
  
         # Get last log entry for this Claim
         last_logs = frappe.get_all(
@@ -256,11 +285,12 @@ class Claim(Document):
             limit_page_length=1,
         )
  
+        now = now_datetime()
+ 
         if last_logs:
             last_modified = last_logs[0].get("date")
             last_log_name = last_logs[0].get("name")
  
-            now = now_datetime()
             # Update duration for previous log if exists
             if last_modified and last_log_name:
                 duration_secs = (now - last_modified).total_seconds()
@@ -271,14 +301,17 @@ class Claim(Document):
                     duration_secs,
                 )
  
-        # Append entry
+        # Append entry to child table
         self.append("claim_process", {
             "user": user,
             "activity": action,
-            "organisation": organisation,  # Make sure this field exists in child table
-            "date": now_datetime()
+            "organisation": organisation,
+            "user_full_name": full_name,
+            "user_authority": authority,
+            "date": now
         })
  
+        # Optional: insert a separate doc if needed
         log = frappe.get_doc({
             "doctype": "Claim Process",
             "parent": self.name,
@@ -286,8 +319,10 @@ class Claim(Document):
             "parenttype": "Claim",
             "user": user,
             "activity": action,
-            "organisation": organisation,  # Make sure this field exists in child table
-            "date": now_datetime()
+            "organisation": organisation,
+            "user_full_name": full_name,
+            "user_authority": authority,
+            "date": now
         })
         log.insert(ignore_permissions=True)
 
@@ -464,18 +499,18 @@ class Claim(Document):
 #         return ""
 
 #     # Get user's office (assumes a Link field "office" on User)
-#     user_office = frappe.db.get_value("User", user, "office")
+#     user_office = frappe.db.get_value("User", user, "organisation")
 #     if not user_office:
 #         # No office assigned → see nothing
 #         return "1=0"
 
 #     # Try to treat Office as a tree using lft/rgt (standard Frappe tree)
 #     try:
-#         office_doc = frappe.get_doc("Office", user_office)
+#         office_doc = frappe.get_doc("Organisation", user_office)
 
 #         # Get this office + all child offices
 #         offices = frappe.get_all(
-#             "Office",
+#             "Organisation",
 #             filters={
 #                 "lft": (">=", office_doc.lft),
 #                 "rgt": ("<=", office_doc.rgt),
@@ -622,18 +657,20 @@ def get_required_documents(amount_claimed):
         "claim_category": claim_category,
         "documents": documents
     }
- 
- 
+
 def get_claim_category_from_amount(amount):
-    category = frappe.db.sql("""
-        SELECT name
-        FROM `tabClaim Category`
-        WHERE
-             %s BETWEEN min_amount AND max_amount
-        ORDER BY min_amount ASC
-        LIMIT 1
-    """, (amount,), as_dict=True)
- 
+    amount = float(amount or 0)
+    category = frappe.get_all(
+        "Claim Category",
+        filters={
+            "min_amount": ("<=", amount),
+            "max_amount": (">=", amount),
+        },
+        fields=["name"],
+        order_by="min_amount asc",
+        limit=1
+    )
+
     return category[0].name if category else None
 
 @frappe.whitelist()
