@@ -1,4 +1,4 @@
-frappe.query_reports["Mrc Register"] = {
+frappe.query_reports["MRC Register"] = {
     "filters": [
         {
             fieldname: "from_date",
@@ -21,7 +21,30 @@ frappe.query_reports["Mrc Register"] = {
         {
             fieldname: "dispensary",
             label: __("Dispensary"),
-            fieldtype: "Data",
+            fieldtype: "Link",
+            options: "Organisation",
+            reqd: 0
+        },
+        {
+            fieldname: "workflow_state",
+            label: __("Workflow"),
+            fieldtype: "Select",
+            options: [
+                "",
+                "Draft",
+                "HC Review",
+                "IMO Review",
+                "Sanctioned",
+                "RDD Section",
+                "RDD Review",
+                "JS/SS Review",
+                "JD Section",
+                "JD Review",
+                "Director Review",
+                "Govt Review",
+                "Rejected",
+                "Returned",
+            ].join("\n"),
             reqd: 0
         },
         {
@@ -30,15 +53,14 @@ frappe.query_reports["Mrc Register"] = {
             fieldtype: "Select",
             options: [
                 "",
-                "Draft",
-                "HC Review",
-                "IMO Review",
-                "RD Review",
-                "Join Director Review",
-                "Director Review",
+                "Data Entry",
+                "Registered",
+                "Processing",
                 "Sanctioned",
+                "Rejected",
+                "Returned",
                 "Paid",
-                "Objection"
+                "Closed"
             ].join("\n"),
             reqd: 0
         }

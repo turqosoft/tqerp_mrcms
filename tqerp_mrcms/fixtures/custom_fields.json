@@ -31,6 +31,17 @@
         "options":"Organisation",
         "label":"Organisation",
         "insert_after":"organisation_type"
+    },
+    {
+        "doctype":"Custom Field",
+        "dt" : "User",
+        "module":"Tqerp Mrcms",
+        "name": "Section in User",
+        "fieldname":"section",
+        "fieldtype":"Link",
+        "options":"MRC Region",
+        "label":"Section",
+        "insert_after":"time_zone"
     }
 ] 
     

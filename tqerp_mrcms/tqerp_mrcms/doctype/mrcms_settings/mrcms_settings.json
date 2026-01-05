@@ -1,64 +1,87 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "creation": "2025-11-12 12:47:38.158831",
-    "doctype": "DocType",
-    "engine": "InnoDB",
-    "field_order": [
-     "disp_organisation_type",
-     "default_claim_checklist",
-     "cb_mrcms1",
-     "upload_file_size",
-     "upload_file_size_unit",
-     "max_claims_per_bundle"
-   
-    ],
-    "fields": [
-     {
+  "actions": [],
+  "allow_rename": 0,
+  "creation": "2025-11-12 12:47:38.158831",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "disp_organisation_type",
+    "default_claim_checklist",
+    "validate_claim_checklist",
+    "validate_required_documents",
+    "bill_details_required",
+    "cb_mrcms1",
+    "upload_file_size",
+    "upload_file_size_unit",
+    "max_claims_per_bundle"
+  ],
+  "fields": [
+    {
       "fieldname": "disp_organisation_type",
       "fieldtype": "Link",
       "label": "Dispensary Organisation Type",
-      "options":"Organisation Type"
-     },
-     {
+      "options": "Organisation Type"
+    },
+    {
       "fieldname": "default_claim_checklist",
       "fieldtype": "Link",
       "label": "Claim checklist",
-      "options":"Claim Checklist"
-     },
-     {
-       "fieldname": "cb_mrcms1",
-       "fieldtype": "Column Break"
-      },
-      {
-       "fieldname": "upload_file_size",
-       "fieldtype": "Int",
-       "label": "Maximum File Upload Size"   },
-      {
-       "fieldname": "upload_file_size_unit",
-       "fieldtype": "Select",
-       "label": "Unit",
-       "options": "KB\nMB",
-       "default": "MB"
-     },
-     {
-       "fieldname": "max_claims_per_bundle",
-       "fieldtype": "Int",
-       "label": "Maximum Claims per Bundle",
-       "description": "Maximum number of claims allowed in a single claim bundle"
-     }
-     
-    ],
-    "index_web_pages_for_search": 1,
-    "issingle": 1,
-    "links": [],
-    "modified": "2025-11-12 12:48:22.926208",
-    "modified_by": "Administrator",
-    "module": "Tqerp Mrcms",
-    "name": "Mrcms Settings",
-    "owner": "Administrator",
-    "permissions": [
-     {
+      "options": "Claim Checklist"
+    },
+    {
+      "fieldname": "cb_mrcms1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "upload_file_size",
+      "fieldtype": "Int",
+      "label": "Maximum File Upload Size"
+    },
+    {
+      "fieldname": "upload_file_size_unit",
+      "fieldtype": "Select",
+      "label": "Unit",
+      "options": "KB\nMB",
+      "default": "MB"
+    },
+    {
+      "fieldname": "max_claims_per_bundle",
+      "fieldtype": "Int",
+      "label": "Maximum Claims per Bundle",
+      "description": "Maximum number of claims allowed in a single claim bundle"
+    },
+    {
+      "fieldname": "validate_claim_checklist",
+      "fieldtype": "Check",
+      "label": "Claim Checklist Mandatory",
+      "default": 0,
+      "description": "If checked, claim submission will require completion of the claim checklist"
+    },
+    {
+      "fieldname": "validate_required_documents",
+      "fieldtype": "Check",
+      "label": "Claim Documents Mandatory",
+      "default": 0,
+      "description": "If checked, claim submission will require all mandatory documents to be uploaded"
+    },
+    {
+      "fieldname": "bill_details_required",
+      "fieldtype": "Check",
+      "label": "Bill Details Mandatory",
+      "default": 0,
+      "description": "If checked, claim submission will require bill details to be provided"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "issingle": 1,
+  "links": [],
+  "modified": "2025-11-12 12:48:22.926208",
+  "modified_by": "Administrator",
+  "module": "Tqerp Mrcms",
+  "name": "Mrcms Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
       "create": 1,
       "delete": 1,
       "email": 1,
@@ -67,9 +90,9 @@
       "role": "System Manager",
       "share": 1,
       "write": 1
-     }
-    ],
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "states": []
-   }
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": []
+}

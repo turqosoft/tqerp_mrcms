@@ -14,6 +14,7 @@ def get_columns():
         {"label": _("IP Name"), "fieldname": "ip_name", "fieldtype": "Data", "width": 180},
         {"label": _("Patient Name"), "fieldname": "name_of_patient", "fieldtype": "Data", "width": 150},
         {"label": _("Dispensary"), "fieldname": "dispensary", "fieldtype": "Data", "width": 150},
+        {"label": _("Workflow"), "fieldname": "workflow_state", "fieldtype": "Data", "width": 150},
         {"label": _("Claim Status"), "fieldname": "claim_status", "fieldtype": "Data", "width": 150},
         {"label": _("Amount Claimed"), "fieldname": "amount_claimed", "fieldtype": "Currency", "width": 150},
         {"label": _("Passed Amount"), "fieldname": "passed_amount", "fieldtype": "Currency", "width": 150},
@@ -26,6 +27,9 @@ def get_data(filters):
     # Apply Filter
     if filters.get("ip_no"):
         conditions["ip_no"] = filters.get("ip_no")
+
+    if filters.get("workflow_state"):
+        conditions["workflow_state"] = filters.get("workflow_state")
 
     if filters.get("claim_status"):
         conditions["claim_status"] = filters.get("claim_status")
@@ -51,6 +55,7 @@ def get_data(filters):
             "ip_name",
             "name_of_patient",
              "dispensary",
+             "workflow_state",
             "claim_status",
             "amount_claimed",
             "passed_amount",

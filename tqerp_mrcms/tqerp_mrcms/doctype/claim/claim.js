@@ -116,6 +116,30 @@ frappe.ui.form.on('Claim', {
             }
         });
     },
+    // fetch bank account details from insured person
+    bank_account_no(frm) {
+        if (!frm.doc.bank_account_no || !frm.doc.ip_no) return;
+ 
+        frappe.call({
+            method: "frappe.client.get",
+            args: {
+                doctype: "Insured Person",
+                name: frm.doc.ip_no
+            },
+            callback(r) {
+                if (!r.message) return;
+ 
+                const bank = (r.message.bank_accounts || [])
+                    .find(b => b.acc_no === frm.doc.bank_account_no);
+ 
+                if (!bank) return;
+ 
+                frm.set_value("bank_name", bank.bank || "");
+                frm.set_value("branch", bank.branch || "");
+                frm.set_value("ifs_code", bank.ifsc_code || "");
+            }
+        });
+    },
 
     claim_objection_template(frm) { load_claim_objections(frm); },
     claim_templates(frm) { load_claim_checklist(frm); },
@@ -398,7 +422,7 @@ function fetch_family_members(frm) {
 // ------------------------------
 function fetch_ip_details(frm) {
     if (!frm.doc.ip_no) return;
-
+ 
     frappe.call({
         method: "frappe.client.get",
         args: {
@@ -406,31 +430,29 @@ function fetch_ip_details(frm) {
             name: frm.doc.ip_no
         },
         callback(r) {
-            if (r.message) {
-                const ip = r.message;
-
-                frm.set_value("ip_name", ip.ip_name || "");
-                frm.set_value("phone", ip.phone || "");
-                frm.set_value("dispensary", ip.dispensary || "");
-                frm.set_value("address", ip.address || "");
-
-                const banks = ip.bank_accounts || [];
-                if (banks.length > 0) {
-                    const bank = banks[0];
-                    frm.set_value("bank_name", bank.bank || "");
-                    frm.set_value("bank_account_no", bank.acc_no || "");
-                    frm.set_value("branch", bank.branch || "");
-                    frm.set_value("ifs_code", bank.ifsc_code || "");
-                } else {
-                    frm.set_value("bank_name", "");
-                    frm.set_value("bank_account_no", "");
-                    frm.set_value("branch", "");
-                    frm.set_value("ifs_code", "");
-                }
+            if (!r.message) return;
+ 
+            const ip = r.message;
+ 
+            // Set IP basic details
+            frm.set_value("ip_name", ip.ip_name || "");
+            frm.set_value("phone", ip.phone || "");
+            frm.set_value("dispensary", ip.dispensary || "");
+            frm.set_value("address", ip.address || "");
+ 
+            // Populate bank account dropdown
+            const banks = ip.bank_accounts || [];
+            const options = banks.map(b => b.acc_no);
+            frm.set_df_property("bank_account_no", "options", options.join("\n"));
+ 
+           
+            if (banks.length > 0) {
+                const firstBank = banks[0];
+                frm.set_value("bank_account_no", firstBank.acc_no || "");
+                frm.set_value("bank_name", firstBank.bank || "");
+                frm.set_value("branch", firstBank.branch || "");
+                frm.set_value("ifs_code", firstBank.ifsc_code || "");
             }
-        },
-        error(err) {
-            console.error("Error fetching IP details:", err);
         }
     });
 }

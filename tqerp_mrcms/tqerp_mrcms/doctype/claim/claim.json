@@ -11,6 +11,7 @@
         "section_break_embe",
         "claim_status",
         "dispensary",
+        "district",
         "organisation_code",
         "column_break_eeuj",
         "naming_series",
@@ -87,7 +88,13 @@
         "claim_category",
         "section_break_cr",
         "claim_remarks",
-        "claim_process"
+        "claim_process",
+        "section_break_sd",
+        "sanction_letter_no",
+        "column_break_sd1",
+        "letter_date",
+        "column_break_sd2",
+        "sanction_order_no"
     ],
     "fields": [
         {
@@ -103,8 +110,7 @@
             "in_standard_filter": 1,
             "options": "\nData Entry\nRegistered\nProcessing\nSanctioned\nPaid\nRejected\nReturned\nClosed",
             "default": "Data Entry",
-            "read_only": 1,
-            "in_list_view": 1
+            "read_only": 1
         },
         {
             "fieldname": "dispensary",
@@ -113,6 +119,14 @@
             "options": "Organisation",
             "fetch_from:": "ip_no.dispensary",
             "reqd": 1,
+            "read_only": 1,
+            "in_list_view": 1
+        },
+        {
+            "fieldname": "district",
+            "label": "District",
+            "fieldtype": "Data",
+            "fetch_from": "dispensary.district",
             "read_only": 1,
             "in_list_view": 1
         },
@@ -255,7 +269,8 @@
         {
             "fieldname": "bank_account_no",
             "label": "Bank Account No",
-            "fieldtype": "Data",
+            "fieldtype": "Select",
+            "options":"",
             "in_list_view": 1,
             "reqd": 1
         },
@@ -364,7 +379,9 @@
             "read_only": 1,
             "options": "Claim Category",
             "depends_on": "eval:doc.passed_amount>0",
-            "mandatory_depends_on": "eval:doc.passed_amount>0"
+            "mandatory_depends_on": "eval:doc.passed_amount>0",
+            "in_list_view": 1,
+            "in_standard_filter":1
         },
         {
             "fieldname": "bill_details",
@@ -460,11 +477,11 @@
         },
         {
             "fieldname": "section_break_ct",
+            "label": "Claim Checklist",
             "fieldtype": "Section Break"
         },
         {
             "fieldname": "claim_templates",
-            "label": "Claim Checklist",
             "fieldtype": "Link",
             "options": "Claim Checklist"
         },
@@ -526,13 +543,13 @@
         },
         {
             "fieldname": "section_break_crd",
-            "fieldtype": "Section Break"
+            "fieldtype": "Section Break",
+            "label": "Claim Required Documents"
         },
         {
             "fieldname": "claim_required_documents",
             "fieldtype": "Table",
-            "options": "Claim Required Documents",
-            "label": "Claim Required Documents"
+            "options": "Claim Required Documents"
         },
         {
             "fieldname": "section_break_rate_type",
@@ -582,11 +599,41 @@
         {
             "fieldname": "column_break_cr2",
             "fieldtype": "Column Break"
+        },
+
+
+        {
+            "fieldname": "section_break_sd",
+            "label": "Sanction Details",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "sanction_letter_no",
+            "label": "Sanction Letter No",
+            "fieldtype": "Data"
+        },
+        {
+            "fieldname": "column_break_sd1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "letter_date",
+            "label": "Letter Date",
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname": "column_break_sd2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "sanction_order_no",
+            "label": "Sanction Order No",
+            "fieldtype": "Data"
         }
     ],
     "is_submittable": 1,
     "links": [],
-    "search_fields": "claim_status, claim_date, ip_no, ip_name, dispensary",
+    "search_fields": "claim_status, claim_category, claim_date, ip_no, ip_name, dispensary",
     "modified_by": "Administrator",
     "module": "Tqerp Mrcms",
     "name": "Claim",

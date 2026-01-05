@@ -17,7 +17,8 @@
         "column_break_deuj",
         "parent_organisation",
         "district",
-        "address"
+        "address",
+        "head_of_account"
     ],
     "fields": [
         {
@@ -78,6 +79,12 @@
         {
             "fieldname": "column_break_deuj",
             "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "head_of_account",
+            "label": "Head of Account",
+            "fieldtype": "Data",
+            "in_list_view": 1
         }
     ],
     "is_tree": 1,

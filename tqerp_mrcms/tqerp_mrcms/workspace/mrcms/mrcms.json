@@ -101,7 +101,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-12-25 23:35:06.908251",
+ "modified": "2026-01-03 05:54:48.316036",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS",
@@ -124,25 +124,22 @@
    "role": "Head Clerk"
   },
   {
-   "role": "Regional Director"
-  },
-  {
-   "role": "Deputy Director"
-  },
-  {
-   "role": "Junior Superintendent"
-  },
-  {
    "role": "Cashier"
   },
   {
    "role": "RDD Section"
   },
   {
+   "role": "RDD"
+  },
+  {
    "role": "JD Section"
   },
   {
-   "role": "DIR Section"
+   "role": "JS/SS"
+  },
+  {
+   "role": "JD"
   },
   {
    "role": "Director"

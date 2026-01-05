@@ -1,13 +1,13 @@
 from frappe.model.document import Document
 import frappe
-from frappe.utils import now_datetime, nowdate
+from frappe.utils import now_datetime, nowdate, today
 from frappe.utils import getdate, add_days, cint
 import os, urllib
 
 class Claim(Document):
 
     def validate(self):
-            self.validate_mandatory_documents()
+            self.validate_mrcms_rules()
 
             self.set_comment_meta()
             self.prevent_edit_others_comments()
@@ -58,7 +58,18 @@ class Claim(Document):
  
             previous_doc = self.get_doc_before_save()
             self.validate_entitlement_period()
- 
+
+        # Populate IP Communication with logged-in user and date
+        for row in self.get("ip_communication") or []:
+            # Skip rows that already have a user
+            if row.contacted_by:
+                continue
+            # Set date if missing
+            if not row.date:
+                row.date = today()
+            # Always set logged-in user
+            row.contacted_by = frappe.session.user
+
         # ------------------------------
         # Fetch active rule for category
         # ------------------------------
@@ -147,27 +158,34 @@ class Claim(Document):
                         f"Allowed types: {', '.join(allowed_extensions)}"
                     )
 
-    # Fetch all entitlement periods for this IP
+    # Fetch ONLY the entitlement period(s) that COVER / OVERLAP the treatment period (from_date → to_date)
     def before_print(self, print_settings=None):
-   
+ 
+        if not self.from_date or not self.to_date or not self.ip_no:
+            self.entitled_periods = "--"
+            return
+ 
         entitlements = frappe.get_all(
             "Entitlement",
             filters={
                 "parent": self.ip_no,
-                "parenttype": "Insured Person"
+                "parenttype": "Insured Person",
+                "start_date": ("<=", self.to_date),
+                "end_date": (">=", self.from_date),
             },
             fields=["start_date", "end_date"],
-            order_by="start_date asc"  
+            order_by="start_date asc"
         )
  
         if entitlements:
-           
             periods = [
-                f"{frappe.utils.formatdate(e.start_date, 'dd-mm-yyyy')} to {frappe.utils.formatdate(e.end_date, 'dd-mm-yyyy')}"
+                f"{frappe.utils.formatdate(e.start_date, 'dd-mm-yyyy')} to "
+                f"{frappe.utils.formatdate(e.end_date, 'dd-mm-yyyy')}"
                 for e in entitlements
             ]
-            # Join multiple periods with line breaks for HTML
-            self.entitled_periods = ",<br><br><br>".join(periods)
+ 
+            # Multiple only if treatment spans multiple entitlement slabs
+            self.entitled_periods = "<br><br><br>".join(periods)
         else:
             self.entitled_periods = "--"
             
@@ -431,24 +449,50 @@ class Claim(Document):
                 if old.is_locked and old.comment != new.comment:
                     frappe.throw("You cannot edit this remark because next authority has processed it.")
 
-    def validate_mandatory_documents(self):
+    def validate_mrcms_rules(self):
+        settings = frappe.get_single("Mrcms Settings")
+ 
         prev = self.get_doc_before_save()
+        if not prev:
+            return
  
-        missing = []
+        if prev.workflow_state == self.workflow_state:
+            return
  
-        for row in self.claim_required_documents:
-            if cint(row.mandatory):
-                if not row.uploaded_file or not str(row.uploaded_file).strip():
-                    missing.append(row.claim_doc_name or row.claim_doc_master)
+        if self.workflow_state != "HC Review":
+            return
  
-        if missing:
-            frappe.throw(
-                "Please upload all mandatory documents before approval.<br><br>"
-                "<b>Missing documents:</b><br>"
-                + "<br>".join(missing),
-                title="Mandatory Documents Required"
-            )
-
+        # -----------------------------
+        # Claim Checklist Validation
+        # -----------------------------
+        if settings.validate_claim_checklist:
+            for row in self.claim_checklist or []:
+                if row.required == "Yes":
+                    if not row.present:
+                        frappe.throw(
+                            f"❌ Checklist item '{row.criteria}' is required but not marked as Present."
+                        )
+                   
+ 
+        # ---------------------------------
+        # Required Documents Validation
+        # ---------------------------------
+        if settings.validate_required_documents:
+            missing = []
+ 
+            for row in self.claim_required_documents or []:
+                if cint(row.mandatory):
+                    if not row.uploaded_file or not str(row.uploaded_file).strip():
+                        missing.append(row.claim_doc_name or row.claim_doc_master)
+ 
+            # Throw AFTER checking all rows
+            if missing:
+                frappe.throw(
+                    "Please upload all mandatory documents before approval.<br><br>"
+                    "<b>Missing documents:</b><br>"
+                    + "<br>".join(missing),
+                    title="Mandatory Documents Required"
+                )
 # def get_permission_query_conditions(user):
     # pass
     """
@@ -553,6 +597,7 @@ def get_child_organisations(root_office):
  
     return list(all_offices)
 
+# Show only claim authorised for the user to see in the CLAIM list view
 def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
@@ -565,19 +610,22 @@ def get_permission_query_conditions(user):
     # if "MRCMS Admin" in frappe.get_roles(user):
     #     return ""
  
-    # Get user's organisation (adjust fieldname on User if different)
-    user_organisation = frappe.db.get_value("User", user, "organisation")
+    # Get user's organisation
     user_authority = frappe.db.get_value("User", user, "authority")
+ 
+    user_organisation, user_section = frappe.db.get_value("User", user,["organisation", "section"]) or (None, None)
+
     if not user_organisation:
         # No organisation assigned → see nothing
         return "1=0"
- 
+
     organisations = get_child_organisations(user_organisation)
     if not organisations:
         organisations = [user_organisation]
  
     escaped_organisations = ", ".join(frappe.db.escape(o) for o in organisations)
     organisation_condition = f"`tabClaim`.`dispensary` in ({escaped_organisations})"
+
     # --- New IMO Role Restriction Logic ---
     user_roles = frappe.get_roles(user)
     # Check if the user is an IMO. If so, add the workflow state restriction.
@@ -586,11 +634,25 @@ def get_permission_query_conditions(user):
         workflow_condition = "`tabClaim`.`workflow_state` = 'IMO Review'"
         # Combine the two conditions using AND
         return f"({organisation_condition}) AND ({workflow_condition})"
- 
+    
     # --- Default: Apply only organisation Restriction for Non-IMOs (e.g., clerk, etc.) ---
- 
-    # If the user is not an IMO, only the organisation restriction applies (assuming this is the base requirement)
-    return f"`tabClaim`.`dispensary` in ({escaped_organisations})"
+    if not user_section:
+        # If the user is not an IMO, only the organisation restriction applies (assuming this is the base requirement)
+        return organisation_condition
+    else:
+        # If the user belongs to a section in the Directorate apply both org condition and Section/MRC region condition
+        section_condition = ""
+        # Get all districts that belong to this MRC Region
+        districts_in_region = frappe.get_all("District", filters={"mrc_region": user_section}, pluck="name")
+        if districts_in_region:
+            escaped_districts = ", ".join(frappe.db.escape(d) for d in districts_in_region)
+            section_condition = f"`tabClaim`.`district` in ({escaped_districts})"
+        else:
+            # If no districts match the section → show nothing
+            section_condition = "1=0"
+
+        # If the user has a section associated, then list only claims associtated with that section
+        return f"({section_condition}) AND ({organisation_condition})"
 
 @frappe.whitelist()
 def get_required_documents(amount_claimed):

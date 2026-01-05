@@ -33,7 +33,6 @@ doctype_js = {"Claim" : "public/js/claim.js"}
 doctype_list_js = {
     "Claim" : "public/js/claim_list.js",
     "Claim Bundle Management" : "public/js/claim_bundle_management.js",
-    "Claim Sanction List":"public/js/claim_sanction_list.js",
     "Claim Payment List":"public/js/claim_payment_list.js",
     "Claim Proceedings": "public/js/claim_proceedings.js",
 }
@@ -278,49 +277,49 @@ doc_events = {
 }
 
 fixtures = [
-    # # 1) Workflow definition for Claim
-    # {
-    #     "doctype": "Workflow",
-    #     "filters": [
-    #         # ["document_type", "=", "Claim"]
-    #         ["name", "=", "Claim Processing v3"]
-    #     ]
-    # },
+    # 1) Workflow definition for Claim
+    {
+        "doctype": "Workflow",
+        "filters": [
+            # ["document_type", "=", "Claim"]
+            ["name", "=", "Claim Processing v5"]
+        ]
+    },
 
-    # # 2) Workflow States used by this workflow (optional but recommended)
-    # {
-    #     "doctype": "Workflow State",
-    #     "filters": [
-    #         ["name", "in", [
-    #             "Draft",
-    #             "Returned",
-    #             "HC Review",
-    #             "IMO Review",
-    #             "Sanctioned",
-    #             "RD Section",
-    #             "RD Review",
-    #             "Rejected",
-    #             "JD Section",
-    #             "JD Review",
-    #             "DIR Section",
-    #             "DIR Review",
-    #             "Govt Review"
-    #         ]]
-    #     ]
-    # },
+    # 2) Workflow States used by this workflow (optional but recommended)
+    {
+        "doctype": "Workflow State",
+        "filters": [
+            ["name", "in", [
+                "Draft",
+                "Returned",
+                "HC Review",
+                "IMO Review",
+                "Sanctioned",
+                "RDD Section",
+                "RDD Review",
+                "Rejected",
+                "JD Section",
+                "JS/SS Review",
+                "JD Review",
+                "Director Review",
+                "Govt Review"
+            ]]
+        ]
+    },
 
-    # # 3) Workflow Actions used (only if you created custom ones)
-    # {
-    #     "doctype": "Workflow Action Master",
-    #     "filters": [
-    #         ["name", "in", [
-    #             "Approve",
-    #             "Objection",
-    #             "Reject",
-    #             "Review"
-    #         ]]
-    #     ]
-    # },
+    # 3) Workflow Actions used (only if you created custom ones)
+    {
+        "doctype": "Workflow Action Master",
+        "filters": [
+            ["name", "in", [
+                "Approve",
+                "Objection",
+                "Reject",
+                "Review"
+            ]]
+        ]
+    },
     # Role Permission Manager
     # {
     #     "doctype": "Custom DocPerm",

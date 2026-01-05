@@ -86,8 +86,8 @@
 
   <!-- REFERENCE -->
   <div class="section center bold">
-    Ref:- Letter No A 75/2025, dated:
-    {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }},
+    Ref:- Letter No {{doc.sanction_letter_no}}, dated:
+    {{ frappe.utils.formatdate(doc.letter_date, "dd-mm-yyyy") }},
     {{ doc.dispensary }}
   </div><br>
 
@@ -97,7 +97,16 @@
       has forwarded the Medical Reimbursement claim in respect of {{ doc.ip_name }},
       IP No. {{ doc.ip_no }} for Rs. {{ doc.amount_claimed }}/-.</p>
 
-    <p>The charges of treatment were availed by the IP for his/her {{ doc.relation }}.</p>
+      {% set gender = frappe.db.get_value(
+          "Insured Person",
+          doc.ip_no,
+          "gender"
+      ) %}
+      
+      {% set poss_pronoun = "his" if gender == "Male" else "her" %}
+    
+      <p>The charges of treatment were availed by the IP for {{ poss_pronoun }} {{ doc.relation }}.</p>
+        
 
     <p>The treatment was availed during the period from 
       {{ frappe.utils.formatdate(doc.from_date, "dd-mm-yyyy") }} to 

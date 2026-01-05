@@ -15,7 +15,8 @@
     "remarks",
     "sbm_section",
     "details",
-    "bundle_total"
+    "bundle_total",
+    "claim_category"
   ],
   "fields": [
     {
@@ -74,6 +75,14 @@
       "fieldtype": "Float",
       "label": "Total Passed Amount",
       "in_list_view": 1
+    },
+    {
+      "fieldname": "claim_category",
+      "label": "Claim Category",
+      "fieldtype": "Link",
+      "options": "Claim Category",
+      "hidden": 1,
+      "reqd": 1
     }
   ],
   "grid_page_length": 50,

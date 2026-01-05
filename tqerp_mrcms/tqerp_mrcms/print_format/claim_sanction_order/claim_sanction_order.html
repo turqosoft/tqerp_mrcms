@@ -1,3 +1,5 @@
+{% if doc.claim_status == "Sanctioned" %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,17 +109,36 @@
     <h3>THIRUVANANTHAPURAM-14</h3><br><br>
 
     <p class="center-bold">Sub:- MRC in respect of {{doc.ip_name}}, IP No.{{doc.ip_no}}, {{doc.dispensary}} of Rs. {{doc.passed_amount}}/- Sanction orders issued</p> <br>
-    <p class="center-bold">Ref:- Letter No A 75/2025, dated: {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }}, {{doc.dispensary}}</p> <br>
+    <p class="center-bold">Ref:- Letter No {{doc.sanction_letter_no}}, dated: {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }}, {{doc.dispensary}}</p> <br>
 
-    <p class="center-bold underline">ORDER NO. {{doc.name}}, Dated: {{ frappe.utils.formatdate(doc.claim_date, "dd-mm-yyyy") }}</p> <br>
+    <p class="center-bold underline">ORDER NO. {{doc.sanction_order_no}}, Dated: {{ frappe.utils.formatdate(doc.letter_date, "dd-mm-yyyy") }}</p> <br>
 
     <!-- Left-aligned paragraph blocks with spacing -->
-    <p class="left-paragraph">Sanction is accorded for the reimbursement of Rs. {{doc.passed_amount}}/- ( Rupees {{doc.rupees}}), to Sri {{doc.ip_name}}, {{doc.dispensary}} being the cost of medicines purchased by him/her for the treatment of {{doc.diseases}}.</p>
+      {% set gender = frappe.db.get_value(
+        "Insured Person",
+        doc.ip_no,
+        "gender"
+    ) %}
+    
+    {% set obj_pronoun = "him" if gender == "Male" else "her" %}
+    {% set poss_pronoun = "his" if gender == "Male" else "her" %}
+    <p class="left-paragraph">Sanction is accorded for the reimbursement of Rs. {{doc.passed_amount}}/- (Rupees {{doc.rupees}}), to Sri {{doc.ip_name}}, {{doc.dispensary}},being the cost of medicines purchased by {{ obj_pronoun }} for the treatment of {{doc.diseases}}.
+    </p>
+      
+    <p class="left-paragraph">The treatment was availed by {{ poss_pronoun }} {{doc.relation}} during the period from {{ frappe.utils.formatdate(doc.from_date, "dd-mm-yyyy") }} to {{ frappe.utils.formatdate(doc.to_date, "dd-mm-yyyy") }} from {{doc.hospital}}.
+    </p>
+      
 
-    <p class="left-paragraph">The treatment was availed by his/her {{doc.relation}} during the period from {{ frappe.utils.formatdate(doc.from_date, "dd-mm-yyyy") }} to {{ frappe.utils.formatdate(doc.to_date, "dd-mm-yyyy") }} from {{doc.hospital}}.</p>
-
-    <p class="left-paragraph">The expenditure in this regard will be met from the Head of Account 2210-01-102-96-03-SST.</p>
-
+    {% set head_of_account = frappe.db.get_value(
+      "Organisation",
+      doc.dispensary,
+      "head_of_account"
+  ) %}
+  
+  <p class="left-paragraph">
+    The expenditure in this regard will be met from the Head of Account {{ head_of_account }}.
+  </p>
+  
     <!-- Footer section with left and right -->
     <!-- Footer section with left and right -->
 <div class="footer">
@@ -153,3 +174,8 @@
   </div>
 </body>
 </html>
+{% else %}
+<div style="text-align:center; font-weight:bold; margin-top:50px;">
+  Sanction Order can be printed only for sanctioned claims.
+</div>
+{% endif %}
