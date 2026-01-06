@@ -88,7 +88,8 @@ frappe.listview_settings['Claim'] = {
                             passed_amount: full_doc.passed_amount || 0,
                             ifs_code: full_doc.ifs_code || 0,
                             bank_account_no: full_doc.bank_account_no || 0,
-                            bank_name: full_doc.bank_name || 0
+                            bank_name: full_doc.bank_name || 0,
+                            ranch: full_doc.branch || 0
 
                         });
                     }

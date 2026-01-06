@@ -45,7 +45,8 @@ frappe.listview_settings['Claim Bundle Management'] = {
                         passed_amount: child.passed_amount || 0,
                         ifs_code: child.ifs_code || "",
                         bank_account_no: child.bank_account_no || "",
-                        bank_name: child.bank_name || ""
+                        bank_name: child.bank_name || "",
+                        branch: child.branch || ""
                     });
                 }
             }

@@ -20,6 +20,7 @@
         "ifs_code",
         "bank_account_no",
         "bank_name",
+        "branch",
         "credit_date",
         "credit_status",
         "utr_number",
@@ -154,6 +155,13 @@
             "label": "Phone",
             "fetch_from": "claim_no.phone",
             "in_list_view": 1
+        },
+        {
+            "fieldname": "branch",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "fetch_from": "claim_no.branch",
+            "label": "Branch"
         }
     ],
     "istable": 1,
