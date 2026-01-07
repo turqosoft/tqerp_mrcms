@@ -140,6 +140,10 @@
     "modified_by": "Administrator",
     "module": "Tqerp Mrcms",
     "name": "Insured Person",
+    "row_format": "Dynamic",
+    "search_fields": "ip_name,phone,dispensary",
+    "show_title_field_in_link": 1,
+    "title_field": "ip_no",
     "naming_rule": "By fieldname",
     "owner": "Administrator",
     "permissions": [

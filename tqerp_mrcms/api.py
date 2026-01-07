@@ -849,46 +849,6 @@ def update_claim():
         frappe.log_error(frappe.get_traceback(), "Update Claim Failed")
         return {"error": "Failed to update claim. Check server logs."}
 
-@frappe.whitelist()
-def get_ip_details_list(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""
-        SELECT
-            ip_no,
-            CONCAT(MAX(ip_name), ' - ', MAX(phone), ' - ', MAX(dispensary))
-        FROM `tabInsured Person`
-        WHERE
-            ip_no LIKE %(txt)s
-            OR ip_name LIKE %(txt)s
-            OR phone LIKE %(txt)s
-        GROUP BY ip_no
-        ORDER BY MAX(ip_name) ASC
-        LIMIT %(start)s, %(page_len)s
-    """, {
-        "txt": f"%{txt}%",
-        "start": start,
-        "page_len": page_len
-    })
-
-@frappe.whitelist()
-def get_item_details_list(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql("""
-        SELECT
-            item_code,
-            CONCAT(MAX(item_name), ' - ', MAX(aux_code))
-        FROM `tabItem`
-        WHERE
-            item_code LIKE %(txt)s
-            OR item_name LIKE %(txt)s
-            OR aux_code LIKE %(txt)s
-        GROUP BY item_code
-        ORDER BY MAX(item_name) ASC
-        LIMIT %(start)s, %(page_len)s
-    """, {
-        "txt": f"%{txt}%",
-        "start": start,
-        "page_len": page_len
-    })
-
 
 import frappe
 from datetime import datetime, date

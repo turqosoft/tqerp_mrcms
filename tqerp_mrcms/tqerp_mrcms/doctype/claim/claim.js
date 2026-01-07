@@ -4,7 +4,7 @@
 frappe.ui.form.on('Claim', {
 
     refresh(frm) {
-        frm.set_query("ip_no", () => ({ query: "tqerp_mrcms.api.get_ip_details_list" }));
+        // frm.set_query("ip_no", () => ({ query: "tqerp_mrcms.api.get_ip_details_list" }));
         frm.set_query("name_of_patient", () => ({}));
         // Remember current value on load/refresh
         frm._last_passed_amount = frm.doc.passed_amount;
