@@ -6,9 +6,9 @@
     "editable_grid": 1,
     "engine": "InnoDB",
     "field_order": [
-        "date",
+        "remarks",
         "contacted_by",
-        "remarks"
+        "date"
     ],
     "fields": [
         {
@@ -24,6 +24,7 @@
             "fieldtype": "Link",
             "options": "User",
             "in_list_view": 1,
+            "read_only": 1,
             "label": "User"
         },
         {
