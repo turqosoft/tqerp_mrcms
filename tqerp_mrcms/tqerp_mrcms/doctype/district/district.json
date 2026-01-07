@@ -31,13 +31,15 @@
             "fieldname": "district",
             "fieldtype": "Data",
             "label": "District",
-            "unique": 1
+            "unique": 1,
+            "in_list_view": 1
         },
         {
             "fieldname": "mrc_region",
             "fieldtype": "Link",
             "options": "MRC Region",
-            "label": "MRC Region"
+            "label": "MRC Region",
+            "in_list_view": 1
         }
     ],
     "index_web_pages_for_search": 1,
