@@ -212,7 +212,7 @@ frappe.ui.form.on('Claim', {
 
         // 5) Category call
         frappe.call({
-            method: "tqerp_mrcms.api.get_claim_category_by_amount",
+            method: "tqerp_mrcms.tqerp_mrcms.doctype.claim.claim.get_claim_category_by_amount",
             args: {
                 passed_amount: val
             },

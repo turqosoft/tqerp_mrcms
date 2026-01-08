@@ -1902,25 +1902,25 @@ def get_fixed_fund_for_office(office):
  
     return {"fixed": fixed_total}
  
-
-@frappe.whitelist()
-def get_claim_category_by_amount(passed_amount):
-    amount = float(passed_amount)
+# 080126-Moved to claim.py
+# @frappe.whitelist()
+# def get_claim_category_by_amount(passed_amount):
+#     amount = float(passed_amount)
  
-    categories = frappe.get_all(
-        "Claim Category",
-        fields=["name", "min_amount", "max_amount"],
-        order_by="min_amount asc"  
-    )
+#     categories = frappe.get_all(
+#         "Claim Category",
+#         fields=["name", "min_amount", "max_amount"],
+#         order_by="min_amount asc"  
+#     )
  
-    for c in categories:
-        min_val = float(c.min_amount or 0)
-        max_val = float(c.max_amount or 0)
+#     for c in categories:
+#         min_val = float(c.min_amount or 0)
+#         max_val = float(c.max_amount or 0)
  
-        if min_val <= amount <= max_val:
-            return c.name
+#         if min_val <= amount <= max_val:
+#             return c.name
  
-    return None
+#     return None
 
 # #############################
 # FUND MANAGEMENT

@@ -16,10 +16,10 @@ class Claim(Document):
                 return
     
             # ALWAYS derive category from amount
-            new_category = get_claim_category_from_amount(self.amount_claimed)
+            new_category = get_claim_category_by_amount(self.amount_claimed)
     
             category_changed = self.claim_category != new_category
-            self.claim_category = new_category
+            # self.claim_category = new_category
     
             # Re-populate documents if category changed or empty
             if category_changed or not self.claim_required_documents:
@@ -660,7 +660,7 @@ def get_required_documents(amount_claimed):
         return []
  
     # 1️⃣ Determine category
-    claim_category = get_claim_category_from_amount(amount_claimed)
+    claim_category = get_claim_category_by_amount(amount_claimed)
  
     if not claim_category:
         frappe.throw("No Claim Category configured for this amount")
@@ -702,20 +702,39 @@ def get_required_documents(amount_claimed):
         "documents": documents
     }
 
-def get_claim_category_from_amount(amount):
-    amount = float(amount or 0)
-    category = frappe.get_all(
-        "Claim Category",
-        filters={
-            "min_amount": ("<=", amount),
-            "max_amount": (">=", amount),
-        },
-        fields=["name"],
-        order_by="min_amount asc",
-        limit=1
-    )
+# def get_claim_category_from_amount(amount):
+#     amount = float(amount or 0)
+#     category = frappe.get_all(
+#         "Claim Category",
+#         filters={
+#             "min_amount": ("<=", amount),
+#             "max_amount": (">=", amount),
+#         },
+#         fields=["name"],
+#         order_by="min_amount asc",
+#         limit=1
+#     )
 
-    return category[0].name if category else None
+#     return category[0].name if category else None
+
+@frappe.whitelist()
+def get_claim_category_by_amount(passed_amount):
+    amount = float(passed_amount)
+ 
+    categories = frappe.get_all(
+        "Claim Category",
+        fields=["name", "min_amount", "max_amount"],
+        order_by="min_amount asc"  
+    )
+ 
+    for c in categories:
+        min_val = float(c.min_amount or 0)
+        max_val = float(c.max_amount or 0)
+ 
+        if min_val <= amount <= max_val:
+            return c.name
+ 
+    return None
 
 @frappe.whitelist()
 def create_claim_bundle_management(claims_data=None):
