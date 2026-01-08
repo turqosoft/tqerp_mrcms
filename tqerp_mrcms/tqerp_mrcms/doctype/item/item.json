@@ -71,7 +71,7 @@
     "naming_rule": "By fieldname",
     "search_fields": "item_code,item_name,aux_code,item_category",
     "show_title_field_in_link": 1,
-    "title_field": "item_name",
+    "title_field": "item_code",
     "owner": "Administrator",
     "permissions": [
         {
