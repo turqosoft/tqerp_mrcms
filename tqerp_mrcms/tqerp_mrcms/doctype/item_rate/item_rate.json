@@ -28,7 +28,8 @@
       "label": "Rate List",
       "options": "Rate List",
       "reqd": 1,
-      "in_list_view": 1
+      "in_list_view": 1,
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "type",
@@ -36,13 +37,15 @@
       "label": "Type",
       "fetch_from": "rate_list.type",
       "read_only": 1,
-      "in_list_view": 1
+      "in_list_view": 1,
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "effective_from",
       "fieldtype": "Date",
       "label": "Effective From",
-      "default": "Today"
+      "default": "Today",
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "valid_till",
@@ -59,7 +62,8 @@
       "fieldtype": "Link",
       "label": "Item Code",
       "options": "Item",
-      "in_list_view": 1
+      "in_list_view": 1,
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "item_name",
@@ -67,14 +71,16 @@
       "fieldtype": "Data",
       "label": "Item Name",
       "read_only": 1,
-      "in_list_view": 1
+      "in_list_view": 1,
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "unit",
       "fetch_from": "item_code.unit",
       "fieldtype": "Data",
       "read_only": 1,
-      "label": "Unit"
+      "label": "Unit",
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "treatment_category",
@@ -89,7 +95,8 @@
       "fieldtype": "Currency",
       "label": "Rate",
       "reqd": 1,
-      "in_list_view": 1
+      "in_list_view": 1,
+      "allow_in_quick_entry": 1
     },
     {
       "fieldname": "remarks",
