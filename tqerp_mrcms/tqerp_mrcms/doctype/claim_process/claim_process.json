@@ -8,11 +8,11 @@
     "field_order": [
         "date",
         "activity",
-        "user",
-        "office",
-        "duration_seconds",
         "user_full_name",
-        "user_authority"
+        "user_authority",
+        "organisation",
+        "user",
+        "duration_seconds"
     ],
     "fields": [
         {
@@ -28,33 +28,33 @@
             "label": "Activity"
         },
         {
+            "fieldname": "user_full_name",
+            "fieldtype": "Data",
+            "label": "Full Name"
+        },
+        {
+            "fieldname": "user_authority",
+            "fieldtype": "Data",
+            "label": "Authority"
+        },
+        {
+            "fieldname": "organisation",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Organisation"
+        },
+        {
             "fieldname": "user",
             "fieldtype": "Data",
             "in_list_view": 1,
             "label": "User"
         },
         {
-            "fieldname": "office",
-            "fieldtype": "Data",
-            "in_list_view": 1,
-            "label": "Office"
-        },
-        {
             "fieldname": "duration_seconds",
             "fieldtype": "Int",
             "label": "Duration (Seconds)",
             "allow_on_submit": 1
-        },
-        {
-            "fieldname": "user_full_name",
-            "fieldtype": "Data",
-            "label": "Full Name"
-          },
-          {
-            "fieldname": "user_authority",
-            "fieldtype": "Data",
-            "label": "Authority"
-          }
+        }
     ],
     "index_web_pages_for_search": 1,
     "istable": 1,
