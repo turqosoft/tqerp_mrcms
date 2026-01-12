@@ -10,12 +10,18 @@ frappe.ui.form.on("Claim Bundle Management", {
                 args: {
                     doctype: "User",
                     filters: { name: frappe.session.user },
-                    fieldname: "organisation"  
+                    fieldname: ["organisation", "section"]  
                 },
                 callback: function(r) {
                     if (r && r.message) {
-                        frm.set_value("organisation", r.message.organisation);  
-                        frm.refresh_field("organisation");  
+                        if (!frm.doc.organisation && r.message.organisation) {
+                            frm.set_value("organisation", r.message.organisation);
+                        }
+                        if (!frm.doc.section && r.message.section) {
+                            frm.set_value("section", r.message.section);
+                        }
+                        frm.refresh_field("organisation");
+                        frm.refresh_field("section"); 
                     }
                 }
             });

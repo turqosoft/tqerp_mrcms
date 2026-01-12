@@ -10,6 +10,7 @@ frappe.listview_settings['Claim Bundle Management'] = {
             }
 
             let claims_to_send = [];
+            let sections_selected = new Set();
 
             for (let doc of selected_docs) {
 
@@ -31,6 +32,11 @@ frappe.listview_settings['Claim Bundle Management'] = {
                     return;
                 }
 
+                // Track sections
+                if (d.section) {
+                    sections_selected.add(d.section);
+                }
+
                 for (let child of d.details) {
                     claims_to_send.push({
                         claim_bundle_no: d.name,
@@ -46,9 +52,19 @@ frappe.listview_settings['Claim Bundle Management'] = {
                         ifs_code: child.ifs_code || "",
                         bank_account_no: child.bank_account_no || "",
                         bank_name: child.bank_name || "",
-                        branch: child.branch || ""
+                        branch: child.branch || "",
+                        voucher_no:child.voucher_no
                     });
                 }
+            }
+
+            // --- BLOCK if multiple sections are selected ---
+            if (sections_selected.size > 1) {
+                let sections_list = Array.from(sections_selected).join(", ");
+                frappe.msgprint(
+                    `⚠️ You can't create a Claim Payment List for multiple sections at once. Selected claims belong to: ${sections_list}`
+                );
+                return;
             }
 
             if (!claims_to_send.length) {
@@ -70,7 +86,7 @@ frappe.listview_settings['Claim Bundle Management'] = {
                 }
 
             } catch (err) {
-                frappe.msgprint(__('Error: {0}', [err.message]));
+                frappe.msgprint(__('Error: ') + err.message);
             }
         });
     }

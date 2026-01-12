@@ -9,20 +9,43 @@
     "naming_series",
     "bundle_status",
     "physical_bundle_no",
+    "claim_category",
+    "section",
     "organisation",
+    "organisation_code",
+    "district",
     "cb_break_cbm1",
     "bundle_date",
     "remarks",
     "sbm_section",
     "details",
     "bundle_total",
-    "claim_category"
+    "sb_section_user",
+    "submitted_by",
+    "cb_break_u1",
+    "submitted_by_name",
+    "cb_break_u2",
+    "submitted_by_authority"
   ],
   "fields": [
     {
       "fieldname": "physical_bundle_no",
       "fieldtype": "Data",
       "label": "Physical Bundle Number"
+    },
+    {
+      "fieldname": "claim_category",
+      "label": "Claim Category",
+      "fieldtype": "Link",
+      "options": "Claim Category",
+      "hidden": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "section",
+      "fieldtype": "Link",
+      "label": "MRC Section",
+      "options": "MRC Region"
     },
     {
       "fieldname": "organisation",
@@ -33,16 +56,19 @@
     },
     {
       "fieldname": "naming_series",
+      "label": "Naming Series",
       "fieldtype": "Select",
-      "label": "Naming series",
-      "options": "CB-.YYYY.-.####"
+      "options": "CB-.{organisation_code}.-.{section}.-.YYYY.-.####",
+      "reqd": 1,
+      "default": "CB-.{organisation_code}.-.{section}.-.YYYY.-.####",
+      "hidden": 1
     },
     {
       "fieldname": "bundle_status",
       "fieldtype": "Select",
       "options": "\nOpen\nClosed\nSanctioned\nNot-Sanctioned",
       "label": "Bundle Status",
-      "default": "Not-Sanctioned",
+      "default": "Open",
       "allow_on_submit": 1
     },
     {
@@ -77,12 +103,53 @@
       "in_list_view": 1
     },
     {
-      "fieldname": "claim_category",
-      "label": "Claim Category",
+      "fieldname": "sb_section_user",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "submitted_by",
       "fieldtype": "Link",
-      "options": "Claim Category",
+      "label": "Submitted By",
+      "options": "User",
+      "read_only": 1,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "cb_break_u1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "submitted_by_name",
+      "fieldtype": "Data",
+      "label": "Submitted By Name",
+      "read_only": 1,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "cb_break_u2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "submitted_by_authority",
+      "fieldtype": "Data",
+      "label": "Submitted By Authority",
+      "read_only": 1,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "district",
+      "fieldtype": "Link",
+      "label": "District",
+      "options": "District",
       "hidden": 1,
-      "reqd": 1
+      "read_only": 1
+    },
+    {
+      "fieldname": "organisation_code",
+      "label": "Organisation Code",
+      "fieldtype": "Data",
+      "fetch_from": "organisation.organisation_code",
+      "hidden": 1
     }
   ],
   "grid_page_length": 50,

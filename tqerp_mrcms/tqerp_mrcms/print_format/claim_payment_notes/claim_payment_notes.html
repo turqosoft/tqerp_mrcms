@@ -1,0 +1,148 @@
+<style>
+    @page {
+        size: A4 portrait;
+        margin: 15mm;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        color: #000;
+    }
+
+    .main.header {
+        display: flex;
+        justify-content: space-between; /* space between left and right items */
+        align-items: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative; /* to allow absolute positioning */
+    }
+
+    /* Center "Notes" text */
+    .center-bold {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: bold;
+        font-size: 19;
+        text-align: center;
+    }
+
+    /* Right-aligned doc name */
+    .title-right {
+        margin-left: auto; /* push to right */
+        font-weight: bold;
+    }
+
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+        vertical-align: middle;
+        color: #000;
+        background: #fff !important; /* force white background */
+    }
+
+    /* Header row */
+    .row-header th {
+        font-weight: bold;
+        color: #000;
+        
+    }
+
+    /* Detail row */
+    .row-detail td {
+        font-weight: normal;
+        background: #fff !important;
+    }
+
+    /* Total row */
+    .row-total th,
+    .row-total td {
+        font-weight: bold;
+       
+        color: #000;
+    }
+
+    /* Annexure / Notes row */
+    .row-annexure td {
+        font-weight: normal;
+        text-align: left;
+       
+        color: #000;
+    }
+
+    .right-text { text-align: right; }
+    .left-text { text-align: left; }
+</style>
+<!-- Header -->
+<div class="main header">
+    <div class="center-bold">Notes</div>
+    <div class="title-right">{{ doc.name }}</div>
+</div>
+
+ 
+<table>
+    <thead>
+        <tr class="row-header">
+            <th>Ref.-</th>
+            <th>MRC</th>
+            <th>Bundle No.</th>
+            <th>Period</th>
+            <th>SL No</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="row-detail">
+            <td>1</td>
+            <td>{{ doc.section }}</td>
+            <td>{{ doc.details[0].claim_bundle_no if doc.details }}</td>
+            <td>{{ doc.payment_date if doc.payment_date }}</td>
+            <td>SL NO 1 TO {{ doc.details | length }}</td>
+            <td>{{ doc.details | length }} NOS</td>
+            <td class="right-text">₹{{ "%.2f"|format(doc.payment_total or 0) }}</td>
+        </tr>
+    </tbody>
+
+    <tfoot>
+        <!-- TOTAL Row -->
+        <tr class="row-total">
+            <th colspan="5" class="right-text">TOTAL</th>
+            <th>{{ doc.total_quantity or (doc.details | length ~ " NOS") }}</th>
+            <th class="right-text">₹{{ "%.2f"|format(doc.payment_total or 0) }}</th>
+        </tr>
+
+        <!-- Annexure + Notes Row -->
+        <tr class="row-annexure">
+           
+            <td colspan="10">
+                {% if doc.notes %}
+                    {% for line in doc.notes.splitlines() %}
+                        {% if line.strip() %}
+                            {{ line }}<br>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+        </tr>
+    </tfoot>
+</table>

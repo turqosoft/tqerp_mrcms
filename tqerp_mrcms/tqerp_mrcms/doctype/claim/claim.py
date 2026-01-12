@@ -3,6 +3,7 @@ import frappe
 from frappe.utils import now_datetime, nowdate, today
 from frappe.utils import getdate, add_days, cint
 import os, urllib
+import json
 
 class Claim(Document):
 
@@ -738,61 +739,85 @@ def get_claim_category_by_amount(passed_amount):
 
 @frappe.whitelist()
 def create_claim_bundle_management(claims_data=None):
-    import json
-    import frappe
- 
+
     if not claims_data:
         frappe.throw("⚠️ No claims selected.")
- 
+
     if isinstance(claims_data, str):
         claims_data = json.loads(claims_data)
- 
-    max_claims = frappe.db.get_single_value("Mrcms Settings", "max_claims_per_bundle") or 5
-    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
- 
+
+    max_claims = frappe.db.get_single_value(
+        "Mrcms Settings", "max_claims_per_bundle"
+    ) or 5
+
+    user_org, _ = frappe.db.get_value(
+        "User",
+        frappe.session.user,
+        ["organisation", "section"]
+    )
+
     created_bundles = []
- 
+
     for claim in claims_data:
         claim_no = claim.get("claim_no")
         claim_category = claim.get("claim_category")
- 
+        district = claim.get("district")
+
+        if not district:
+            frappe.throw(f"District not found for Claim {claim_no}")
+
+        # 🔹 Derive MRC Section from District
+        mrc_section = frappe.db.get_value(
+            "District",
+            district,
+            "mrc_region"
+        )
+
+        if not mrc_section:
+            frappe.throw(
+                f"MRC Section not mapped for District {district} (Claim {claim_no})"
+            )
+
         # Skip if already bundled
         if frappe.db.exists("Claim Bundle Details", {"claim_no": claim_no}):
             continue
- 
-        # Find the latest open bundle for this category
+
+        # 🔹 Find open bundle by Org + MRC Section + Category
         open_bundle = frappe.get_all(
             "Claim Bundle Management",
             filters={
                 "organisation": user_org,
+                "section": mrc_section,
                 "bundle_status": "Open",
                 "claim_category": claim_category
             },
             order_by="creation desc",
             limit=1
         )
- 
+
+        cbm = None
+
         if open_bundle:
             cbm = frappe.get_doc("Claim Bundle Management", open_bundle[0].name)
-            # Check if bundle reached max_claims
+
             if len(cbm.details) >= max_claims:
                 cbm.bundle_status = "Closed"
                 cbm.save(ignore_permissions=True)
                 cbm = None
-        else:
-            cbm = None
- 
-        # If no valid open bundle, create new one
+
+        # 🔹 Create new bundle if required
         if not cbm:
             cbm = frappe.new_doc("Claim Bundle Management")
             cbm.organisation = user_org
-            cbm.bundle_status = "Open"
+            cbm.section = mrc_section
             cbm.claim_category = claim_category
- 
-        # Add claim to bundle
+            cbm.bundle_status = "Open"
+
+        # 🔹 Add claim to bundle
         cbm.append("details", {
             "claim_no": claim_no,
             "claim_date": claim.get("claim_date"),
+            "district": district,
             "ip_no": claim.get("ip_no"),
             "ip_name": claim.get("ip_name"),
             "name_of_patient": claim.get("name_of_patient"),
@@ -805,34 +830,28 @@ def create_claim_bundle_management(claims_data=None):
             "bank_account_no": claim.get("bank_account_no"),
             "bank_name": claim.get("bank_name")
         })
- 
-        # Save existing bundle instead of insert
+
         if cbm.get("__islocal"):
-            cbm.insert(ignore_permissions=True)  # only insert if new
+            cbm.insert(ignore_permissions=True)
         else:
-            cbm.save(ignore_permissions=True)    # update existing
- 
+            cbm.save(ignore_permissions=True)
+
         created_bundles.append(cbm.name)
- 
+
     frappe.db.commit()
- 
+
     if created_bundles:
-        bundle_list = "\n".join(list(set(created_bundles)))
+        bundle_list = "\n".join(sorted(set(created_bundles)))
         frappe.msgprint(
             f"✅ Claim Bundles created/updated successfully!\n\nBundle Numbers:\n{bundle_list}",
             indicator="green"
         )
-        frappe.logger().info(f"Claim Bundles created/updated: {created_bundles}")
     else:
         frappe.msgprint(
             "⚠️ No new claim bundles were created (all claims may already be bundled).",
             indicator="orange"
         )
- 
- 
- 
- 
-import frappe
+
 from tqerp_mrcms.api import create_claim_bundle_management
  
 def auto_add_claim_to_bundle(doc, method):

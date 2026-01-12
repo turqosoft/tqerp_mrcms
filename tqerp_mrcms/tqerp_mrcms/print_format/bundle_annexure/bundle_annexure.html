@@ -1,0 +1,126 @@
+<style>
+    @page {
+        size: A4 landscape;
+        margin: 15mm;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        color: #000;
+    }
+
+    .title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    table {
+        width: 95%;
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    tr th:last-child,
+    tr td:last-child {
+        border-right: 1px solid #000;
+    }
+
+    thead th {
+        background: #fff !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+    }
+
+    tfoot th,
+    tfoot td {
+        background: #fff !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+    }
+
+    .right {
+        text-align: right;
+    }
+
+    .footer {
+        margin-top: 40px;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    .verified {
+        margin-top: 20px;
+        text-align: left;
+        font-style: italic;
+    }
+</style>
+
+<!-- Only Annexure as heading -->
+<div class="title">
+    ANNEXURE
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Sl No</th>
+            <th>Bundle</th>
+            <th>Name</th>
+            <th>IP No</th>
+            <th>Order No</th>
+            <th>Bank</th>
+            <th>Branch</th>
+            <th>IFS Code</th>
+            <th>Account No</th>
+            <th>Amount</th>
+            <th>Voucher No</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for row in doc.details %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ doc.physical_bundle_no or doc.name }}</td>
+            <td>{{ row.ip_name or row.name_of_patient }}</td>
+            <td>{{ row.ip_no }}</td>
+            <td>{{ row.claim_no }}</td>
+            <td>{{ row.bank_name }}</td>
+            <td>{{ row.branch or "" }}</td>
+            <td>{{ row.ifs_code }}</td>
+            <td>{{ row.bank_account_no }}</td>
+            <td class="right">{{ "%.2f"|format(row.passed_amount or 0) }}</td>
+            <td>{{ row.voucher_no or "" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <th colspan="9" class="right">TOTAL</th>
+            <th class="right">{{ "%.2f"|format(doc.bundle_total or 0) }}</th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="verified">
+    All Entries are verified and found correct
+</div>
+
+<div class="footer">
+    <div>{{ doc.submitted_by_name }}</div>
+    <div>{{ doc.submitted_by_authority }}</div>
+</div>
+

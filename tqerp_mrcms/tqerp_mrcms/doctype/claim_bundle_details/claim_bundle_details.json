@@ -20,7 +20,6 @@
         "ifs_code",
         "bank_account_no",
         "bank_name",
-        "branch",
         "credit_date",
         "credit_status",
         "utr_number",
@@ -117,6 +116,13 @@
             "label": "Bank Name"
         },
         {
+            "fieldname": "branch",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "fetch_from": "claim_no.branch",
+            "label": "Branch"
+        },
+        {
             "fieldname": "credit_date",
             "fieldtype": "Date",
             "label": "Credit Date",
@@ -150,11 +156,10 @@
             "in_list_view": 1
         },
         {
-            "fieldname": "branch",
+            "fieldname": "voucher_no",
             "fieldtype": "Data",
-            "in_list_view": 1,
-            "fetch_from": "claim_no.branch",
-            "label": "Branch"
+            "label": "Voucher No",
+            "in_list_view": 1
         }
     ],
     "istable": 1,

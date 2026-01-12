@@ -10,6 +10,8 @@
     "payment_status",
     "claim_payment_no",
     "organisation",
+    "organisation_code",
+    "section",
     "cb_break_cpl1",
     "payment_date",
     "remarks",
@@ -27,7 +29,15 @@
     "cb_break_cpl2",
     "total_allocated",
     "cb_break_cpl3",
-    "balance"
+    "balance",
+    "sb_break_notes",
+    "notes",
+    "sb_section_user1",
+    "submitted_by",
+    "cb_break_cpu1",
+    "submitted_by_name",
+    "cb_break_cpu2",
+    "submitted_by_authority"
   ],
   "fields": [
     {
@@ -43,10 +53,19 @@
       "read_only": 1
     },
     {
+      "fieldname": "section",
+      "fieldtype": "Link",
+      "label": "MRC Section",
+      "options": "MRC Region"
+    },
+    {
       "fieldname": "naming_series",
+      "label": "Naming Series",
       "fieldtype": "Select",
-      "label": "Naming series",
-      "options": "CPL-.YYYY.-.####"
+      "options": "CPL-.{organisation_code}.-.{section}.-.YYYY.-.####",
+      "reqd": 1,
+      "default": "CPL-.{organisation_code}.-.{section}.-.YYYY.-.####",
+      "hidden": 1
     },
     {
       "fieldname": "payment_status",
@@ -143,6 +162,57 @@
       "fieldname": "cpl_section2",
       "fieldtype": "Section Break",
       "label": "Funding Details"
+    },
+    {
+      "fieldname": "sb_break_notes",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Text Editor",
+      "label": "Notes",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "sb_section_user1",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "submitted_by",
+      "fieldtype": "Link",
+      "label": "Submitted By",
+      "options": "User",
+      "read_only": 1,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "cb_break_cpu1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "submitted_by_name",
+      "fieldtype": "Data",
+      "label": "Submitted By Name",
+      "read_only": 1,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "cb_break_cpu2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "submitted_by_authority",
+      "fieldtype": "Data",
+      "label": "Submitted By Authority",
+      "read_only": 1,
+      "allow_on_submit": 1
+    },
+    {
+      "fieldname": "organisation_code",
+      "label": "Organisation Code",
+      "fieldtype": "Data",
+      "fetch_from": "organisation.organisation_code",
+      "hidden": 1
     }
   ],
   "grid_page_length": 50,
