@@ -48,7 +48,7 @@ doctype_list_js = {
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "index"
 
 # website user home page (by Role)
 # role_home_page = {
@@ -272,9 +272,17 @@ doc_events = {
         "validate": "tqerp_mrcms.api.validate"
     },
     "Claim": {
-        "on_submit": "tqerp_mrcms.api.auto_add_claim_to_bundle"
+        "on_update": "tqerp_mrcms.api.auto_add_claim_to_bundle"
     }
 }
+
+# Website Route Rules
+website_route_rules = [
+    {"from_route": "/portal-login", "to_route": "claims-portal"},
+    {"from_route": "/register", "to_route": "claims-portal"},
+    {"from_route": "/dashboard", "to_route": "claims-portal"},
+    {"from_route": "/claims/<path:app_path>", "to_route": "claims-portal"},
+]
 
 fixtures = [
     # 1) Workflow definition for Claim
@@ -321,31 +329,40 @@ fixtures = [
         ]
     },
     # Role Permission Manager
-    # {
-    #     "doctype": "Custom DocPerm",
-    #     "filters": [
-    #         ["parent", "in", [
-    #             "Claim",
-    #             "Claim Proceedings",
-    #             "Claim Category",
-    #             "Fund Manager",
-    #             "Insured Person",
-    #             "Mrcms Settings",
-    #             "Claim Checklist",
-    #             "Relation",
-    #             "Office",
-    #             "Bank",
-    #             "District",
-    #             "Authority",
-    #             "Claim Bundle Management",
-    #             "Claim Sanction List",
-    #             "Local Office",
-    #             "Claim Payment List",
-    #             "Workflow",
-    #             "Organisation"
-    #             # add any other doctypes for which you've customised permissions
-    #         ]]
-    #     ]
-    # },
+    {
+        "doctype": "Custom DocPerm",
+        "filters": [
+            ["parent", "in", [
+                "Claim",
+                "Claim Proceedings",
+                "Claim Category",
+                "Fund Manager",
+                "Insured Person",
+                "Mrcms Settings",
+                "Claim Checklist",
+                "Relation",
+                "Office",
+                "Bank",
+                "District",
+                "Authority",
+                "Claim Bundle Management",
+                "Claim Sanction List",
+                "Local Office",
+                "Claim Payment List",
+                "Workflow",
+                "Organisation Type",
+                "Organisation",
+                "MRC Region",
+                "Claim Documents",
+                "Claim Document Rule",
+                "Unit",
+                "Item Category",
+                "Item",
+                "Rate List",
+                "Item Rate"
+                # add any other doctypes for which you've customised permissions
+            ]]
+        ]
+    },
 ]
 
