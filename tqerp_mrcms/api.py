@@ -1413,30 +1413,55 @@ def number_to_words_indian(num):
 # -----Claim Bundle Management------
 @frappe.whitelist()
 def create_claim_bundle_management(claims_data=None):
+ 
     if not claims_data:
         frappe.throw("⚠️ No claims selected.")
  
     if isinstance(claims_data, str):
         claims_data = json.loads(claims_data)
  
-    max_claims = frappe.db.get_single_value("Mrcms Settings", "max_claims_per_bundle") or 5
-    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
+    max_claims = frappe.db.get_single_value(
+        "Mrcms Settings", "max_claims_per_bundle"
+    ) or 5
+ 
+    user_org, _ = frappe.db.get_value(
+        "User",
+        frappe.session.user,
+        ["organisation", "section"]
+    )
  
     created_bundles = []
  
     for claim in claims_data:
         claim_no = claim.get("claim_no")
         claim_category = claim.get("claim_category")
+        district = claim.get("district")
+ 
+        if not district:
+            frappe.throw(f"District not found for Claim {claim_no}")
+ 
+        # 🔹 Derive MRC Section from District
+        mrc_section = frappe.db.get_value(
+            "District",
+            district,
+            "mrc_region"
+        )
+ 
+        if not mrc_section:
+            frappe.throw(
+                f"MRC Section not mapped for District {district} (Claim {claim_no})"
+            )
  
         # Skip if already bundled
         if frappe.db.exists("Claim Bundle Details", {"claim_no": claim_no}):
             continue
  
-        # Find the latest open bundle for this category
+        # 🔹 Find open bundle by Org + MRC Section + Category
         open_bundle = frappe.get_all(
             "Claim Bundle Management",
             filters={
                 "organisation": user_org,
+                "section": mrc_section,
                 "bundle_status": "Open",
                 "claim_category": claim_category
             },
@@ -1444,27 +1469,30 @@ def create_claim_bundle_management(claims_data=None):
             limit=1
         )
  
+        cbm = None
+ 
         if open_bundle:
             cbm = frappe.get_doc("Claim Bundle Management", open_bundle[0].name)
-            # Check if bundle reached max_claims
+ 
             if len(cbm.details) >= max_claims:
                 cbm.bundle_status = "Closed"
                 cbm.save(ignore_permissions=True)
                 cbm = None
-        else:
-            cbm = None
  
-        # If no valid open bundle, create new one
+        # 🔹 Create new bundle if required
         if not cbm:
             cbm = frappe.new_doc("Claim Bundle Management")
             cbm.organisation = user_org
-            cbm.bundle_status = "Open"
+            cbm.section = mrc_section
+            cbm.district = district
             cbm.claim_category = claim_category
+            cbm.bundle_status = "Open"
  
-        # Add claim to bundle
+        # 🔹 Add claim to bundle
         cbm.append("details", {
             "claim_no": claim_no,
             "claim_date": claim.get("claim_date"),
+            "district": district,
             "ip_no": claim.get("ip_no"),
             "ip_name": claim.get("ip_name"),
             "name_of_patient": claim.get("name_of_patient"),
@@ -1478,29 +1506,28 @@ def create_claim_bundle_management(claims_data=None):
             "bank_name": claim.get("bank_name")
         })
  
-        # Save existing bundle instead of insert
         if cbm.get("__islocal"):
-            cbm.insert(ignore_permissions=True)  # only insert if new
+            cbm.insert(ignore_permissions=True)
         else:
-            cbm.save(ignore_permissions=True)    # update existing
+            cbm.save(ignore_permissions=True)
  
         created_bundles.append(cbm.name)
  
     frappe.db.commit()
  
     if created_bundles:
-        bundle_list = "\n".join(list(set(created_bundles)))
+        bundle_list = "\n".join(sorted(set(created_bundles)))
         frappe.msgprint(
             f"✅ Claim Bundles created/updated successfully!\n\nBundle Numbers:\n{bundle_list}",
             indicator="green"
         )
-        frappe.logger().info(f"Claim Bundles created/updated: {created_bundles}")
     else:
         frappe.msgprint(
             "⚠️ No new claim bundles were created (all claims may already be bundled).",
             indicator="orange"
         )
-       
+ 
+ 
 import frappe
 from tqerp_mrcms.api import create_claim_bundle_management
  
@@ -1518,7 +1545,8 @@ def auto_add_claim_to_bundle(doc, method):
  
     claim_data = [{
         "claim_no": doc.name,
-        "claim_category": doc.claim_category,  # important for separate bundles
+        "claim_category": doc.claim_category,
+        "district": doc.district,  
         "claim_date": doc.claim_date or "",
         "ip_no": doc.ip_no or "",
         "ip_name": doc.ip_name or "",
@@ -1593,14 +1621,36 @@ def create_claim_payment_list(claims_data):
     if not valid_claims:
         return
  
+    # --- Get all sections of the valid claims ---
+    sections = set()
+    for row in valid_claims:
+        bundle_no = row.get("claim_bundle_no")
+        section = frappe.db.get_value("Claim Bundle Management", bundle_no, "section")
+        if section:
+            sections.add(section)
+ 
+    # --- Restrict if multiple sections ---
+    if len(sections) > 1:
+        frappe.throw(
+            "⚠️ You can't create a Claim Payment List for multiple sections at once. "
+            f"Selected claims belong to: {', '.join(sections)}"
+        )
+ 
+    # --- Single section for CPL ---
+    section = sections.pop() if sections else None
+ 
+    # --- Get user's organisation ---
     user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
  
+    # --- Create CPL ---
     cpl = frappe.get_doc({
         "doctype": "Claim Payment List",
         "organisation": user_org,
+        "section": section,
         "details": []
     })
  
+    # --- Append details ---
     for row in valid_claims:
         cpl.append("details", {
             "claim_bundle_no": row.get("claim_bundle_no"),
@@ -1615,9 +1665,9 @@ def create_claim_payment_list(claims_data):
             "passed_amount": row.get("passed_amount", 0),
             "ifs_code": row.get("ifs_code", ""),
             "bank_account_no": row.get("bank_account_no", ""),
-            "bank_name": row.get("bank_name", "")
+            "bank_name": row.get("bank_name", ""),
+            "voucher_no": row.get("voucher_no", "")
         })
- 
  
     cpl.insert(ignore_permissions=True)
  
@@ -1631,8 +1681,6 @@ def create_claim_payment_list(claims_data):
         "name": cpl.name,
         "redirect_to": f"/app/claim-payment-list/{cpl.name}"
     }
-   
-
 
 #download payment list as excel
 import frappe
@@ -2296,3 +2344,265 @@ def item_code_with_name(doctype, txt, searchfield, start, page_len, filters):
 #         limit_start=start,
 #         limit_page_length=page_len
 #     )
+
+import frappe
+from datetime import datetime, date
+
+# Vue.js app API
+
+@frappe.whitelist(allow_guest=True)
+def sign_up(email, password, full_name, phone, ip=None):
+    try:
+        if frappe.db.exists("User", email):
+            return {"status": "failed", "message": "Email already registered"}
+        elif frappe.db.exists("User", ip):
+            return {"status": "failed", "message": "IP already registered"}    
+        
+        # search ip in Insured Person
+        ip = frappe.db.get_value("Insured Person", {"ip_no": ip}, "name")
+        if not ip:
+            return {"status": "failed", "message": "IP not found"}
+              
+        # 1. Create User
+        user = frappe.new_doc("User")
+        user.email = email
+        user.first_name = full_name
+        user.mobile_no = phone
+        user.ip = ip
+        user.enabled = 1
+        user.new_password = password
+        user.user_type = "Website User"
+        user.save(ignore_permissions=True)
+        
+        # 2. Add Role
+        # user.add_roles("Insured Person")
+        
+        frappe.db.commit()
+
+        # 3. Login
+        frappe.local.login_manager.login_as(email)
+        
+        return {"status": "success", "message": "Account created successfully"}
+        
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    
+@frappe.whitelist(allow_guest=True)
+def portal_login(usr, pwd):
+    """Custom login method for portal users."""
+    try:
+        login_manager = frappe.auth.LoginManager()
+        login_manager.authenticate(user=usr, pwd=pwd)
+        login_manager.post_login()
+    except frappe.AuthenticationError:
+        frappe.clear_messages()
+        return {"status": "failed", "message": "Invalid Login"}
+    
+    return {"status": "success", "message": "Logged In"}
+
+@frappe.whitelist()
+def change_password_with_old(old_password, new_password):
+    """Changes the logged-in user's password after verifying the old password."""
+    user = frappe.session.user
+    if user == "Guest":
+        return {"status": "error", "message": "Not logged in"}
+    
+    if not old_password or not new_password:
+        return {"status": "error", "message": "Old and New passwords are required"}
+    
+    try:
+        from frappe.auth import LoginManager
+        login_manager = LoginManager()
+        
+        # Verify old password
+        # check_password raises frappe.AuthenticationError if wrong
+        login_manager.check_password(user, old_password)
+        
+        # Update to new password
+        from frappe.utils.password import update_password
+        update_password(user, new_password)
+        
+        return {"status": "success", "message": "Password updated successfully"}
+    except frappe.AuthenticationError:
+        return {"status": "error", "message": "Incorrect old password"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    
+
+@frappe.whitelist(allow_guest=True)
+def reset_password_with_otp(phone, otp, new_password):
+    """Resets the user's password after verifying the OTP sent to phone."""
+    if not all([phone, otp, new_password]):
+        return {"status": "error", "message": "All fields are required"}
+    
+    cached_otp = frappe.cache().get_value(f"password_reset_otp_{phone}")
+    
+    if not cached_otp:
+        return {"status": "error", "message": "OTP expired or not requested. Please try again."}
+    
+    if str(otp) != str(cached_otp):
+        return {"status": "error", "message": "Invalid OTP. Please try again."}
+    
+    user = frappe.db.get_value("User", {"mobile_no": phone}, "name")
+    if not user:
+        return {"status": "error", "message": "User not found"}
+
+    try:
+        # Update password
+        from frappe.utils.password import update_password
+        update_password(user, new_password)
+        
+        # Clear OTP from cache
+        frappe.cache().delete_value(f"password_reset_otp_{phone}")
+        
+        return {"status": "success", "message": "Password updated successfully"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    
+@frappe.whitelist(allow_guest=True)
+def send_reset_password_otp(phone):
+    """Generates and 'sends' an OTP for password reset using phone number."""
+    import random
+    if not phone:
+        return {"status": "error", "message": "Phone number is required"}
+    
+    # Find user by mobile_no
+    user = frappe.db.get_value("User", {"mobile_no": phone}, "name")
+    
+    if not user:
+        return {"status": "error", "message": "No user found with this phone number"}
+    
+    otp = str(random.randint(100000, 999999))
+    # Cache for 10 minutes using phone as key
+    frappe.cache().set_value(f"password_reset_otp_{phone}", otp, expires_in_sec=600)
+    
+    # Simulation: print to console
+    print(f"DEBUG: Password Reset OTP for Phone {phone} is {otp}")
+    
+    return {"status": "success", "message": "OTP sent successfully to your phone (Simulated)"}
+
+@frappe.whitelist()
+def update_profile(full_name, phone, otp):
+    """Updates the logged-in user's profile after verifying the provided OTP."""
+    user = frappe.session.user
+    if user == "Guest":
+        return {"status": "error", "message": "Not logged in"}
+    
+    cached_otp = frappe.cache().get_value(f"profile_otp_{user}")
+    
+    if not cached_otp:
+        return {"status": "error", "message": "OTP expired or not requested. Please send OTP again."}
+    
+    if str(otp) != str(cached_otp):
+        return {"status": "error", "message": "Invalid OTP. Please try again."}
+    
+    try:
+        frappe.db.set_value("User", user, {
+            "full_name": full_name,
+            "mobile_no": phone,
+            "first_name": full_name.split(' ')[0],
+            "last_name": ' '.join(full_name.split(' ')[1:]) if len(full_name.split(' ')) > 1 else ""
+        })
+        frappe.db.commit()
+        
+        # Clear OTP from cache after successful update
+        frappe.cache().delete_value(f"profile_otp_{user}")
+        
+        return {"status": "success", "message": "Profile updated successfully"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    
+
+@frappe.whitelist()
+def send_profile_otp():
+    """Generates and 'sends' an OTP for profile update. For now, it logs it and returns success."""
+    import random
+    user = frappe.session.user
+    if user == "Guest":
+        return {"status": "error", "message": "Not logged in"}
+    
+    otp = str(random.randint(100000, 999999))
+    # Cache for 10 minutes
+    frappe.cache().set_value(f"profile_otp_{user}", otp, expires_in_sec=600)
+    
+    # In a real system, you'd send this via SMS. 
+    # For now, we'll return a simulated success. 
+    # We can also print it to the console for the developer.
+    phone = frappe.db.get_value("User", user, "mobile_no")
+    print(f"DEBUG: OTP for User {user} (Phone: {phone}) is {otp}")
+    
+    return {"status": "success", "message": "OTP sent successfully to your phone (Simulated)"}
+
+@frappe.whitelist()
+def get_user_dashboard_data():
+    """Returns statistics and basic profile context for the logged-in user."""
+    user = frappe.session.user
+    if user == "Guest":
+        return {"error": "Not logged in"}
+    
+    # Get user details
+    user_info = frappe.db.get_value("User", user, ["full_name", "mobile_no", "ip"], as_dict=True) or {}
+    ip_no = user_info.get("ip")
+    
+    if not ip_no:
+        return {
+            "user": {
+                "full_name": user_info.get("full_name") or frappe.session.user_fullname,
+                "email": user,
+                "phone": user_info.get("mobile_no"),
+                "ip": None
+            },
+            "summary": {
+                "total": 0,
+                "pending": 0,
+                "approved": 0,
+                "rejected": 0
+            },
+            "recent_claims": []
+        }
+    
+    # Fetch Stats
+    summary = frappe.db.get_all(
+        "Claim",
+        filters={"ip_no": ip_no},
+        fields=["claim_status", "count(*) as count"],
+        group_by="claim_status"
+    )
+    
+    stats = {"total": 0, "pending": 0, "approved": 0, "rejected": 0}
+    for row in summary:
+        status = row.claim_status
+        count = row.count
+        stats["total"] += count
+        if status in ["Sanctioned", "Paid"]:
+            stats["approved"] += count
+        elif status == "Rejected":
+            stats["rejected"] += count
+        else:
+            stats["pending"] += count
+            
+    # Recent Claims
+    recent = frappe.get_all(
+        "Claim",
+        filters={"ip_no": ip_no},
+        fields=["name", "claim_date", "claim_status", "amount_claimed"],
+        order_by="creation desc",
+        limit=5
+    )
+    
+    return {
+        "user": {
+            "full_name": user_info.get("full_name") or frappe.session.user_fullname,
+            "email": user,
+            "phone": user_info.get("mobile_no"),
+            "ip": ip_no
+        },
+        "summary": stats,
+        "recent_claims": recent
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def get_current_user():
+    """Returns the currently logged in user."""
+    return frappe.session.user
