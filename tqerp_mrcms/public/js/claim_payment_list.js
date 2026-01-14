@@ -4,30 +4,29 @@ frappe.ui.form.on('Claim Payment List', {
         frm.set_query("fund_manager", function() {
             return {
                 query: "tqerp_mrcms.api.get_available_fund_managers",
-                filters: { office: frm.doc.office }
+                filters: { organisation: frm.doc.organisation }
             };
         });
     },
     
     onload: function(frm) {
 
-       
         if (!frm.is_new()) return;
     
-        // Get logged-in user's office
+        // Get logged-in user's organisation
         frappe.call({
             method: "frappe.client.get_value",
             args: {
                 doctype: "User",
                 filters: { name: frappe.session.user },
-                fieldname: ["office"]
+                fieldname: ["organisation"]
             },
             callback: function(r) {
-                if (r.message && r.message.office && !frm.doc.office) {
-    
-                    // ✅ silent set (safe only for new doc)
-                    frm.doc.office = r.message.office;
-                    frm.refresh_field("office");
+                if (r.message && r.message.organisation && !frm.doc.organisation) {
+
+                    
+                    frm.doc.organisation = r.message.organisation;
+                    frm.refresh_field("organisation");
                 }
             }
         });
@@ -39,8 +38,6 @@ frappe.ui.form.on('Claim Payment List', {
         }
     },
     
-    
-
     // -------------------------------
     // FUND MANAGER SELECT (DRAFT ONLY)
     // -------------------------------
@@ -48,8 +45,8 @@ frappe.ui.form.on('Claim Payment List', {
 
         if(!frm.doc.fund_manager || frm.doc.docstatus === 1) return;
 
-        // Use automatically set office
-        fetch_fund_details(frm, frm.doc.office);
+        // Use automatically set organisation
+        fetch_fund_details(frm, frm.doc.organisation);
     },
 
     // -------------------------------
@@ -66,8 +63,6 @@ frappe.ui.form.on('Claim Payment List', {
         }
     },
     
-
-    
     refresh: function(frm) {
 
         // AFTER SUBMIT → DO NOTHING
@@ -83,8 +78,8 @@ frappe.ui.form.on('Claim Payment List', {
         }
     
         // Fund calc only for NEW doc
-        if (frm.is_new() && frm.doc.fund_manager && frm.doc.office) {
-            fetch_fund_details(frm, frm.doc.office);
+        if (frm.is_new() && frm.doc.fund_manager && frm.doc.organisation) {
+            fetch_fund_details(frm, frm.doc.organisation);
         }
     },       
 
@@ -101,7 +96,6 @@ frappe.ui.form.on('Claim Payment List', {
         }
     },
 
-   
     before_submit: function(frm) {
         return new Promise((resolve, reject) => {
             frappe.call({
@@ -121,30 +115,20 @@ frappe.ui.form.on('Claim Payment List', {
             });
         });
     }
-    
 
-    // -------------------------------
-    // BEFORE CANCEL
-    // -------------------------------
-    // before_cancel: function(frm) {
-    //     frappe.call({
-    //         method: "tqerp_mrcms.api.reverse_fund_on_cancel",
-    //         args: { payment_list_name: frm.doc.name },
-    //         async: false
-    //     });
-    // }
+    
 });
 
 // ===============================
 // HELPER FUNCTION
 // ===============================
-function fetch_fund_details(frm, office) {
+function fetch_fund_details(frm, organisation) {
 
     frappe.call({
         method: "tqerp_mrcms.api.get_fund_details",
         args: { 
             fund_manager: frm.doc.fund_manager,
-            office: office // automatically use logged-in user's office
+            organisation: organisation // automatically use logged-in user's organisation
         },
         callback: function(r) {
             if(!r.message) return;

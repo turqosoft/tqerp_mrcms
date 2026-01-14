@@ -1924,31 +1924,31 @@ def process_payment_file_paymentlist(docname, file_url):
         "mismatch_file_url": mismatch_file_url
     }
 
-# Funding Details updation
-from frappe.utils import flt
-import frappe
+# # Funding Details updation
+# from frappe.utils import flt
+# import frappe
  
-@frappe.whitelist()
-def get_fixed_fund_for_office(office):
-    """Return sum of fixed fund for the latest submitted Fund Manager for the office"""
-    if not office:
-        frappe.throw("Office is required")
+# @frappe.whitelist()
+# def get_fixed_fund_for_office(office):
+#     """Return sum of fixed fund for the latest submitted Fund Manager for the office"""
+#     if not office:
+#         frappe.throw("Office is required")
  
-    fm_list = frappe.get_all(
-        "Fund Manager",
-        filters={"office": office, "docstatus": 1},
-        order_by="`tabFund Manager`.modified desc",
-        limit_page_length=1,
-        fields=["name"]
-    )
+#     fm_list = frappe.get_all(
+#         "Fund Manager",
+#         filters={"office": office, "docstatus": 1},
+#         order_by="`tabFund Manager`.modified desc",
+#         limit_page_length=1,
+#         fields=["name"]
+#     )
  
-    if not fm_list:
-        return {"fixed": 0}
+#     if not fm_list:
+#         return {"fixed": 0}
  
-    fm_doc = frappe.get_doc("Fund Manager", fm_list[0].name)
-    fixed_total = sum([flt(row.fixed or 0) for row in fm_doc.details])
+#     fm_doc = frappe.get_doc("Fund Manager", fm_list[0].name)
+#     fixed_total = sum([flt(row.fixed or 0) for row in fm_doc.details])
  
-    return {"fixed": fixed_total}
+#     return {"fixed": fixed_total}
  
 # 080126-Moved to claim.py
 # @frappe.whitelist()
