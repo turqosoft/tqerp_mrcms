@@ -10,6 +10,7 @@ import frappe
 from frappe.utils.xlsxutils import make_xlsx
 from io import BytesIO
 import math
+from frappe.utils import flt
 # @frappe.whitelist(allow_guest=False)
 # def submit_claim(data):
 #     claim_data = json.loads(data)
@@ -917,7 +918,6 @@ def create_claim_proceeding_for_multiple(claims_data):
     # Create parent document
     cp = frappe.get_doc({
         "doctype": "Claim Proceedings",
-        "naming_series": "CP-.YYYY.-",  # <-- set on parent
         "claim_proceedings": []         # child table fieldname
     })
  
