@@ -111,7 +111,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-07 22:07:31.569823",
+ "modified": "2026-01-13 21:06:05.098897",
  "modified_by": "Administrator",
  "module": "Tqerp Mrcms",
  "name": "MRCMS",
@@ -143,10 +143,10 @@
    "role": "RDD"
   },
   {
-   "role": "JD Section"
+   "role": "Section Clerk"
   },
   {
-   "role": "JS/SS"
+   "role": "JSSS"
   },
   {
    "role": "JD"

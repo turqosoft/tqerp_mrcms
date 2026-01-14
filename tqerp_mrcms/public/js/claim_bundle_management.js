@@ -86,7 +86,9 @@ frappe.listview_settings['Claim Bundle Management'] = {
                 }
 
             } catch (err) {
-                frappe.msgprint(__('Error: ') + err.message);
+                if (err._server_messages) {
+                    frappe.msgprint(JSON.parse(err._server_messages).join("<br>"));
+                }
             }
         });
     }

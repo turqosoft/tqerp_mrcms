@@ -54,7 +54,9 @@ frappe.listview_settings['Claim'] = {
                     }
 
                 } catch (err) {
-                    frappe.msgprint(__('Error: {0}', [err.message]));
+                   
+                    let msg = (err.exc || err.message || JSON.stringify(err));
+                    frappe.msgprint(msg);
                 }
             });
 

@@ -725,6 +725,11 @@ frappe.ui.form.on('Package Rate Item', {
         calculate_table_totals(frm);
         calculate_passed_amount(frm);
         frm.refresh_field('package_rate_items');
+
+        if (row.qty < 1) {
+            frappe.msgprint(__('Quantity should be greater than 0'));
+            frappe.model.set_value(cdt, cdn, 'qty', 1);
+        }
     },
     admissible_percentage: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
@@ -732,6 +737,11 @@ frappe.ui.form.on('Package Rate Item', {
         calculate_table_totals(frm);
         calculate_passed_amount(frm);
         frm.refresh_field('package_rate_items');
+
+        if (row.admissible_percentage < 1 || row.admissible_percentage > 100) {
+            frappe.msgprint(__('Admissible Percentage should be between 1 and 100'));
+            frappe.model.set_value(cdt, cdn, 'admissible_percentage', 100);
+        }
     }
 });
 
@@ -752,6 +762,11 @@ frappe.ui.form.on('Non Package Rate Item', {
         calculate_table_totals(frm);
         calculate_passed_amount(frm);
         frm.refresh_field('non_package_rate_items');
+
+        if (row.qty < 1) {
+            frappe.msgprint(__('Quantity should be greater than 0'));
+            frappe.model.set_value(cdt, cdn, 'qty', 1);
+        }
     },
     admissible_percentage: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
@@ -759,6 +774,11 @@ frappe.ui.form.on('Non Package Rate Item', {
         calculate_table_totals(frm);
         calculate_passed_amount(frm);
         frm.refresh_field('non_package_rate_items');
+
+        if (row.admissible_percentage < 1 || row.admissible_percentage > 100) {
+            frappe.msgprint(__('Admissible Percentage should be between 1 and 100'));
+            frappe.model.set_value(cdt, cdn, 'admissible_percentage', 100);
+        }
     }
 });
 

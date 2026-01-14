@@ -96,7 +96,13 @@
         "column_break_sd1",
         "letter_date",
         "column_break_sd2",
-        "sanction_order_no"
+        "sanction_order_no",
+        "section_break_id",
+        "claim_bundle_management",
+        "column_break_id1",
+        "claim_proceedings",
+        "column_break_id2",
+        "claim_payment_list"
     ],
     "fields": [
         {
@@ -637,6 +643,39 @@
             "fieldname": "sanction_order_no",
             "label": "Sanction Order No",
             "fieldtype": "Data"
+        },
+        {
+            "fieldname": "section_break_id",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "claim_bundle_management",
+            "label": "Claim Bundle",
+            "fieldtype": "Link",
+            "options": "Claim Bundle Management",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_id1",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "claim_proceedings",
+            "label": "Claim Proceedings",
+            "fieldtype": "Link",
+            "options": "Claim Proceedings",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_id2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "claim_payment_list",
+            "label": "Claim Payment List",
+            "fieldtype": "Link",
+            "options": "Claim Payment List",
+            "read_only": 1
         }
     ],
     "is_submittable": 1,

@@ -18,6 +18,61 @@ class ClaimPaymentList(Document):
         from tqerp_mrcms.api import reverse_fund_on_cancel
         reverse_fund_on_cancel(self.name)
 
+    def before_save(self):
+        # Store bundle number in each Claim
+        for row in self.details:  
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_payment_list",
+                    self.name
+                )
+ 
+    def on_trash(self):
+        """
+        Clear claim_payment_list if draft Payment List is deleted
+        """
+        for row in self.details:
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_payment_list",
+                    None
+                )
+ 
+    def validate(self):
+        """
+        Prevent adding a Claim that is already linked
+        to another Claim Payment List.
+        """
+        seen = set()
+ 
+        for row in self.details:
+            if not row.claim_no:
+                continue
+ 
+            # 1️⃣ Prevent duplicate claim in same document
+            if row.claim_no in seen:
+                frappe.throw(f"❌ Claim {row.claim_no} is duplicated in the Payment List.")
+            seen.add(row.claim_no)
+ 
+            # 2️⃣ Prevent claim in another Payment List
+            existing_pl = frappe.db.get_value(
+                "Claim",
+                row.claim_no,
+                "claim_payment_list"
+            )
+ 
+            # Allow edit of same document
+            if existing_pl and existing_pl != self.name:
+                frappe.throw(
+                    f"❌ Claim {row.claim_no} is already linked to "
+                    f"Claim Payment List <b>{existing_pl}</b>. "
+                    f"You cannot add it to another Payment List."
+                )
+
 
 def get_child_organisations(root_office):
     """Return root_office + all its descendants using parent_organisation."""

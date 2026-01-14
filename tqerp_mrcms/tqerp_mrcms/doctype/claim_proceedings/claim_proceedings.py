@@ -21,6 +21,72 @@ class ClaimProceedings(Document):
             doctype="Claim Proceedings"
         )
 
+    def validate(self):
+        """
+        Prevent creating Claim Proceedings if the claim
+        already has:
+        1) a Claim Bundle
+        2) another Claim Proceedings
+        """
+        for row in self.claim_proceedings:
+            if not row.claim_no:
+                continue
+ 
+            # 1️⃣ Check Claim Bundle
+            bundle = frappe.db.get_value(
+                "Claim",
+                row.claim_no,
+                "claim_bundle_management"
+            )
+ 
+            if bundle:
+                frappe.throw(
+                    f"❌ Claim {row.claim_no} is already linked to "
+                    f"Claim Bundle <b>{bundle}</b>. "
+                    f"You cannot create Claim Proceedings for this claim."
+                )
+ 
+            # 2️⃣ Check Claim Proceedings
+            existing_cp = frappe.db.get_value(
+                "Claim",
+                row.claim_no,
+                "claim_proceedings"
+            )
+ 
+            # Allow if editing same document
+            if existing_cp and existing_cp != self.name:
+                frappe.throw(
+                    f"❌ Claim {row.claim_no} is already linked to "
+                    f"Claim Proceedings <b>{existing_cp}</b>. "
+                    f"You cannot create another Claim Proceedings for this claim."
+                )
+ 
+ 
+ 
+    def before_save(self):
+        for row in self.claim_proceedings:
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_proceedings",
+                    self.name
+                )
+   
+    def on_trash(self):
+        """
+        Clear claim_proceedings link from Claim
+        when a draft Claim Proceedings is deleted.
+        """
+        for row in self.claim_proceedings:
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_proceedings",
+                    None
+                )
+
 def get_child_organisations(root_office):
     """Return root_office + all its descendants using parent_organisation."""
     to_visit = [root_office]

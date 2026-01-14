@@ -12,6 +12,65 @@ class ClaimBundleManagement(Document):
         self.submitted_by_name = user.full_name
         self.submitted_by_authority = user.authority
 
+    def validate(self):
+        """
+        Prevent adding a claim to this bundle if it is already in:
+        - Another Claim Bundle
+        - Or in Claim Proceedings
+        """
+        for row in self.details:
+            if not row.claim_no:
+                continue
+ 
+            # Check if claim is already in another Claim Bundle
+            existing_bundle = frappe.db.get_value(
+                "Claim",
+                row.claim_no,
+                "claim_bundle_management"
+            )
+            if existing_bundle and existing_bundle != self.name:
+                frappe.throw(
+                    f"❌ Claim {row.claim_no} is already linked to "
+                    f"Claim Bundle {existing_bundle}. You cannot add it again."
+                )
+ 
+            # Check if claim is in any Claim Proceedings
+            proceedings = frappe.db.get_value(
+                "Claim",
+                row.claim_no,
+                "claim_proceedings"
+            )
+            if proceedings:
+                frappe.throw(
+                    f"❌ Claim {row.claim_no} is already linked to "
+                    f"Claim Proceedings {proceedings}. You cannot add it to a bundle."
+                )
+
+    def before_save(self):
+        # Store bundle number in each Claim
+        for row in self.details:  
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_bundle_management",
+                    self.name
+                )
+
+    def on_trash(self):
+        """
+        Clear claim_bundle_management link from Claim
+        when this document is deleted.
+        """
+        for row in self.details:
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_bundle_management",
+                    None
+                )
+
 
 
 def get_child_organisations(root_office):
