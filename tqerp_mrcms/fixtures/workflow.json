@@ -202,7 +202,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "JS/SS",
+    "allow_edit": "JSSS",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -465,7 +465,7 @@
    {
     "action": "Review",
     "allow_self_approval": 1,
-    "allowed": "JS/SS",
+    "allowed": "JSSS",
     "condition": "doc.claim_category != \"Category A\" and doc.claim_category != \"Category B\"\r\n",
     "next_state": "JD Review",
     "parent": "Claim Processing v5",
@@ -478,7 +478,7 @@
    {
     "action": "Objection",
     "allow_self_approval": 1,
-    "allowed": "JS/SS",
+    "allowed": "JSSS",
     "condition": null,
     "next_state": "JD Section",
     "parent": "Claim Processing v5",
@@ -491,7 +491,7 @@
    {
     "action": "Reject",
     "allow_self_approval": 1,
-    "allowed": "JS/SS",
+    "allowed": "JSSS",
     "condition": "doc.claim_category != \"Category A\" and doc.claim_category != \"Category B\"\r\n",
     "next_state": "Rejected",
     "parent": "Claim Processing v5",
