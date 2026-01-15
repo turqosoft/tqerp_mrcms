@@ -42,6 +42,18 @@
         "options":"MRC Region",
         "label":"Section",
         "insert_after":"time_zone"
+    },
+    {
+        "doctype":"Custom Field",
+        "dt" : "User",
+        "module":"Tqerp Mrcms",
+        "name": "IP in User",
+        "fieldname":"ip",
+        "fieldtype":"Link",
+        "options":"Insured Person",
+        "label":"Insured Person",
+        "insert_after":"office"
+       
     }
 ] 
     

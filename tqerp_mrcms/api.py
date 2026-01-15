@@ -1144,102 +1144,6 @@ import pandas as pd
 from frappe.utils import getdate
 
 @frappe.whitelist()
-def process_payment_file_org(docname, file_url):
-    """
-    Reads uploaded Excel/CSV with columns:
-    MOBILE, ACCOUNT NO., AMOUNT, CREDIT DATE, CREDIT STATUS, UTR Number
-
-    Matches each row in child table (doc.claims) using:
-      - bank_account_no
-      - passed_amount
-
-    Updates:
-      - credit_date
-      - credit_status
-      - utr_number
-      - credit_amount
-    """
-
-    doc = frappe.get_doc("Claim Proceedings", docname)
-
-    # Resolve file path from /files/ URL
-    # e.g. /files/payment.xlsx -> sites/site/public/files/payment.xlsx
-    
-    filename = file_url.split("/files/")[-1]
-    file_path = frappe.get_site_path("public", "files", filename)
-
-    ext = file_path.split(".")[-1].lower()
-
-    if ext in ("xlsx", "xls"):
-        df = pd.read_excel(file_path)
-    elif ext == "csv":
-        df = pd.read_csv(file_path)
-    else:
-        frappe.throw("Unsupported file type. Please upload CSV or Excel.")
-
-    # Normalise headers: lower, trim, replace spaces & dots
-    # "ACCOUNT NO."   -> "account_no"
-    # "CREDIT DATE"   -> "credit_date"
-    # "UTR Number"    -> "utr_number"
-    df.columns = [
-        c.strip().lower().replace(" ", "_").replace(".", "")
-        for c in df.columns
-    ]
-
-    # We expect these normalised column names
-    required_cols = ["account_no", "amount", "credit_date", "credit_status", "utr_number"]
-    for col in required_cols:
-        if col not in df.columns:
-            frappe.throw(f"Missing required column in uploaded file: {col}")
-
-    rows = df.to_dict("records")
-
-    updated = 0
-    unmatched = []
-
-    # Assume child table is doc.claims; change if your fieldname is different
-    for row in doc.claim_proceedings:
-        matched = False
-        for rec in rows:
-            # Compare on account_no + amount == passed_amount
-            bank_acc_file = str(rec.get("account_no") or "").strip()
-            bank_acc_row  = str(row.bank_account_no or "").strip()
-
-            amt_file = float(rec.get("amount") or 0)
-            amt_row  = float(row.passed_amount or 0)
-
-            if bank_acc_row == bank_acc_file and amt_row == amt_file:
-                # Match found: update payment fields
-                row.credit_amount = amt_file
-                row.credit_status = rec.get("credit_status")
-                row.utr_number    = rec.get("utr_number")
-
-                credit_date_val = rec.get("credit_date")
-                if credit_date_val:
-                    row.credit_date = getdate(credit_date_val)
-
-                frappe.db.set_value("Claim", row.claim_no, "claim_status", "Paid")
-
-                updated += 1
-                matched = True
-                break
-
-        if not matched:
-            # Track unmatched rows (for info)
-            unmatched.append({
-                "bank_account_no": row.bank_account_no,
-                "passed_amount": row.passed_amount
-            })
-
-    doc.save(ignore_permissions=True)
-    frappe.db.commit()
-
-    return {
-        "updated": updated,
-        "unmatched": unmatched
-    }
-
-@frappe.whitelist()
 def process_payment_file(docname, file_url):
     import os
     import pandas as pd
@@ -1303,10 +1207,12 @@ def process_payment_file(docname, file_url):
     for row in doc.claim_proceedings:
         matched = False
         for rec in rows:
-            if (str(row.bank_account_no).strip() ==
+            if (
+                str(row.bank_account_no).strip() ==
                 str(rec.get("account_no") or "").strip()
                 and float(row.passed_amount) ==
-                    float(rec.get("amount") or 0)):
+                float(rec.get("amount") or 0)
+            ):
  
                 row.credit_amount = rec.get("amount")
                 row.credit_status = rec.get("credit_status")
@@ -1315,9 +1221,28 @@ def process_payment_file(docname, file_url):
                 row._highlight = "green"
  
                 # -----------------------
-                # Update Claims to To Paid
+                # Update Claim Status
                 # -----------------------
-                frappe.db.set_value("Claim", row.claim_no, "claim_status", "Paid")
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_status",
+                    "Paid"
+                )
+ 
+                # -----------------------
+                # Update Credit Details in Claim (NEW)
+                # -----------------------
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    {
+                        "credit_amount": rec.get("amount"),
+                        "credit_date": getdate(rec.get("credit_date")),
+                        "credit_status": rec.get("credit_status"),
+                        "utr_number": rec.get("utr_number"),
+                    }
+                )
  
                 updated += 1
                 matched = True
@@ -1340,13 +1265,13 @@ def process_payment_file(docname, file_url):
         mismatch_df.to_excel(mismatch_path, index=False)
         mismatch_file_url = f"/files/{mismatch_filename}"
  
-    
- 
     # -----------------------
     # Auto Move To Paid
     # -----------------------
-    if all([r.credit_status and str(r.credit_status).lower() == "delivered"
-            for r in doc.claim_proceedings]):
+    if all(
+        r.credit_status and str(r.credit_status).lower() == "delivered"
+        for r in doc.claim_proceedings
+    ):
         doc.proceedings_status = "Paid"
  
     doc.save(ignore_permissions=True)
@@ -1812,7 +1737,8 @@ def process_payment_file_paymentlist(docname, file_url):
  
     if doc.docstatus != 1:
         frappe.throw("Upload allowed only after submission.")
-        # ---------------------
+ 
+    # ---------------------
     # Validate File URL
     # ---------------------
     if not file_url:
@@ -1850,7 +1776,6 @@ def process_payment_file_paymentlist(docname, file_url):
     except Exception as e:
         frappe.throw(f"Failed to read the file: {e}")
  
- 
     df.columns = [
         c.strip().lower().replace(" ", "_").replace(".", "")
         for c in df.columns
@@ -1869,10 +1794,12 @@ def process_payment_file_paymentlist(docname, file_url):
     for row in doc.details:
         matched = False
         for rec in rows:
-            if (str(row.bank_account_no).strip() ==
+            if (
+                str(row.bank_account_no).strip() ==
                 str(rec.get("account_no") or "").strip()
                 and float(row.passed_amount) ==
-                    float(rec.get("amount") or 0)):
+                float(rec.get("amount") or 0)
+            ):
  
                 row.credit_amount = rec.get("amount")
                 row.credit_status = rec.get("credit_status")
@@ -1881,9 +1808,28 @@ def process_payment_file_paymentlist(docname, file_url):
                 row._highlight = "green"
  
                 # -----------------------
-                # Update Claims to To Paid
+                # Update Claim Status
                 # -----------------------
-                frappe.db.set_value("Claim", row.claim_no, "claim_status", "Paid")
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_status",
+                    "Paid"
+                )
+ 
+                # -----------------------
+                # Update Credit Details in Claim
+                # -----------------------
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    {
+                        "credit_amount": rec.get("amount"),
+                        "credit_date": getdate(rec.get("credit_date")),
+                        "credit_status": rec.get("credit_status"),
+                        "utr_number": rec.get("utr_number"),
+                    }
+                )
  
                 updated += 1
                 matched = True
@@ -1906,12 +1852,13 @@ def process_payment_file_paymentlist(docname, file_url):
         mismatch_df.to_excel(mismatch_path, index=False)
         mismatch_file_url = f"/files/{mismatch_filename}"
  
-   
     # -----------------------
     # Auto Move To Paid
     # -----------------------
-    if all([r.credit_status and str(r.credit_status).lower() == "delivered"
-            for r in doc.details]):
+    if all(
+        r.credit_status and str(r.credit_status).lower() == "delivered"
+        for r in doc.details
+    ):
         doc.payment_status = "Paid"
  
     doc.save(ignore_permissions=True)
@@ -1923,52 +1870,6 @@ def process_payment_file_paymentlist(docname, file_url):
         "unmatched_count": len(unmatched),
         "mismatch_file_url": mismatch_file_url
     }
-
-# # Funding Details updation
-# from frappe.utils import flt
-# import frappe
- 
-# @frappe.whitelist()
-# def get_fixed_fund_for_office(office):
-#     """Return sum of fixed fund for the latest submitted Fund Manager for the office"""
-#     if not office:
-#         frappe.throw("Office is required")
- 
-#     fm_list = frappe.get_all(
-#         "Fund Manager",
-#         filters={"office": office, "docstatus": 1},
-#         order_by="`tabFund Manager`.modified desc",
-#         limit_page_length=1,
-#         fields=["name"]
-#     )
- 
-#     if not fm_list:
-#         return {"fixed": 0}
- 
-#     fm_doc = frappe.get_doc("Fund Manager", fm_list[0].name)
-#     fixed_total = sum([flt(row.fixed or 0) for row in fm_doc.details])
- 
-#     return {"fixed": fixed_total}
- 
-# 080126-Moved to claim.py
-# @frappe.whitelist()
-# def get_claim_category_by_amount(passed_amount):
-#     amount = float(passed_amount)
- 
-#     categories = frappe.get_all(
-#         "Claim Category",
-#         fields=["name", "min_amount", "max_amount"],
-#         order_by="min_amount asc"  
-#     )
- 
-#     for c in categories:
-#         min_val = float(c.min_amount or 0)
-#         max_val = float(c.max_amount or 0)
- 
-#         if min_val <= amount <= max_val:
-#             return c.name
- 
-#     return None
 
 # #############################
 # FUND MANAGEMENT
