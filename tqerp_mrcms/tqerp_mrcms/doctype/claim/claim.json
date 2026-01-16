@@ -102,7 +102,13 @@
         "column_break_id1",
         "claim_proceedings",
         "column_break_id2",
-        "claim_payment_list"
+        "claim_payment_list",
+        "section_break_credit",
+        "credit_date",
+        "credit_status",
+        "column_break_cd1",
+        "utr_number",
+        "credit_amount"
     ],
     "fields": [
         {
@@ -676,6 +682,14 @@
             "fieldtype": "Link",
             "options": "Claim Payment List",
             "read_only": 1
+        },
+        {
+            "fieldname": "section_break_credit",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "column_break_cd1",
+            "fieldtype": "Column Break"
         }
     ],
     "is_submittable": 1,
