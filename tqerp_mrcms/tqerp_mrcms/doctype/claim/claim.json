@@ -508,7 +508,8 @@
             "fieldname": "claim_process",
             "label": "Claim Progress",
             "fieldtype": "Table",
-            "options": "Claim Process"
+            "options": "Claim Process",
+            "read_only": 1
         },
         {
             "fieldname": "credit_date",
@@ -630,7 +631,8 @@
         {
             "fieldname": "sanction_letter_no",
             "label": "Sanction Letter No",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "read_only": 1
         },
         {
             "fieldname": "column_break_sd1",
@@ -639,7 +641,8 @@
         {
             "fieldname": "letter_date",
             "label": "Letter Date",
-            "fieldtype": "Date"
+            "fieldtype": "Date",
+            "read_only": 1
         },
         {
             "fieldname": "column_break_sd2",
@@ -648,7 +651,8 @@
         {
             "fieldname": "sanction_order_no",
             "label": "Sanction Order No",
-            "fieldtype": "Data"
+            "fieldtype": "Data",
+            "read_only": 1
         },
         {
             "fieldname": "section_break_id",

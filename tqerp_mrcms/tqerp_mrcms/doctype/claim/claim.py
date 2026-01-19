@@ -36,7 +36,7 @@ class Claim(Document):
         self.lock_previous_comments()
 
     def on_update(self):
-        self.log_claim_process("Created")
+        # self.log_claim_process("Created")
         self.validate_entitlement_period()
 
         prev = self.get_doc_before_save()
@@ -58,6 +58,9 @@ class Claim(Document):
  
  
             previous_doc = self.get_doc_before_save()
+            if previous_doc:
+                self.log_claim_status_change(previous_doc)
+
             self.validate_entitlement_period()
 
         # Populate IP Communication with logged-in user and date
@@ -192,7 +195,7 @@ class Claim(Document):
             
     def on_submit(self):
         """Log submission of the Claim"""
-        self.log_claim_process("Submitted")
+        # self.log_claim_process("Submitted")
         self.validate_entitlement_period()
         for row in self.claim_required_documents:
             if row.mandatory == "Yes" and not row.uploaded_file:
@@ -281,88 +284,67 @@ class Claim(Document):
             frappe.throw(msg)
 
 
-    def log_claim_process(self, action, user=None, organisation=None):
-        """Append an entry to Claim Process child table with full name and authority"""
+    def log_claim_process(self, action, current_state, next_state):
+        """
+        Logs ONLY workflow-related actions.
+        Stores both CURRENT and NEXT workflow states.
+        Calculates duration_seconds correctly.
+        """
+ 
         from frappe.utils import now_datetime
  
-        if not user:
-            user = frappe.session.user
-        if not organisation:
-            organisation = frappe.db.get_value("User", user, "organisation")
- 
-        # Get user details
-        user_doc = frappe.get_doc("User", user)
-        full_name = user_doc.full_name or user
-        authority = user_doc.authority or ""
- 
-        # Get last log entry for this Claim
-        last_logs = frappe.get_all(
-            "Claim Process",
-            filters={"parent": self.name},
-            fields=["name", "date"],
-            order_by="date desc",
-            limit_page_length=1,
-        )
- 
         now = now_datetime()
+        user = frappe.session.user
+        user_doc = frappe.get_doc("User", user)
  
-        if last_logs:
-            last_modified = last_logs[0].get("date")
-            last_log_name = last_logs[0].get("name")
+        #  Update duration of previous log (IN MEMORY)
+        if self.get("claim_process"):
+            last_row = self.get("claim_process")[-1]
  
-            # Update duration for previous log if exists
-            if last_modified and last_log_name:
-                duration_secs = (now - last_modified).total_seconds()
-                frappe.db.set_value(
-                    "Claim Process",
-                    last_log_name,
-                    "duration_seconds",
-                    duration_secs,
-                )
+            if last_row.date:
+                duration = int((now - last_row.date).total_seconds())
+                last_row.duration_seconds = duration
  
-        # Append entry to child table
+        #  Append new workflow log
         self.append("claim_process", {
-            "user": user,
+            "date": now,
             "activity": action,
-            "organisation": organisation,
-            "user_full_name": full_name,
-            "user_authority": authority,
-            "date": now
+            "current_state": current_state,
+            "claim_status_log": next_state,
+            "user": user,
+            "organisation": getattr(user_doc, "organisation", None),
+            "user_full_name": user_doc.full_name,
+            "user_authority": getattr(user_doc, "authority", None)
         })
  
-        # Optional: insert a separate doc if needed
-        log = frappe.get_doc({
-            "doctype": "Claim Process",
-            "parent": self.name,
-            "parentfield": "claim_process",
-            "parenttype": "Claim",
-            "user": user,
-            "activity": action,
-            "organisation": organisation,
-            "user_full_name": full_name,
-            "user_authority": authority,
-            "date": now
-        })
-        log.insert(ignore_permissions=True)
-
+ 
     def log_claim_status_change(self, previous_doc):
-        """Track changes to claim_status only"""
+        """
+        Log ONLY when workflow_state changes.
+        """
+ 
         if not previous_doc:
             return
  
-        old_status = previous_doc.get("claim_status")
-        new_status = self.get("claim_status")
+        old_state = previous_doc.workflow_state   # CURRENT workflow state
+        new_state = self.workflow_state           # NEXT workflow state
  
-        if old_status != new_status:
-            # Fetch the organisation of the logged-in user
-            organisation = frappe.db.get_value("User", frappe.session.user, "organisation") or "Not Set"
+        #  No workflow change → skip logging
+        if old_state == new_state:
+            return
  
-            # Log claim_status change with organisation
-            self.log_claim_process(
-                action=f'Claim status changed from "{old_status}" to "{new_status}"',
-                user=frappe.session.user,
-                organisation=organisation
-            )
+        if new_state and not frappe.db.exists("Workflow State", new_state):
+            frappe.throw(f"Invalid Workflow State: {new_state}")
+ 
+        #  Activity = Claim Status
+        activity_text = self.claim_status
+ 
+        # Log workflow transition
+        self.log_claim_process(
+            action=activity_text,
+            current_state=old_state,
+            next_state=new_state
+        )
 
     def populate_required_documents(self):
         if not self.claim_category:
