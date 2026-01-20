@@ -59,9 +59,10 @@
         },
         {
             "fieldname": "claim_no",
-            "fieldtype": "Data",
-            "in_list_view": 1,
-            "label": "Claim No"
+            "label": "Claim No",
+            "fieldtype": "Link",
+            "options": "Claim",
+            "in_list_view": 1
         },
         {
             "fieldname": "claim_date",
