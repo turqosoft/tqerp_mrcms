@@ -50,16 +50,15 @@ class Claim(Document):
             self.populate_required_documents()
 
     def before_save(self):
+        previous_doc = self.get_doc_before_save()
+        if previous_doc:
+            self.log_claim_status_change(previous_doc)
+
         for row in self.claim_remarks:
             if row.comment_by and not row.comment_by_full_name:
                 user = frappe.get_doc("User", row.comment_by)
                 row.comment_by_full_name = user.full_name
                 row.comment_by_authority = user.authority
- 
- 
-            previous_doc = self.get_doc_before_save()
-            if previous_doc:
-                self.log_claim_status_change(previous_doc)
 
             self.validate_entitlement_period()
 

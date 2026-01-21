@@ -513,7 +513,8 @@
         {
             "fieldname": "claim_process",
             "fieldtype": "Table",
-            "options": "Claim Process"
+            "options": "Claim Process",
+            "read_only": 1
         },
         {
             "fieldname": "credit_date",
