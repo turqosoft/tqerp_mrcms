@@ -88,7 +88,6 @@
         "claim_category",
         "section_break_cr",
         "claim_remarks",
-        "claim_process",
         "section_break_sdh",
         "sanction_details_header",
         "section_break_sd",
@@ -108,7 +107,9 @@
         "credit_status",
         "column_break_cd1",
         "utr_number",
-        "credit_amount"
+        "credit_amount",
+        "section_break_claim_process",
+        "claim_process"
     ],
     "fields": [
         {
@@ -504,9 +505,13 @@
             "fieldtype": "Table",
             "options": "Claim Checklist Details"
         },
+                {
+            "fieldname": "section_break_claim_process",
+            "fieldtype": "Section Break",
+            "label": "Claim Progress"
+        },
         {
             "fieldname": "claim_process",
-            "label": "Claim Progress",
             "fieldtype": "Table",
             "options": "Claim Process",
             "read_only": 1
