@@ -23,7 +23,9 @@
             "fieldname": "name1",
             "fieldtype": "Data",
             "in_list_view": 1,
+            "fetch_from": "claim_no.ip_name",
             "label": "Name"
+            
         },
         {
             "fieldname": "ip_no",
@@ -31,32 +33,40 @@
             "in_list_view": 1,
             "in_standard_filter": 1,
             "label": "IP No",
-            "options": "Insured Person"
+            "options": "Insured Person",
+            "fetch_from": "claim_no.ip_no"
+
         },
         {
             "fieldname": "ifsc",
             "fieldtype": "Data",
             "in_list_view": 1,
-            "label": "IFSC"
+            "label": "IFSC",
+            "fetch_from": "claim_no.ifs_code"
         },
         {
             "fieldname": "phone",
             "fieldtype": "Data",
             "in_list_view": 1,
-            "label": "Mobile"
+            "label": "Mobile",
+            "fetch_from": "claim_no.phone"
+
         },
         {
             "fieldname": "bank_account_no",
             "fieldtype": "Data",
             "in_list_view": 1,
-            "label": "A/c No"
+            "label": "A/c No",
+            "fetch_from": "claim_no.bank_account_no"
         },
         {
             "fieldname": "passed_amount",
             "fieldtype": "Float",
             "in_list_view": 1,
-            "label": "Amount"
+            "label": "Amount",
+            "fetch_from": "claim_no.passed_amount"
         },
+        
         {
             "fieldname": "claim_no",
             "label": "Claim No",
