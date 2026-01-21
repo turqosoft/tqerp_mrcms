@@ -33,36 +33,48 @@ frappe.ui.form.on('Claim', {
 
     onload(frm) {
         frm.set_df_property("name_of_patient", "read_only", 0);
-
+ 
         if (frm.doc.workflow_state !== 'IMO Review') {
             frm.set_df_property("passed_amount", "read_only", 1);
             frm.set_df_property("rupees", "read_only", 1);
             frm.set_df_property("package_rate", "read_only", 1);
             frm.set_df_property("non_package_rate", "read_only", 1);
-
+           
         } else {
             frm.set_df_property('passed_amount', 'read_only', 0);
             frm.set_df_property('rupees', 'read_only', 0);
             frm.set_df_property("package_rate", "read_only", 0);
             frm.set_df_property("non_package_rate", "read_only", 0);
         }
-
+ 
+        if (frm.doc.workflow_state !== 'Sanctioned') {
+            frm.set_df_property("sanction_letter_no", "read_only", 1);
+            frm.set_df_property("sanction_order_no", "read_only", 1);
+            frm.set_df_property("letter_date", "read_only", 1);
+        } else {
+            frm.set_df_property("sanction_letter_no", "read_only", 0);
+            frm.set_df_property("sanction_order_no", "read_only", 0);
+            frm.set_df_property("letter_date", "read_only", 0);
+        }
+ 
         if (frm.doc.ip_no) {
             fetch_family_members(frm);
             fetch_ip_details(frm);
         }
-
+ 
         if (!frm.doc.claim_templates) load_claim_checklist(frm, true);
-
+ 
         setTimeout(() => make_claim_checklist_readonly(frm), 500);
-
+ 
         const opts = frappe.route_options || {};
         if (opts.ip_no) frm.set_value("ip_no", opts.ip_no);
         if (opts.ip_name) frm.set_value("ip_name", opts.ip_name);
-
+ 
         // make custom remakrs field read-only so that previous remarks should not be edited.
         apply_readonly_to_comments(frm);
         frm.set_df_property('organisation_code', 'read_only', 1);
+ 
+        frm.refresh_field('claim_process');
     },
     ip_no(frm) {
         [
