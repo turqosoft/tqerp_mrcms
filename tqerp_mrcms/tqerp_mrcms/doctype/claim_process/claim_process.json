@@ -61,14 +61,14 @@
           "fieldname": "claim_status_log",
           "fieldtype": "Link",
           "options": "Workflow State",
-          "label": "Next State",
+          "label": "To State",
           "in_list_view": 1
       },
       {
         "fieldname": "current_state",
         "fieldtype": "Link",
         "options": "Workflow State",
-        "label": "Current State",
+        "label": "From State",
         "in_list_view": 1
     }
   ],

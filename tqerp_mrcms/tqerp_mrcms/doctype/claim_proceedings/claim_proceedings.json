@@ -11,7 +11,6 @@
     "naming_series",
     "proceedings_status",
     "organisation",
-    "organisation_code",
     "employee",
     "employee_name",
     "column_break_deuj",
@@ -26,11 +25,12 @@
     "section_break_abc",
     "claim_proceedings",
     "cp_section1",
-    "available",
-    "cp_cb1",
-    "total_allocated",
-    "cp_cb2",
-    "balance"
+     "available",
+     "cp_cb1",
+     "total_allocated",
+     "cp_cb2",
+      "balance"
+
   ],
   "fields": [
     {
@@ -52,10 +52,9 @@
       "label": "Naming Series",
       "fieldtype": "Select",
       "options": "CP-.{organisation_code}.-.YYYY.-.####",
-      "reqd": 1,
       "default": "CP-.{organisation_code}.-.YYYY.-.####",
-      "hidden": 1
-    },
+      "hidden":1
+  },
     {
       "fieldname": "proceedings_status",
       "fieldtype": "Select",
@@ -78,7 +77,8 @@
       "fieldtype": "Data",
       "fetch_from": "organisation.organisation_code",
       "hidden": 1
-    },
+   },
+   
     {
       "fieldname": "employee",
       "fieldtype": "Link",
@@ -120,60 +120,60 @@
     {
       "fieldname": "cp_section1",
       "fieldtype": "Section Break",
-      "label": "Fund Details"
-    },
-    {
+      "label":"Fund Details"
+     },
+     {
       "fieldname": "balance",
       "fieldtype": "Currency",
       "label": "Balance"
-    },
-    {
+     },
+     {
       "fieldname": "available",
       "fieldtype": "Currency",
       "label": "Fund Available"
-    },
-    {
+     },
+     {
       "fieldname": "cp_cb1",
       "fieldtype": "Column Break"
-    },
-    {
+     },
+     {
       "fieldname": "total_allocated",
       "fieldtype": "Currency",
       "label": "Total Allocated"
-    },
-    {
+     },
+     {
       "fieldname": "cp_cb2",
       "fieldtype": "Column Break"
-    },
-    {
+     },
+     {
       "fieldname": "fund_manager",
       "label": "Fund",
       "fieldtype": "Link",
       "options": "Fund Manager"
-    },
-    {
-      "fieldname": "fund_date",
-      "fieldtype": "Date",
-      "label": "Fund Date"
-    },
-    {
-      "fieldname": "approval_note",
-      "fieldtype": "Data",
-      "label": "Approval Note"
-    },
-    {
-      "fieldname": "cp_cb3",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "cp_cb4",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "cp_section2",
-      "fieldtype": "Section Break",
-      "label": "Funding Details"
-    }
+      },
+      {
+        "fieldname": "fund_date",
+        "fieldtype": "Date",
+        "label": "Fund Date"
+      },
+      {
+        "fieldname": "approval_note",
+        "fieldtype": "Data",
+        "label": "Approval Note"
+      },
+      {
+        "fieldname": "cp_cb3",
+        "fieldtype": "Column Break"
+       },
+       {
+        "fieldname": "cp_cb4",
+        "fieldtype": "Column Break"
+       },
+       {
+        "fieldname": "cp_section2",
+        "fieldtype": "Section Break",
+        "label":"Funding Details"
+       }
   ],
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
