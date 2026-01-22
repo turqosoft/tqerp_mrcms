@@ -22,7 +22,8 @@ def get_columns():
 
 def get_data(filters):
     # Basic Condition
-    conditions = {"docstatus": 1}
+    # conditions = {"docstatus": 1}
+    conditions = {}
 
     # Apply Filter
     if filters.get("ip_no"):
