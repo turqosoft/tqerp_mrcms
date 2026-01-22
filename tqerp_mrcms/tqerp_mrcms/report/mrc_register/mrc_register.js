@@ -26,6 +26,24 @@ frappe.query_reports["MRC Register"] = {
             reqd: 0
         },
         {
+            fieldname: "claim_status",
+            label: __("Claim Status"),
+            fieldtype: "Select",
+            options: [
+                "",
+                "Data Entry",
+                "Returned",
+                "Registered",
+                "Processing",
+                "Sanctioned",
+                "Rejected",
+                "Proceedings",
+                "Paid"
+                
+            ].join("\n"),
+            reqd: 0
+        },
+        {
             fieldname: "workflow_state",
             label: __("Workflow"),
             fieldtype: "Select",
@@ -44,23 +62,6 @@ frappe.query_reports["MRC Register"] = {
                 "Govt Review",
                 "Rejected",
                 "Returned",
-            ].join("\n"),
-            reqd: 0
-        },
-        {
-            fieldname: "claim_status",
-            label: __("Claim Status"),
-            fieldtype: "Select",
-            options: [
-                "",
-                "Data Entry",
-                "Registered",
-                "Processing",
-                "Sanctioned",
-                "Rejected",
-                "Returned",
-                "Paid",
-                "Closed"
             ].join("\n"),
             reqd: 0
         }
