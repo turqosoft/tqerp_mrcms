@@ -9,6 +9,7 @@ def execute(filters=None):
 
 def get_columns():
     return [
+        {"label": _("Claim No"), "fieldname": "name", "fieldtype": "Data", "width": 150}, 
         {"label": _("Date"), "fieldname": "date", "fieldtype": "Date", "width": 120},
         {"label": _("IP Number"), "fieldname": "ip_no", "fieldtype": "Data", "width": 150},
         {"label": _("IP Name"), "fieldname": "ip_name", "fieldtype": "Data", "width": 180},
@@ -51,6 +52,7 @@ def get_data(filters):
         "Claim",
         filters=conditions,
         fields=[
+            "name",
             "claim_date as date",
             "ip_no",
             "ip_name",
