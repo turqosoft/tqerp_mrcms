@@ -115,7 +115,7 @@
         {
             "fieldname": "custom_header",
             "fieldtype": "HTML",
-            "options": "<div style='background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:20px;letter-spacing:0.5px;text-align:center;color:#0d47a1;'>മെഡിക്കൽ റീ-ഇംബഴ്സ്മെന്റിനുള്ള അപേക്ഷ</div><div style='background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:16px;letter-spacing:0.5px;text-align:center;color:#0d47a1;'>Ayur / Homeo / SST / Specialty (DIMS / RDD / IMO) / Spects / Way Bill / Covid-19 / Spl Situ / Rule 60(6)</div>"
+            "options": "<div style=\"background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:20px;letter-spacing:0.5px;text-align:center;color:#0d47a1;\">മെഡിക്കൽ റീ-ഇംബഴ്സ്മെന്റിനുള്ള അപേക്ഷ</div><div style=\"background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:16px;letter-spacing:0.5px;text-align:center;color:#0d47a1;\">Ayur / Homeo / SST / Specialty (DIMS / RDD / IMO) / Spects / Way Bill / Covid-19 / Spl Situ / Rule 60(6)</div>"
         },
         {
             "fieldname": "claim_status",
@@ -319,7 +319,7 @@
         {
             "fieldname": "heading_hospital_category",
             "fieldtype": "HTML",
-            "options": "<div style='background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:16px;letter-spacing:0.5px;text-align:center;color:#0d47a1;'>Hospital Category</div>"
+            "options": "<div style=\"background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:16px;letter-spacing:0.5px;text-align:center;color:#0d47a1;\">Hospital Category</div>"
         },
         {
             "fieldname": "nabh",
@@ -627,7 +627,7 @@
         {
             "fieldname": "sanction_details_header",
             "fieldtype": "HTML",
-            "options": "<div style='background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:16px;letter-spacing:0.5px;text-align:center;color:#0d47a1;'>SANCTION DETAILS</div>"
+            "options": "<div style=\"background:#e3f2fd;padding:10px 14px;border-radius:4px;font-weight:600;font-size:16px;letter-spacing:0.5px;text-align:center;color:#0d47a1;\">SANCTION DETAILS</div>"
         },
         {
             "fieldname": "section_break_sd",
