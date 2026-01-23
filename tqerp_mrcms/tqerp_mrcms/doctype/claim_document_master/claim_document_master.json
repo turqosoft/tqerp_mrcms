@@ -1,6 +1,7 @@
 {
   "actions": [],
   "allow_rename": 1,
+  "allow_import": 1,
   "autoname": "field:document_name",
   "creation": "2025-11-28 16:40:10.281765",
   "doctype": "DocType",
