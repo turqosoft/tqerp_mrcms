@@ -2,7 +2,6 @@
 // Main client script
 // ------------------------------
 frappe.ui.form.on('Claim', {
-
     refresh(frm) {
         // frm.set_query("ip_no", () => ({ query: "tqerp_mrcms.api.get_ip_details_list" }));
         frm.set_query("name_of_patient", () => ({}));
@@ -13,40 +12,67 @@ frappe.ui.form.on('Claim', {
 
         // Claim Management
         // toggle_claim_rate_tables(frm);
+    },
 
+    hospital_type(frm) {
+        reset_and_load_claim_checklist(frm);
+    },
+
+    type(frm) { // IP / OP
+        reset_and_load_claim_checklist(frm);
+    },
+
+    // ------------------------------
+    // CLAIM TEMPLATE → LOAD CHECKLIST
+    // ------------------------------
+    claim_templates(frm) {
+        if (!frm.doc.claim_templates) {
+            clear_claim_checklist(frm);
+            return;
+        }
+
+        frappe.db.get_doc("Claim Checklist", frm.doc.claim_templates)
+            .then(doc => populate_claim_checklist(frm, doc));
     },
 
     validate(frm) {
+        // ------------------------------
+        // BASIC VALIDATIONS (UNCHANGED)
+        // ------------------------------
         if (frm.doc.type === 'IP' && !frm.doc.hospital) {
             frappe.msgprint(__('Hospital is mandatory when Type is IP.'));
             frappe.validated = false;
+            return;
         }
+
         if (frm.doc.type === 'IP' && !frm.doc.in_patient_no) {
             frappe.msgprint(__('In Patient Number is mandatory when Type is IP.'));
             frappe.validated = false;
+            return;
         }
+
         if (frm.doc.claim_status === 'Sanctioned' && !frm.doc.passed_amount) {
             frappe.msgprint(__('Passed Amount is mandatory.'));
             frappe.validated = false;
+            return;
         }
     },
 
     onload(frm) {
         frm.set_df_property("name_of_patient", "read_only", 0);
- 
+
         if (frm.doc.workflow_state !== 'IMO Review') {
             frm.set_df_property("passed_amount", "read_only", 1);
             frm.set_df_property("rupees", "read_only", 1);
             frm.set_df_property("package_rate", "read_only", 1);
             frm.set_df_property("non_package_rate", "read_only", 1);
-           
         } else {
             frm.set_df_property('passed_amount', 'read_only', 0);
             frm.set_df_property('rupees', 'read_only', 0);
             frm.set_df_property("package_rate", "read_only", 0);
             frm.set_df_property("non_package_rate", "read_only", 0);
         }
- 
+
         if (frm.doc.workflow_state !== 'Sanctioned') {
             frm.set_df_property("sanction_letter_no", "read_only", 1);
             frm.set_df_property("sanction_order_no", "read_only", 1);
@@ -56,26 +82,27 @@ frappe.ui.form.on('Claim', {
             frm.set_df_property("sanction_order_no", "read_only", 0);
             frm.set_df_property("letter_date", "read_only", 0);
         }
- 
+
         if (frm.doc.ip_no) {
             fetch_family_members(frm);
             fetch_ip_details(frm);
         }
- 
+
         if (!frm.doc.claim_templates) load_claim_checklist(frm, true);
- 
+
         setTimeout(() => make_claim_checklist_readonly(frm), 500);
- 
+
         const opts = frappe.route_options || {};
         if (opts.ip_no) frm.set_value("ip_no", opts.ip_no);
         if (opts.ip_name) frm.set_value("ip_name", opts.ip_name);
- 
+
         // make custom remakrs field read-only so that previous remarks should not be edited.
         apply_readonly_to_comments(frm);
         frm.set_df_property('organisation_code', 'read_only', 1);
- 
+
         frm.refresh_field('claim_process');
     },
+
     ip_no(frm) {
         [
             "name_of_patient", "relation", "age_of_patient",
@@ -88,6 +115,7 @@ frappe.ui.form.on('Claim', {
             fetch_ip_details(frm);
         }
     },
+
     dispensary: function (frm) {
         if (frm.doc.dispensary) {
             frappe.db.get_value('Organisation', frm.doc.dispensary, 'organisation_code')
@@ -124,14 +152,14 @@ frappe.ui.form.on('Claim', {
                 if (frm.doc.age_of_patient !== r.message.age_of_patient) {
                     frm.set_value("age_of_patient", r.message.age_of_patient);
                 }
-
             }
         });
     },
+
     // fetch bank account details from insured person
     bank_account_no(frm) {
         if (!frm.doc.bank_account_no || !frm.doc.ip_no) return;
- 
+
         frappe.call({
             method: "frappe.client.get",
             args: {
@@ -140,12 +168,12 @@ frappe.ui.form.on('Claim', {
             },
             callback(r) {
                 if (!r.message) return;
- 
+
                 const bank = (r.message.bank_accounts || [])
                     .find(b => b.acc_no === frm.doc.bank_account_no);
- 
+
                 if (!bank) return;
- 
+
                 frm.set_value("bank_name", bank.bank || "");
                 frm.set_value("branch", bank.branch || "");
                 frm.set_value("ifs_code", bank.ifsc_code || "");
@@ -166,8 +194,8 @@ frappe.ui.form.on('Claim', {
             frm.set_df_property("name_of_patient", "options", options.join("\n"));
         }
     },
-    passed_amount(frm) {
 
+    passed_amount(frm) {
         // 1) Do nothing for already finalised claims
         if (["Sanctioned", "Paid", "Closed"].includes(frm.doc.claim_status)) {
             return;
@@ -190,7 +218,6 @@ frappe.ui.form.on('Claim', {
             return;
         }
 
-
         if (!frm.doc.passed_amount || frm.doc.passed_amount == 0) {
             frm.set_value("rupees", "");
             frm.set_value("claim_category", "");
@@ -204,7 +231,6 @@ frappe.ui.form.on('Claim', {
                 num: val
             },
             callback: function (r) {
-
                 if (r.message) {
                     const currentWords = String(frm.doc.rupees || "");
                     const newWords = String(r.message || "");
@@ -221,7 +247,6 @@ frappe.ui.form.on('Claim', {
             }
         });
 
-
         // 5) Category call
         frappe.call({
             method: "tqerp_mrcms.tqerp_mrcms.doctype.claim.claim.get_claim_category_by_amount",
@@ -229,7 +254,6 @@ frappe.ui.form.on('Claim', {
                 passed_amount: val
             },
             callback: function (r) {
-
                 if (r.message) {
                     const currentCat = String(frm.doc.claim_category || "");
                     const newCat = String(r.message || "");
@@ -252,9 +276,7 @@ frappe.ui.form.on('Claim', {
             }
         });
     },
-    // ------------------------------
-    // CLAIM STATUS PROGRESS LOGGER
-    // ------------------------------
+
     // ------------------------------
     // CLAIM STATUS PROGRESS LOGGER
     // ------------------------------
@@ -294,6 +316,7 @@ frappe.ui.form.on('Claim', {
             }
         });
     },
+
     amount_claimed(frm) {
         if (!frm.doc.amount_claimed) return;
 
@@ -317,6 +340,7 @@ frappe.ui.form.on('Claim', {
             }
         });
     },
+
     claim_remarks_add(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
 
@@ -359,6 +383,7 @@ frappe.ui.form.on('Claim', {
             frm.refresh_field("claim_remarks");
         }
     },
+
     // RATE MANAGEMENT
     // package_rate(frm) {
     //     toggle_claim_rate_tables(frm);
@@ -368,6 +393,7 @@ frappe.ui.form.on('Claim', {
     //     toggle_claim_rate_tables(frm);
     //     // populate_rate_item_fields(frm, 'Non-Package');
     // },
+    
     setup(frm) {
         frm.fields_dict['package_rate_items'].grid.get_field('rate_item_name').get_query = function () {
             return {
@@ -387,10 +413,8 @@ frappe.ui.form.on('Claim', {
                 }
             };
         };
-    },
-    // RATE MANAGEMENT ENDS HERE
+    }
 });
-
 
 // ------------------------------
 // Helper function to fetch family members
@@ -434,7 +458,7 @@ function fetch_family_members(frm) {
 // ------------------------------
 function fetch_ip_details(frm) {
     if (!frm.doc.ip_no) return;
- 
+
     frappe.call({
         method: "frappe.client.get",
         args: {
@@ -443,21 +467,20 @@ function fetch_ip_details(frm) {
         },
         callback(r) {
             if (!r.message) return;
- 
+
             const ip = r.message;
- 
+
             // Set IP basic details
             frm.set_value("ip_name", ip.ip_name || "");
             frm.set_value("phone", ip.phone || "");
             frm.set_value("dispensary", ip.dispensary || "");
             frm.set_value("address", ip.address || "");
- 
+
             // Populate bank account dropdown
             const banks = ip.bank_accounts || [];
             const options = banks.map(b => b.acc_no);
             frm.set_df_property("bank_account_no", "options", options.join("\n"));
- 
-           
+
             if (banks.length > 0) {
                 const firstBank = banks[0];
                 frm.set_value("bank_account_no", firstBank.acc_no || "");
@@ -490,87 +513,97 @@ function load_claim_objections(frm) {
         });
 }
 
-// ------------------------------
-// Load Claim Checklist
-// ------------------------------
-function load_claim_checklist(frm, use_default = false) {
-    let template = frm.doc.claim_templates;
+function load_claim_checklist(frm, silent = false) {
+    if (!frm.doc.claim_templates) {
+        clear_claim_checklist(frm);
+        return;
+    }
 
-    if (!template && use_default) {
-        frappe.db.get_single_value('MRCMS Settings', 'default_claim_checklist')
-            .then(default_template => {
-                if (default_template) {
-                    frm.set_value('claim_templates', default_template);
-                    frappe.db.get_doc('Claim Checklist', default_template)
-                        .then(doc => populate_claim_checklist(frm, doc));
-                }
+    frappe.db.get_doc("Claim Checklist", frm.doc.claim_templates)
+        .then(doc => {
+            frm.clear_table("claim_checklist");
+            (doc.claim_checklist_details || []).forEach(row => {
+                let child = frm.add_child("claim_checklist");
+                child.criteria = row.criteria;
+                child.required = row.required;
+                child.present = row.present || 0;
             });
-        return;
-    }
-
-    if (template) {
-        frappe.db.get_doc('Claim Checklist', template)
-            .then(doc => populate_claim_checklist(frm, doc));
-        return;
-    }
-
-    frm.clear_table('claim_checklist');
-    frm.refresh_field('claim_checklist');
+            frm.refresh_field("claim_checklist");
+            setTimeout(() => make_claim_checklist_readonly(frm), 200);
+        })
+        .catch(err => {
+            if (!silent) frappe.msgprint(__("Failed to load claim checklist"));
+        });
 }
 
-// ------------------------------
-// Populate Checklist
-// ------------------------------
+function reset_and_load_claim_checklist(frm) {
+    clear_claim_checklist(frm);
+
+    if (!frm.doc.hospital_type || !frm.doc.type) return;
+
+    frappe.db.get_list("Claim Checklist", {
+        filters: {
+            hospital_type: frm.doc.hospital_type,
+            type: frm.doc.type
+        },
+        fields: ["name"],
+        limit_page_length: 1
+    }).then(r => {
+        if (!r.length) {
+            frappe.msgprint(__('No checklist template found'));
+            return;
+        }
+
+        frm.set_value("claim_templates", r[0].name);
+
+        frappe.db.get_doc("Claim Checklist", r[0].name)
+            .then(doc => populate_claim_checklist(frm, doc));
+    });
+}
+
+function clear_claim_checklist(frm) {
+    frm.clear_table("claim_checklist");
+    frm.refresh_field("claim_checklist");
+}
+
 function populate_claim_checklist(frm, doc) {
-    frm.clear_table('claim_checklist');
+    frm.clear_table("claim_checklist");
+
     (doc.claim_checklist_details || []).forEach(row => {
-        let child = frm.add_child('claim_checklist');
-        child.criteria = row.criteria || "";
-        child.required = row.required || 0;
+        let child = frm.add_child("claim_checklist");
+        child.criteria = row.criteria;
+        child.required = row.required;
         child.present = row.present || 0;
     });
-    frm.refresh_field('claim_checklist');
 
-    setTimeout(() => make_claim_checklist_readonly(frm), 300);
+    frm.refresh_field("claim_checklist");
+    setTimeout(() => make_claim_checklist_readonly(frm), 200);
 }
 
-// ------------------------------
-// Safe Readonly Mode
-// ------------------------------
 function make_claim_checklist_readonly(frm) {
-    const field = frm.get_field('claim_checklist');
-    if (!field || !field.grid) return;
+    const grid = frm.fields_dict.claim_checklist.grid;
 
-    const grid = field.grid;
-    if (!grid.grid_rows || grid.grid_rows.length === 0) return;
+    if (grid) {
+        grid.grid_rows.forEach(row => {
+            row.fields_dict.criteria.df.read_only = 1;
+            row.fields_dict.required.df.read_only = 1;
+            row.fields_dict.present.df.read_only = 0;
+        });
 
-    grid.grid_rows.forEach(row => {
-        if (row.fields_dict?.criteria) row.fields_dict.criteria.df.read_only = 1;
-        if (row.fields_dict?.required) row.fields_dict.required.df.read_only = 1;
-        if (row.fields_dict?.present) row.fields_dict.present.df.read_only = 0;
-    });
+        grid.cannot_add_rows = true;
+        grid.cannot_delete_rows = true;
 
-    grid.cannot_add_rows = true;
-    grid.cannot_delete_rows = true;
-
-    frm.refresh_field('claim_checklist');
-
-    setTimeout(() => {
-        try {
-            $(grid.wrapper).find('.grid-add-row, .grid-footer, .grid-empty').hide();
-        } catch (e) {
-            console.error("Error hiding grid elements:", e);
-        }
-    }, 200);
+        frm.refresh_field("claim_checklist");
+    }
 }
 
 // Helper function to make comments read-only for others
 function apply_readonly_to_comments(frm) {
-    const grid = frm.fields_dict.claim_remarks.grid;
+    const grid = frm.fields_dict.claim_remarks?.grid;
 
     //     grid.grid_rows.forEach(row => {
     //         const doc = locals['Claim Remarks'][row.docname];
-
+    // 
     //         if (doc.comment_by !== frappe.session.user || doc.is_locked) {
     //             row.toggle_enable('comment', false);
     //         } else {
@@ -580,7 +613,6 @@ function apply_readonly_to_comments(frm) {
 }
 
 frappe.ui.form.on('Claim Required Documents', {
-
     // Trigger when document master is selected
     claim_doc_master: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
@@ -632,7 +664,6 @@ frappe.ui.form.on('Claim Required Documents', {
                 // ---- GET DOCUMENT MASTER ----
                 frappe.db.get_doc('Claim Document Master', row.claim_doc_master)
                     .then(doc_master => {
-
                         // ---- EXTENSION CHECK ----
                         let allowed_extensions = [];
                         if (doc_master.file_type_jpg) allowed_extensions.push('jpg');
@@ -722,7 +753,7 @@ function populate_rate_item_fields(cdt, cdn) {
 
 frappe.ui.form.on('Package Rate Item', {
     rate_item_name(frm, cdt, cdn) {
-        populate_rate_item_fields(cdt, cdn, frm);
+        populate_rate_item_fields(cdt, cdn);
     },
     rate: function (frm, cdt, cdn) {
         let row = locals[cdt][cdn];
@@ -804,10 +835,10 @@ function calculate_row_total(row) {
 
 function calculate_passed_amount(frm) {
     let total = 0;
-    if(frm.doc.package_rate) {
+    if (frm.doc.package_rate) {
         (frm.doc.package_rate_items || []).forEach(row => total += row.total || 0);
     }
-    if(frm.doc.non_package_rate) {
+    if (frm.doc.non_package_rate) {
         (frm.doc.non_package_rate_items || []).forEach(row => total += row.total || 0);
     }
     frm.set_value("passed_amount", total);

@@ -32,6 +32,9 @@
         "non_nabh",
         "bill_details",
         "bill_total",
+
+        "bill_total_passed_amount",
+
         "heading_objections",
         "no_prescription",
         "date_mismatch",
@@ -47,6 +50,7 @@
         "from_date",
         "to_date",
         "type",
+        "hospital_type",
         "hospital",
         "in_patient_no",
         "column_break_treatment_details",
@@ -124,7 +128,8 @@
             "in_standard_filter": 1,
             "options": "\nData Entry\nRegistered\nProcessing\nSanctioned\nPaid\nRejected\nReturned\nClosed",
             "default": "Data Entry",
-            "read_only": 1
+            "read_only": 1,
+            "no_copy": 1
         },
         {
             "fieldname": "dispensary",
@@ -249,6 +254,14 @@
             "label": "IP/OP",
             "fieldtype": "Select",
             "options": "\nOP\nIP",
+            "reqd": 1
+        },
+         {
+            "fieldname": "hospital_type",
+            "label": "Hospital Type",
+            "fieldtype": "Select",
+            "options": "\nGovernment\nPrivate",
+            "in_list_view": 1,
             "reqd": 1
         },
         {
@@ -379,7 +392,8 @@
         {
             "fieldname": "passed_amount",
             "label": "Passed Amount",
-            "fieldtype": "Float"
+            "fieldtype": "Float",
+            "no_copy": 1
         },
         {
             "fieldname": "rupees",
@@ -408,6 +422,12 @@
             "fieldname": "bill_total",
             "fieldtype": "Float",
             "label": "Medical Bill Total",
+            "read_only": 1
+        },
+        {
+            "fieldname": "bill_total_passed_amount",
+            "fieldtype": "Float",
+            "label": "Passed Total",
             "read_only": 1
         },
         {
@@ -490,6 +510,7 @@
             "options": "IP Communication",
             "allow_on_submit": 1
         },
+
         {
             "fieldname": "section_break_ct",
             "label": "Claim Checklist",
@@ -514,7 +535,8 @@
             "fieldname": "claim_process",
             "fieldtype": "Table",
             "options": "Claim Process",
-            "read_only": 1
+            "read_only": 1,
+            "no_copy": 1
         },
         {
             "fieldname": "credit_date",
@@ -554,7 +576,8 @@
             "fieldname": "claim_remarks",
             "fieldtype": "Table",
             "options": "Claim Remarks",
-            "label": "Claim Remarks"
+            "label": "Claim Remarks",
+            "no_copy": 1
         },
         {
             "fieldname": "section_break_ipcom",
@@ -612,6 +635,7 @@
             "fieldtype": "Section Break",
             "label": "Amount"
         },
+
         {
             "fieldname": "column_break_cr1",
             "fieldtype": "Column Break"

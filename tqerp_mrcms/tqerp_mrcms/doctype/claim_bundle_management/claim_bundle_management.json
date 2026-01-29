@@ -25,7 +25,8 @@
     "cb_break_u1",
     "submitted_by_name",
     "cb_break_u2",
-    "submitted_by_authority"
+    "submitted_by_authority",
+    "bundle_state"
   ],
   "fields": [
     {
@@ -150,6 +151,15 @@
       "fieldtype": "Data",
       "fetch_from": "organisation.organisation_code",
       "hidden": 1
+    },
+    {
+      "fieldname": "bundle_state",
+      "label": "Bundle State",
+      "fieldtype": "Select",
+      "in_standard_filter": 1,
+      "options": "\nRegistered\nProcessing\nSanctioned",
+      "default": "Registered",
+      "read_only": 1
     }
   ],
   "grid_page_length": 50,

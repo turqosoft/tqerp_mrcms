@@ -8,6 +8,7 @@
         "bill_date",
         "bill_no",
         "bill_amount",
+        "passed_amount",
         "doctor",
         "remarks"
     ],
@@ -30,10 +31,15 @@
             "in_list_view": 1,
             "label": "Amount"
         },
+         {
+            "fieldname": "passed_amount",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Passed Amount"
+        },
         {
             "fieldname": "doctor",
             "fieldtype": "Data",
-            "in_list_view": 1,
             "label": "Doctor"
         },
         {

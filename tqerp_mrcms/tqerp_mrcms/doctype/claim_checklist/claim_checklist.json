@@ -8,6 +8,8 @@
     "engine": "InnoDB",
     "field_order": [
         "claim_name",
+        "type",
+        "hospital_type",
         "claim_checklist_details"
     ],
     "fields": [
@@ -24,6 +26,21 @@
             "fieldtype": "Table",
             "options": "Claim Checklist Details",
             "in_list_view": 1
+        },
+         {
+            "fieldname": "hospital_type",
+            "label": "Hospital Type",
+            "fieldtype": "Select",
+            "options": "\nGovernment\nPrivate",
+            "in_list_view": 1
+        },
+      
+        {
+            "fieldname": "type",
+            "label": "IP/OP",
+            "fieldtype": "Select",
+            "options": "\nOP\nIP",
+            "reqd": 1
         }
     ],
     "links": [],

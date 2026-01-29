@@ -21,46 +21,99 @@ class ClaimProceedings(Document):
             doctype="Claim Proceedings"
         )
 
+    # def validate(self):
+    #     """
+    #     Prevent creating Claim Proceedings if the claim
+    #     already has:
+    #     1) a Claim Bundle
+    #     2) another Claim Proceedings
+    #     """
+    #     for row in self.claim_proceedings:
+    #         if not row.claim_no:
+    #             continue
+ 
+    #         # 1️⃣ Check Claim Bundle
+    #         bundle = frappe.db.get_value(
+    #             "Claim",
+    #             row.claim_no,
+    #             "claim_bundle_management"
+    #         )
+ 
+    #         if bundle:
+    #             frappe.throw(
+    #                 f"❌ Claim {row.claim_no} is already linked to "
+    #                 f"Claim Bundle <b>{bundle}</b>. "
+    #                 f"You cannot create Claim Proceedings for this claim."
+    #             )
+ 
+    #         # 2️⃣ Check Claim Proceedings
+    #         existing_cp = frappe.db.get_value(
+    #             "Claim",
+    #             row.claim_no,
+    #             "claim_proceedings"
+    #         )
+ 
+    #         # Allow if editing same document
+    #         if existing_cp and existing_cp != self.name:
+    #             frappe.throw(
+    #                 f"❌ Claim {row.claim_no} is already linked to "
+    #                 f"Claim Proceedings <b>{existing_cp}</b>. "
+    #                 f"You cannot create another Claim Proceedings for this claim."
+    #             )
+ 
     def validate(self):
         """
-        Prevent creating Claim Proceedings if the claim
-        already has:
-        1) a Claim Bundle
-        2) another Claim Proceedings
+        Prevent creating Claim Proceedings if:
+        1) Claim category is not allowed
+        2) Claim already has a Claim Bundle
+        3) Claim already has another Claim Proceedings
         """
+ 
+        allowed_categories = ["Category A", "Category B"]
+ 
         for row in self.claim_proceedings:
             if not row.claim_no:
                 continue
  
-            # 1️⃣ Check Claim Bundle
-            bundle = frappe.db.get_value(
+            # 🔹 Fetch required fields from Claim
+            claim_data = frappe.db.get_value(
                 "Claim",
                 row.claim_no,
-                "claim_bundle_management"
+                [
+                    "claim_category",
+                    "claim_bundle_management",
+                    "claim_proceedings"
+                ],
+                as_dict=True
             )
  
-            if bundle:
+            if not claim_data:
+                continue
+ 
+            # Validate Claim Category
+            if claim_data.claim_category not in allowed_categories:
                 frappe.throw(
-                    f"❌ Claim {row.claim_no} is already linked to "
-                    f"Claim Bundle <b>{bundle}</b>. "
+                    f"❌ Claim <b>{row.claim_no}</b> belongs to "
+                    f"<b>{claim_data.claim_category}</b> category.<br>"
+                    f"Only <b>Category A</b> and <b>Category B</b> "
+                    f"can create Claim Proceedings."
+                )
+ 
+            #  Check Claim Bundle
+            if claim_data.claim_bundle_management:
+                frappe.throw(
+                    f"❌ Claim <b>{row.claim_no}</b> is already linked to "
+                    f"Claim Bundle <b>{claim_data.claim_bundle_management}</b>.<br>"
                     f"You cannot create Claim Proceedings for this claim."
                 )
  
-            # 2️⃣ Check Claim Proceedings
-            existing_cp = frappe.db.get_value(
-                "Claim",
-                row.claim_no,
-                "claim_proceedings"
-            )
- 
-            # Allow if editing same document
-            if existing_cp and existing_cp != self.name:
+            #  Check existing Claim Proceedings
+            if claim_data.claim_proceedings and claim_data.claim_proceedings != self.name:
                 frappe.throw(
-                    f"❌ Claim {row.claim_no} is already linked to "
-                    f"Claim Proceedings <b>{existing_cp}</b>. "
+                    f"❌ Claim <b>{row.claim_no}</b> is already linked to "
+                    f"Claim Proceedings <b>{claim_data.claim_proceedings}</b>.<br>"
                     f"You cannot create another Claim Proceedings for this claim."
                 )
- 
  
  
     def before_save(self):

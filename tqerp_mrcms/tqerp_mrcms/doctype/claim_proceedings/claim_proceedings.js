@@ -99,3 +99,22 @@ frappe.ui.form.on("Claim Proceedings", {
         }
     }
 });
+
+// ---------------------------------------
+// Child Table: Claim Proceedings Details
+// Apply filter for claim_no field
+// ---------------------------------------
+frappe.ui.form.on("Claim Proceedings Details", {
+    claim_proceedings_add: function(frm, cdt, cdn) {
+        frm.fields_dict["claim_proceedings"]
+            .grid.get_field("claim_no")
+            .get_query = function() {
+                return {
+                    filters: {
+                        claim_status: "Sanctioned",
+                        claim_category: ["in", ["Category A", "Category B"]]
+                    }
+                };
+            };
+    }
+});

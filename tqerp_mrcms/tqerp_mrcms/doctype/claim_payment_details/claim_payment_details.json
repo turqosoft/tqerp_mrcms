@@ -62,29 +62,25 @@
             "fieldname": "name_of_patient",
             "fieldtype": "Data",
             "label": "Patient Name",
-            "fetch_from": "claim_no.name_of_patient",
-            "in_list_view": 1
+            "fetch_from": "claim_no.name_of_patient"
         },
         {
             "fieldname": "dispensary",
             "fieldtype": "Data",
             "label": "Dispensary",
-            "fetch_from": "claim_no.dispensary",
-            "in_list_view": 1
+            "fetch_from": "claim_no.dispensary"
         },
         {
             "fieldname": "claim_status",
             "fieldtype": "Data",
             "label": "Claim Status",
-            "fetch_from": "claim_no.claim_status",
-            "in_list_view": 1
+            "fetch_from": "claim_no.claim_status"
         },
         {
             "fieldname": "amount_claimed",
             "fieldtype": "Currency",
             "label": "Amount Claimed",
-            "fetch_from": "claim_no.amount_claimed",
-            "in_list_view": 1
+            "fetch_from": "claim_no.amount_claimed"
         },
         {
             "fieldname": "passed_amount",
@@ -100,28 +96,24 @@
         {
             "fieldname": "ifs_code",
             "fieldtype": "Data",
-            "in_list_view": 1,
             "fetch_from": "claim_no.ifs_code",
             "label": "IFSC Code"
         },
         {
             "fieldname": "bank_account_no",
             "fieldtype": "Data",
-            "in_list_view": 1,
             "fetch_from": "claim_no.bank_account_no",
             "label": "Bank Account No"
         },
         {
             "fieldname": "bank_name",
             "fieldtype": "Data",
-            "in_list_view": 1,
             "fetch_from": "claim_no.bank_name",
             "label": "Bank Name"
         },
         {
             "fieldname": "branch",
             "fieldtype": "Data",
-            "in_list_view": 1,
             "fetch_from": "claim_no.branch",
             "label": "Branch"
         },
@@ -146,7 +138,6 @@
         {
             "fieldname": "credit_amount",
             "fieldtype": "Float",
-            "in_list_view": 1,
             "label": "Credit Amount",
             "default": 0,
             "allow_on_submit": 1
@@ -161,14 +152,12 @@
             "fieldname": "phone",
             "fieldtype": "Data",
             "label": "Phone",
-            "fetch_from": "claim_no.phone",
-            "in_list_view": 1
+            "fetch_from": "claim_no.phone"
         },
         {
             "fieldname": "voucher_no",
             "fieldtype": "Data",
-            "label": "Voucher No",
-            "in_list_view": 1
+            "label": "Voucher No"
         }
     ],
     "istable": 1,

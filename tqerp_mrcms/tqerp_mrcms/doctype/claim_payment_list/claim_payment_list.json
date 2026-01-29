@@ -12,6 +12,7 @@
     "organisation",
     "organisation_code",
     "section",
+    "claim_category",
     "cb_break_cpl1",
     "payment_date",
     "remarks",
@@ -37,7 +38,8 @@
     "cb_break_cpu1",
     "submitted_by_name",
     "cb_break_cpu2",
-    "submitted_by_authority"
+    "submitted_by_authority",
+    "payment_state"
   ],
   "fields": [
     {
@@ -213,6 +215,22 @@
       "fieldtype": "Data",
       "fetch_from": "organisation.organisation_code",
       "hidden": 1
+    },
+    {
+      "fieldname": "payment_state",
+      "label": "Payment State",
+      "fieldtype": "Select",
+      "in_standard_filter": 1,
+      "options": "\nRegistered\nProcessing\nSanctioned",
+      "default": "Registered",
+      "read_only": 1
+    },
+    {
+      "fieldname": "claim_category",
+      "label": "Claim Category",
+      "fieldtype": "Link",
+      "options": "Claim Category",
+      "read_only": 1
     }
   ],
   "grid_page_length": 50,

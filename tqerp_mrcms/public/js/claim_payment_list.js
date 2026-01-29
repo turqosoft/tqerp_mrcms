@@ -87,11 +87,33 @@ frappe.ui.form.on('Claim Payment List', {
     // VALIDATION
     // -------------------------------
     validate: function(frm) {
-        if(frm.doc.total_allocated && frm.doc.available &&
-           flt(frm.doc.total_allocated) > flt(frm.doc.available)) {
+        // if(frm.doc.total_allocated && frm.doc.available &&
+        //    flt(frm.doc.total_allocated) > flt(frm.doc.available)) {
+        //     frappe.throw(
+        //         __("Total Allocated ({0}) cannot exceed Available Fund ({1})",
+        //             [frm.doc.total_allocated, frm.doc.available])
+        //     );
+        // }
+
+        //  ONE source of truth
+        if (
+            frm.doc.payment_total &&
+            !frm.doc.total_allocated
+        ) {
+            frm.doc.total_allocated = frm.doc.payment_total;
+        }
+ 
+        // Allocation safety check
+        if (
+            frm.doc.total_allocated &&
+            frm.doc.available &&
+            flt(frm.doc.total_allocated) > flt(frm.doc.available)
+        ) {
             frappe.throw(
-                __("Total Allocated ({0}) cannot exceed Available Fund ({1})",
-                    [frm.doc.total_allocated, frm.doc.available])
+                __("Total Allocated ({0}) cannot exceed Available Fund ({1})", [
+                    frm.doc.total_allocated,
+                    frm.doc.available
+                ])
             );
         }
     },

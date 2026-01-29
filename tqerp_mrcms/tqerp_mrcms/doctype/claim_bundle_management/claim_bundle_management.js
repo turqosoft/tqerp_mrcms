@@ -45,16 +45,14 @@ frappe.ui.form.on("Claim Bundle Management", {
 // Apply filter for claim_no field
 // ---------------------------------------
 frappe.ui.form.on("Claim Bundle Details", {
-    
     details_add: function(frm, cdt, cdn) {
-        // Only show claims where claim_status = "Sanctioned"
         frm.fields_dict["details"].grid.get_field("claim_no").get_query = function(doc, cdt, cdn) {
             return {
                 filters: {
-                    claim_status: "Sanctioned"
+                    claim_status: "Sanctioned",
+                    claim_category: ["in", [" Category C1", "Category C2", "Category D"]]
                 }
             };
         };
     }
-
 });
