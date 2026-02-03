@@ -16,13 +16,19 @@ class Claim(Document):
         if not self.amount_claimed:
             return
         
-        # ALWAYS derive category from amount
-        new_category = get_claim_category_by_amount(self.amount_claimed)
-        
-        category_changed = self.claim_category != new_category
-        self.claim_category = new_category
-        
-        # Re-populate documents if category changed or empty
+        # Derive category from amount (NO throwing here)
+        derived_category = get_claim_category_by_amount(self.amount_claimed)
+ 
+        # If no category found, just stop silently
+        if not derived_category:
+            return
+ 
+        category_changed = self.claim_amount_category != derived_category
+ 
+        # Set derived category
+        self.claim_amount_category = derived_category
+ 
+        # ONLY responsibility here: fetch required documents
         if category_changed or not self.claim_required_documents:
             self.populate_required_documents()
     
@@ -38,10 +44,13 @@ class Claim(Document):
         
         prev = self.get_doc_before_save()
         prev_amount = prev.amount_claimed if prev else None
-        prev_category = prev.claim_category if prev else None
-        
-        if (self.amount_claimed != prev_amount or
-            self.claim_category != prev_category):
+        prev_amount_category = prev.claim_amount_category if prev else None
+
+        # Re-populate ONLY if amount-category changed
+        if (
+            self.amount_claimed != prev_amount or
+            self.claim_amount_category != prev_amount_category
+        ):
             self.populate_required_documents()
     
     def before_save(self):
@@ -74,7 +83,7 @@ class Claim(Document):
         rule = frappe.get_all(
             "Claim Document Rule",
             filters={
-                "claim_category": self.claim_category,
+                "claim_category": self.claim_amount_category,
                 "is_active": 1
             },
             fields=["name"],
@@ -154,6 +163,16 @@ class Claim(Document):
                         f"Invalid file type for {doc_master.document_name}. "
                         f"Allowed types: {', '.join(allowed_extensions)}"
                     )
+
+        # Auto-assign claim category based on passed amount and update required documents unless claim is finalized  
+        if self.claim_status in ("Sanctioned", "Paid", "Closed"):
+            return
+        # Only run if passed_amount is set and claim_category is not already assigned
+        if self.passed_amount and not self.claim_category:
+            category = get_claim_category_by_amount(self.passed_amount)
+            if category:
+                self.claim_category = category
+                # self.populate_required_documents()  --- IGNORE ---
     
     # Fetch ONLY the entitlement period(s) that COVER / OVERLAP the treatment period (from_date → to_date)
     def before_print(self, print_settings=None):
@@ -331,48 +350,48 @@ class Claim(Document):
             next_state=new_state
         )
     
+    # Populate required documents based on claim amount category.
     def populate_required_documents(self):
-        if not self.claim_category:
+        if not self.claim_amount_category:
             return
-        
+ 
         # Clear existing rows
         self.set("claim_required_documents", [])
-        
+ 
         rules = frappe.get_all(
             "Claim Document Rule",
             filters={
-                "claim_category": self.claim_category,
+                "claim_category": self.claim_amount_category,
                 "is_active": 1
             },
             pluck="name"
         )
-        
+ 
         if not rules:
             return
-        
+ 
         added = set()
-        
+ 
         for rule in rules:
             rule_doc = frappe.get_doc("Claim Document Rule", rule)
-            
+ 
             for r in rule_doc.claim_document_rule_details:
                 if not r.claim_doc_master or r.claim_doc_master in added:
                     continue
-                
+ 
                 # Fetch document name ONLY from master
                 doc_name = frappe.db.get_value(
                     "Claim Document Master",
                     r.claim_doc_master,
                     "document_name"
                 )
-                
-                # Mandatory MUST come from rule details
+ 
                 self.append("claim_required_documents", {
                     "claim_doc_master": r.claim_doc_master,
                     "claim_doc_name": doc_name,
-                    "mandatory": int(r.mandatory)  
+                    "mandatory": int(r.mandatory)
                 })
-                
+ 
                 added.add(r.claim_doc_master)
     
     # ---------------------------
@@ -530,63 +549,87 @@ def get_child_organisations(root_office):
     
     return list(all_offices)
 
+def get_claim_categories_for_user_org(user_organisation):
+    claim_category = frappe.db.get_value(
+        "Organisation", user_organisation, "claim_category"
+    )
+ 
+    if not claim_category:
+        return []
+ 
+    return [
+        c.strip()
+        for c in claim_category.replace("\n", ",").split(",")
+        if c.strip()
+    ]
 
 # Show only claim authorised for the user to see in the CLAIM list view
 def get_permission_query_conditions(user):
     if not user:
         user = frappe.session.user
-    
-    # Full access for Administrator (and optionally System Manager etc.)
-    if user in ("Administrator",):
+ 
+    # Full access for Administrator
+    if user == "Administrator":
         return ""
-    
-    # If you have a special role that should see everything, uncomment:
-    # if "MRCMS Admin" in frappe.get_roles(user):
-    #     return ""
-    
-    # Get user's organisation
-    user_authority = frappe.db.get_value("User", user, "authority")
-    
-    user_organisation, user_section = frappe.db.get_value("User", user, ["organisation", "section"]) or (None, None)
-    
+ 
+    # Get user's organisation and section
+    user_organisation, user_section = frappe.db.get_value(
+        "User", user, ["organisation", "section"]
+    ) or (None, None)
+ 
     if not user_organisation:
-        # No organisation assigned → see nothing
         return "1=0"
-    
-    organisations = get_child_organisations(user_organisation)
-    if not organisations:
-        organisations = [user_organisation]
-    
+ 
+    # Get organisation type (field is 'type' in Organisation DocType)
+    organisation_type = frappe.db.get_value(
+        "Organisation",
+        user_organisation,
+        "type"
+    )
+ 
+    # Organisation filter
+    organisations = get_child_organisations(user_organisation) or [user_organisation]
     escaped_organisations = ", ".join(frappe.db.escape(o) for o in organisations)
-    organisation_condition = f"`tabClaim`.`dispensary` in ({escaped_organisations})"
-    
-    # --- New IMO Role Restriction Logic ---
+    organisation_condition = f"`tabClaim`.`dispensary` IN ({escaped_organisations})"
+ 
+    # Get user roles
     user_roles = frappe.get_roles(user)
-    # Check if the user is an IMO. If so, add the workflow state restriction.
+ 
+    # IMO: only see claims in 'IMO Review' state
     if "IMO" in user_roles:
-        # The IMO should only see claims that are both in their organisation AND in 'IMO Review' state.
         workflow_condition = "`tabClaim`.`workflow_state` = 'IMO Review'"
-        # Combine the two conditions using AND
         return f"({organisation_condition}) AND ({workflow_condition})"
-    
-    # --- Default: Apply only organisation Restriction for Non-IMOs (e.g., clerk, etc.) ---
-    if not user_section:
-        # If the user is not an IMO, only the organisation restriction applies (assuming this is the base requirement)
+ 
+    # Dispensary users: see all claims for their organisation
+    if organisation_type == "Dispensary":
         return organisation_condition
-    else:
-        # If the user belongs to a section in the Directorate apply both org condition and Section/MRC region condition
-        section_condition = ""
-        # Get all districts that belong to this MRC Region
-        districts_in_region = frappe.get_all("District", filters={"mrc_region": user_section}, pluck="name")
-        if districts_in_region:
-            escaped_districts = ", ".join(frappe.db.escape(d) for d in districts_in_region)
-            section_condition = f"`tabClaim`.`district` in ({escaped_districts})"
-        else:
-            # If no districts match the section → show nothing
-            section_condition = "1=0"
-        
-        # If the user has a section associated, then list only claims associtated with that section
-        return f"({section_condition}) AND ({organisation_condition})"
+ 
+    # Non-dispensary users: filter by claim category
+    claim_categories = get_claim_categories_for_user_org(user_organisation)
+    if not claim_categories:
+        return "1=0"
+ 
+    escaped_categories = ", ".join(frappe.db.escape(c) for c in claim_categories)
+    category_condition = f"`tabClaim`.`claim_category` IN ({escaped_categories})"
+ 
+    combined_condition = f"({organisation_condition}) AND ({category_condition})"
+ 
+    # Section / District filter
+    if not user_section:
+        return combined_condition
+ 
+    districts = frappe.get_all(
+        "District",
+        filters={"mrc_region": user_section},
+        pluck="name"
+    )
+    if not districts:
+        return "1=0"
+ 
+    escaped_districts = ", ".join(frappe.db.escape(d) for d in districts)
+    section_condition = f"`tabClaim`.`district` IN ({escaped_districts})"
+ 
+    return f"({section_condition}) AND ({combined_condition})"
 
 
 @frappe.whitelist()

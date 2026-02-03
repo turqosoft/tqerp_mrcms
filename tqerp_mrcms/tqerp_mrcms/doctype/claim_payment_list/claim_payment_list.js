@@ -1,34 +1,5 @@
 frappe.ui.form.on("Claim Payment List", {
-    // onload: function(frm) {
-    //     // Auto-set Office from logged-in user
-    //     if (!frm.doc.office) {
-    //         frappe.call({
-    //             method: "frappe.client.get_value",
-    //             args: {
-    //                 doctype: "User",
-    //                 filters: { name: frappe.session.user },
-    //                 fieldname: "office"
-    //             },
-    //             callback: function(r) {
-    //                 if (r && r.message) {
-    //                     frm.set_value("office", r.message.office);
-    //                     frm.refresh_field("office");
-    //                     // 🔹 Filter Fund Manager based on office
-    //                     frm.set_query("fund_manager", function() {
-    //                         return {
-    //                             query: "tqerp_mrcms.api.get_available_fund_managers",
-    //                             filters: { office: r.message.office, expired: 0 }
-    //                         };
-    //                     });
-    //                     // 🔹 Fetch fund details if already selected
-    //                     if (frm.doc.fund_manager && frm.doc.docstatus === 0) {
-    //                         fetch_fund_details(frm);
-    //                     }
-    //                 }
-    //             }
-    //         });
-    //     }
-    // },
+  
     onload: function(frm) {
         // Set Organisation field of logged in user automatically only if empty
         if (!frm.doc.organisation) {
@@ -51,16 +22,16 @@ frappe.ui.form.on("Claim Payment List", {
             });
         }
     },
-    before_save: function(frm) {
-        // Calculate total of passed_amount from child table
-        let total = 0;
-        if (frm.doc.details && frm.doc.details.length) {
-            frm.doc.details.forEach(function(row) {
-                total += row.passed_amount || 0;
-            });
-        }
-        frm.set_value("payment_total", total);
-    },
+    // before_save: function(frm) {
+    //     // Calculate total of passed_amount from child table
+    //     let total = 0;
+    //     if (frm.doc.details && frm.doc.details.length) {
+    //         frm.doc.details.forEach(function(row) {
+    //             total += row.passed_amount || 0;
+    //         });
+    //     }
+    //     frm.set_value("payment_total", total);
+    // },
 
     refresh: function(frm) {
         // Show Download button ONLY if submitted
@@ -161,5 +132,87 @@ frappe.ui.form.on("Claim Payment List", {
             });
 
         }
+    },
+
+
+    claim_payment_no: frappe.utils.debounce(function(frm) {
+        if (!frm.doc.claim_payment_no) return;
+
+        frappe.call({
+            method: 'frappe.client.get_list',
+            args: {
+                doctype: 'Claim Payment List',
+                filters: { claim_payment_no: frm.doc.claim_payment_no },
+                fields: ['name'],
+                limit_page_length: 1
+            },
+            callback: function(r) {
+                if (r.message && r.message.length && r.message[0].name !== frm.doc.name) {
+                    frappe.msgprint({
+                        title: __('Duplicate Value'),
+                        message: __('Claim Payment Number already exists'),
+                        indicator: 'red'
+                    });
+                    frm.set_value('claim_payment_no', '');
+                }
+            }
+        });
+    }, 300)
+});
+
+
+// ---------------------------------------
+// Child Table: Claim Payment Details
+// ---------------------------------------
+frappe.ui.form.on("Claim Payment Details", {
+
+    // Apply filter for claim_no field
+    details_add: function(frm, cdt, cdn) {
+        frm.fields_dict["details"].grid.get_field("claim_no").get_query = function(doc, cdt, cdn) {
+            return {
+                filters: {
+                    claim_status: "Sanctioned"
+                }
+            };
+        };
+    },
+
+    // Row added
+    details_add: function(frm, cdt, cdn) {
+        calculate_payment_total(frm);
+    },
+
+    // Row removed
+    details_remove: function(frm, cdt, cdn) {
+        calculate_payment_total(frm);
+    },
+
+    // Table rendered
+    details_on_form_rendered: function(frm, cdt, cdn) {
+        calculate_payment_total(frm);
+    },
+
+    // Trigger whenever passed_amount is fetched/changed
+    passed_amount: function(frm, cdt, cdn) {
+        calculate_payment_total(frm);
+    },
+
+   
+    claim_no: function(frm, cdt, cdn) {
+        calculate_payment_total(frm);
     }
 });
+
+
+// ---------------------------------------
+// Sum passed_amount and set payment_total
+// ---------------------------------------
+function calculate_payment_total(frm) {
+    let total = 0.0;
+
+    (frm.doc.details || []).forEach(row => {
+        total += flt(row.passed_amount, 2);
+    });
+
+    frm.set_value("payment_total", total);
+}

@@ -69,32 +69,20 @@ frappe.ui.form.on('Claim Payment List', {
         if (frm.doc.docstatus === 1) return;
     
         // Only autofill ONCE (new OR unsaved draft)
-        if (!frm.doc.__total_allocated_filled &&
-            frm.doc.payment_total &&
-            !frm.doc.total_allocated) {
+        // if (!frm.doc.__total_allocated_filled &&
+        //     frm.doc.payment_total &&
+        //     !frm.doc.total_allocated) {
     
-            frm.set_value("total_allocated", frm.doc.payment_total);
-            frm.doc.__total_allocated_filled = true;
-        }
+        //     frm.set_value("total_allocated", frm.doc.payment_total);
+        //     frm.doc.__total_allocated_filled = true;
+        // }
     
         // Fund calc only for NEW doc
         if (frm.is_new() && frm.doc.fund_manager && frm.doc.organisation) {
             fetch_fund_details(frm, frm.doc.organisation);
         }
     },       
-
-    // -------------------------------
-    // VALIDATION
-    // -------------------------------
     validate: function(frm) {
-        // if(frm.doc.total_allocated && frm.doc.available &&
-        //    flt(frm.doc.total_allocated) > flt(frm.doc.available)) {
-        //     frappe.throw(
-        //         __("Total Allocated ({0}) cannot exceed Available Fund ({1})",
-        //             [frm.doc.total_allocated, frm.doc.available])
-        //     );
-        // }
-
         //  ONE source of truth
         if (
             frm.doc.payment_total &&
@@ -116,8 +104,26 @@ frappe.ui.form.on('Claim Payment List', {
                 ])
             );
         }
+ 
+        if(frm.doc.total_allocated && frm.doc.available &&
+           flt(frm.doc.total_allocated) > flt(frm.doc.available)) {
+            frappe.throw(
+                __("Total Allocated ({0}) cannot exceed Available Fund ({1})",
+                    [frm.doc.total_allocated, frm.doc.available])
+            );
+        }
     },
-
+    before_workflow_action: async function (frm) {
+        // Return the promise here!
+        return new Promise((resolve, reject) => {
+            frappe.dom.unfreeze()
+            frappe.confirm(
+                `<b>Are you sure you want to <u>${frm.selected_workflow_action}</u>?</b>`,
+                () => resolve(), // Yes → proceed
+                () => reject("❌ Action cancelled by user.") // No → abort transition
+            );
+        });
+    },
     before_submit: function(frm) {
         return new Promise((resolve, reject) => {
             frappe.call({

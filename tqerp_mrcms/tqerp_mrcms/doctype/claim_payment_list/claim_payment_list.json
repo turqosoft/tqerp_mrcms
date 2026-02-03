@@ -45,7 +45,8 @@
     {
       "fieldname": "claim_payment_no",
       "fieldtype": "Data",
-      "label": "Claim payment Number"
+      "label": "Claim payment Number",
+      "unique":1
     },
     {
       "fieldname": "organisation",

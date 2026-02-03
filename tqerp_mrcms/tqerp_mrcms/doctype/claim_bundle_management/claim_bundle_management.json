@@ -32,14 +32,16 @@
     {
       "fieldname": "physical_bundle_no",
       "fieldtype": "Data",
-      "label": "Physical Bundle Number"
+      "label": "Physical Bundle Number",
+      "unique":1
     },
     {
       "fieldname": "claim_category",
       "label": "Claim Category",
       "fieldtype": "Link",
+      "in_list_view": 1,
       "options": "Claim Category",
-      "hidden": 1,
+      "read_only":1,
       "reqd": 1
     },
     {
@@ -85,7 +87,8 @@
       "fieldname": "bundle_date",
       "fieldtype": "Date",
       "label": "Bundle Date",
-      "default": "Today"
+      "default": "Today",
+      "in_list_view": 1
     },
     {
       "fieldname": "sbm_section",
@@ -159,7 +162,8 @@
       "in_standard_filter": 1,
       "options": "\nRegistered\nProcessing\nSanctioned",
       "default": "Registered",
-      "read_only": 1
+      "read_only": 1,
+      "in_list_view": 1
     }
   ],
   "grid_page_length": 50,

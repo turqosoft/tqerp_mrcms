@@ -11,6 +11,11 @@ from frappe.utils.xlsxutils import make_xlsx
 from io import BytesIO
 import math
 from frappe.utils import flt
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill
+from frappe.utils import get_site_path
+import os
+
 # @frappe.whitelist(allow_guest=False)
 # def submit_claim(data):
 #     claim_data = json.loads(data)
@@ -1430,7 +1435,9 @@ def create_claim_bundle_management(claims_data=None):
             "bank_account_no": claim.get("bank_account_no"),
             "bank_name": claim.get("bank_name")
         })
- 
+        # Calculate bundle total
+        cbm.bundle_total = sum(row.passed_amount or 0 for row in cbm.details)
+
         if cbm.get("__islocal"):
             cbm.insert(ignore_permissions=True)
         else:
@@ -1546,36 +1553,57 @@ def create_claim_payment_list(claims_data):
     if not valid_claims:
         return
  
-    # --- Get all sections of the valid claims ---
+    # --- Get Sections & Claim Categories from Claim Bundles ---
     sections = set()
+    claim_categories = set()
+ 
     for row in valid_claims:
         bundle_no = row.get("claim_bundle_no")
-        section = frappe.db.get_value("Claim Bundle Management", bundle_no, "section")
-        if section:
-            sections.add(section)
  
-    # --- Restrict if multiple sections ---
+        bundle_data = frappe.db.get_value(
+            "Claim Bundle Management",
+            bundle_no,
+            ["section", "claim_category"],
+            as_dict=True
+        )
+ 
+        if bundle_data:
+            if bundle_data.section:
+                sections.add(bundle_data.section)
+            if bundle_data.claim_category:
+                claim_categories.add(bundle_data.claim_category)
+ 
+    # --- Restrict multiple sections ---
     if len(sections) > 1:
         frappe.throw(
             "⚠️ You can't create a Claim Payment List for multiple sections at once. "
             f"Selected claims belong to: {', '.join(sections)}"
         )
  
-    # --- Single section for CPL ---
+    # --- Restrict multiple claim categories ---
+    if len(claim_categories) > 1:
+        frappe.throw(
+            "⚠️ You can't create a Claim Payment List for multiple Claim Categories at once. "
+            f"Selected claims belong to: {', '.join(claim_categories)}"
+        )
+ 
+    # --- Single values ---
     section = sections.pop() if sections else None
+    claim_category = claim_categories.pop() if claim_categories else None
  
     # --- Get user's organisation ---
     user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
  
-    # --- Create CPL ---
+    # --- Create Claim Payment List ---
     cpl = frappe.get_doc({
         "doctype": "Claim Payment List",
         "organisation": user_org,
         "section": section,
+        "claim_category": claim_category,   # ✅ ADDED
         "details": []
     })
  
-    # --- Append details ---
+    # --- Append Payment Details ---
     for row in valid_claims:
         cpl.append("details", {
             "claim_bundle_no": row.get("claim_bundle_no"),
@@ -1594,6 +1622,12 @@ def create_claim_payment_list(claims_data):
             "voucher_no": row.get("voucher_no", "")
         })
  
+    # --- Calculate total passed_amount before insert ---
+    cpl.payment_total = sum([row.passed_amount or 0 for row in cpl.details])
+ 
+   
+ 
+    # --- Insert CPL ---
     cpl.insert(ignore_permissions=True)
  
     frappe.msgprint(
@@ -1608,11 +1642,6 @@ def create_claim_payment_list(claims_data):
     }
 
 #download payment list as excel
-import frappe
-import openpyxl
-from openpyxl.styles import Font, Alignment, PatternFill
-from frappe.utils import get_site_path
-import os
  
 @frappe.whitelist()
 def download_payment_details_excel(docname):

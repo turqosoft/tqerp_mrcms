@@ -343,6 +343,7 @@ fixtures = [
                 "Relation",
                 "Office",
                 "Bank",
+                "Bank Branch",
                 "District",
                 "Authority",
                 "Claim Bundle Management",

@@ -1,3 +1,17 @@
+frappe.ui.form.on('Claim Bundle Management', {
+    before_workflow_action: async function (frm) {
+        // Return the promise here!
+        return new Promise((resolve, reject) => {
+            frappe.dom.unfreeze()
+            frappe.confirm(
+                `<b>Are you sure you want to <u>${frm.selected_workflow_action}</u>?</b>`,
+                () => resolve(), // Yes → proceed
+                () => reject("❌ Action cancelled by user.") // No → abort transition
+            );
+        });
+    },
+});
+
 frappe.listview_settings['Claim Bundle Management'] = {
     onload: function(listview) {
 
@@ -25,7 +39,7 @@ frappe.listview_settings['Claim Bundle Management'] = {
                 let d = full_doc.message;
 
                 // BLOCK if bundle_status != Sanctioned
-                if (d.bundle_status !== "Sanctioned") {
+                if (d.bundle_state !== "Sanctioned") {
                     frappe.msgprint(
                         `Bundle <b>${d.name}</b> is not Sanctioned. Cannot create payment list.`
                     );

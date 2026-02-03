@@ -46,6 +46,9 @@ class ClaimBundleManagement(Document):
                     f"Claim Proceedings {proceedings}. You cannot add it to a bundle."
                 )
 
+            if self.workflow_state != "Draft":
+                self.bundle_status = "Closed"
+
     def before_save(self):
         # Store bundle number in each Claim
         for row in self.details:  
