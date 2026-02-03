@@ -6,7 +6,7 @@ authors = [
 description = "MRCMS Application"
 requires-python = ">=3.10"
 readme = "README.md"
-dynamic = ["version"]
+# dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
 ]
