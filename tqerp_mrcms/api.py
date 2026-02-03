@@ -1405,7 +1405,7 @@ def create_claim_bundle_management(claims_data=None):
             cbm = frappe.get_doc("Claim Bundle Management", open_bundle[0].name)
  
             if len(cbm.details) >= max_claims:
-                cbm.bundle_status = "Closed"
+                cbm.bundle_status = "Processing"
                 cbm.save(ignore_permissions=True)
                 cbm = None
  
@@ -1435,9 +1435,10 @@ def create_claim_bundle_management(claims_data=None):
             "bank_account_no": claim.get("bank_account_no"),
             "bank_name": claim.get("bank_name")
         })
-        # Calculate bundle total
+ 
+         # Calculate bundle total
         cbm.bundle_total = sum(row.passed_amount or 0 for row in cbm.details)
-
+ 
         if cbm.get("__islocal"):
             cbm.insert(ignore_permissions=True)
         else:
@@ -1458,7 +1459,6 @@ def create_claim_bundle_management(claims_data=None):
             "⚠️ No new claim bundles were created (all claims may already be bundled).",
             indicator="orange"
         )
- 
  
 import frappe
 from tqerp_mrcms.api import create_claim_bundle_management
@@ -1501,11 +1501,14 @@ def auto_add_claim_to_bundle(doc, method):
 def create_claim_payment_list(claims_data):
     """
     Create ONE Claim Payment List document
-    with multiple rows in Payment Details child table
-    and skip claims already included in a submitted Payment List
+    from Claims in a Claim Bundle, including only
+    Claims not yet linked to any Claim Payment List,
+    skip claims already in a submitted Payment List,
+    and update Claim Bundle status automatically (Open / Processing / Processed).
     """
     import json
     import frappe
+    from tqerp_mrcms.api import update_bundle_status
  
     if not claims_data:
         frappe.throw("⚠️ No payment rows received.")
@@ -1514,16 +1517,18 @@ def create_claim_payment_list(claims_data):
     if isinstance(claims_data, str):
         claims_data = json.loads(claims_data)
  
-    duplicate_claims = []
     valid_claims = []
+    skipped_claims = []
  
-    # --- VALIDATION: Skip claims already in submitted CPL ---
+    # -------------------------------
+    # Filter only Claims not already linked
+    # -------------------------------
     for row in claims_data:
         claim_no = row.get("claim_no")
- 
         if not claim_no:
             frappe.throw("Claim No missing for some rows.")
  
+        # Check if claim is already linked to a submitted CPL
         existing_rows = frappe.get_all(
             "Claim Payment Details",
             filters={"claim_no": claim_no},
@@ -1537,73 +1542,75 @@ def create_claim_payment_list(claims_data):
                 break
  
         if is_submitted:
-            duplicate_claims.append(claim_no)
+            skipped_claims.append(claim_no)
         else:
             valid_claims.append(row)
  
-    if duplicate_claims:
-        duplicate_str = ", ".join([f"<b>{d}</b>" for d in duplicate_claims])
+    if skipped_claims:
         frappe.msgprint(
             f"⚠️ The following Claim(s) are already included in a submitted "
-            f"Claim Payment List:<br>{duplicate_str}",
-            title="Duplicate Claims",
-            indicator="red"
+            f"Claim Payment List and will be skipped:<br>{', '.join(skipped_claims)}",
+            title="Skipped Claims",
+            indicator="orange"
         )
  
     if not valid_claims:
+        frappe.msgprint("⚠️ No valid Claims to create a Payment List.", title="Info", indicator="yellow")
         return
  
-    # --- Get Sections & Claim Categories from Claim Bundles ---
+    # -------------------------------
+    # Get Sections & Claim Categories from Claim Bundles
+    # -------------------------------
     sections = set()
     claim_categories = set()
- 
     for row in valid_claims:
         bundle_no = row.get("claim_bundle_no")
- 
         bundle_data = frappe.db.get_value(
             "Claim Bundle Management",
             bundle_no,
             ["section", "claim_category"],
             as_dict=True
         )
- 
         if bundle_data:
             if bundle_data.section:
                 sections.add(bundle_data.section)
             if bundle_data.claim_category:
                 claim_categories.add(bundle_data.claim_category)
  
-    # --- Restrict multiple sections ---
+    # Restrict multiple sections
     if len(sections) > 1:
         frappe.throw(
-            "⚠️ You can't create a Claim Payment List for multiple sections at once. "
+            f"⚠️ You can't create a Claim Payment List for multiple sections at once. "
             f"Selected claims belong to: {', '.join(sections)}"
         )
  
-    # --- Restrict multiple claim categories ---
+    # Restrict multiple claim categories
     if len(claim_categories) > 1:
         frappe.throw(
-            "⚠️ You can't create a Claim Payment List for multiple Claim Categories at once. "
+            f"⚠️ You can't create a Claim Payment List for multiple Claim Categories at once. "
             f"Selected claims belong to: {', '.join(claim_categories)}"
         )
  
-    # --- Single values ---
     section = sections.pop() if sections else None
     claim_category = claim_categories.pop() if claim_categories else None
  
-    # --- Get user's organisation ---
+    # -------------------------------
+    # Get user's organisation
+    # -------------------------------
     user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
  
-    # --- Create Claim Payment List ---
+    # -------------------------------
+    # Create Claim Payment List
+    # -------------------------------
     cpl = frappe.get_doc({
         "doctype": "Claim Payment List",
         "organisation": user_org,
         "section": section,
-        "claim_category": claim_category,   # ✅ ADDED
+        "claim_category": claim_category,
         "details": []
     })
  
-    # --- Append Payment Details ---
+    # Append Payment Details
     for row in valid_claims:
         cpl.append("details", {
             "claim_bundle_no": row.get("claim_bundle_no"),
@@ -1618,17 +1625,45 @@ def create_claim_payment_list(claims_data):
             "passed_amount": row.get("passed_amount", 0),
             "ifs_code": row.get("ifs_code", ""),
             "bank_account_no": row.get("bank_account_no", ""),
-            "bank_name": row.get("bank_name", ""),
-            "voucher_no": row.get("voucher_no", "")
+            "bank_name": row.get("bank_name", "")
         })
  
-    # --- Calculate total passed_amount before insert ---
-    cpl.payment_total = sum([row.passed_amount or 0 for row in cpl.details])
+    # Calculate total passed amount
+    cpl.payment_total = sum(row.passed_amount or 0 for row in cpl.details)
  
-   
- 
-    # --- Insert CPL ---
+    # Insert CPL
     cpl.insert(ignore_permissions=True)
+ 
+    # -------------------------------
+    # LINK CPL BACK TO CLAIM BUNDLE DETAILS & CLAIM
+    # -------------------------------
+    affected_bundles = set()
+    for row in valid_claims:
+        bundle_no = row.get("claim_bundle_no")
+        claim_no = row.get("claim_no")
+        if not bundle_no or not claim_no:
+            continue
+ 
+        # Link in Claim Bundle Details child table
+        frappe.db.set_value(
+            "Claim Bundle Details",
+            {"parent": bundle_no, "parenttype": "Claim Bundle Management", "claim_no": claim_no},
+            "claim_payment_list",
+            cpl.name
+        )
+ 
+        # Link in Claim
+        frappe.db.set_value("Claim", claim_no, "claim_payment_list", cpl.name)
+ 
+        affected_bundles.add(bundle_no)
+ 
+    # -------------------------------
+    # UPDATE CLAIM BUNDLE STATUS
+    # -------------------------------
+    for bundle_no in affected_bundles:
+        update_bundle_status(bundle_no)
+ 
+    frappe.db.commit()
  
     frappe.msgprint(
         f"✅ Claim Payment List <b>{cpl.name}</b> created successfully!",
@@ -1642,7 +1677,6 @@ def create_claim_payment_list(claims_data):
     }
 
 #download payment list as excel
- 
 @frappe.whitelist()
 def download_payment_details_excel(docname):
  
@@ -2536,3 +2570,50 @@ def get_user_dashboard_data():
 def get_current_user():
     """Returns the currently logged in user."""
     return frappe.session.user
+
+
+def update_bundle_status(bundle_name):
+    """
+    Recalculate and update bundle_status based on Claim Bundle Details
+    """
+ 
+    if not bundle_name:
+        return
+ 
+    rows = frappe.get_all(
+        "Claim Bundle Details",
+        filters={
+            "parent": bundle_name,
+            "parenttype": "Claim Bundle Management"
+        },
+        fields=["claim_payment_list"]
+    )
+ 
+    # No child rows → Open
+    if not rows:
+        frappe.db.set_value(
+            "Claim Bundle Management",
+            bundle_name,
+            "bundle_status",
+            "Open"
+        )
+        return
+ 
+    # If ANY claim is NOT linked to CPL → Processing
+    for r in rows:
+        if not r.claim_payment_list:
+            frappe.db.set_value(
+                "Claim Bundle Management",
+                bundle_name,
+                "bundle_status",
+                "Processing"
+            )
+            return
+ 
+    # All claims linked → Processed
+    frappe.db.set_value(
+        "Claim Bundle Management",
+        bundle_name,
+        "bundle_status",
+        "Processed"
+    )

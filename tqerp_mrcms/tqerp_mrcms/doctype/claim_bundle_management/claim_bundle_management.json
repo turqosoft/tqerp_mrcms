@@ -69,7 +69,7 @@
     {
       "fieldname": "bundle_status",
       "fieldtype": "Select",
-      "options": "\nOpen\nClosed\nSanctioned\nNot-Sanctioned",
+      "options": "\nOpen\nProcessing\nProcessed",
       "label": "Bundle Status",
       "default": "Open",
       "allow_on_submit": 1

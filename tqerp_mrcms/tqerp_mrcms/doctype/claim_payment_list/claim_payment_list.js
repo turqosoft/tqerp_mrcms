@@ -165,7 +165,7 @@ frappe.ui.form.on("Claim Payment List", {
 // Child Table: Claim Payment Details
 // ---------------------------------------
 frappe.ui.form.on("Claim Payment Details", {
-
+ 
     // Apply filter for claim_no field
     details_add: function(frm, cdt, cdn) {
         frm.fields_dict["details"].grid.get_field("claim_no").get_query = function(doc, cdt, cdn) {
@@ -176,43 +176,90 @@ frappe.ui.form.on("Claim Payment Details", {
             };
         };
     },
-
+ 
     // Row added
     details_add: function(frm, cdt, cdn) {
         calculate_payment_total(frm);
     },
-
+ 
     // Row removed
     details_remove: function(frm, cdt, cdn) {
         calculate_payment_total(frm);
     },
-
+ 
     // Table rendered
     details_on_form_rendered: function(frm, cdt, cdn) {
         calculate_payment_total(frm);
     },
-
+ 
     // Trigger whenever passed_amount is fetched/changed
     passed_amount: function(frm, cdt, cdn) {
         calculate_payment_total(frm);
     },
-
+ 
    
     claim_no: function(frm, cdt, cdn) {
         calculate_payment_total(frm);
-    }
+    },
+ 
+    // Row removed from child table
+    details_remove: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.claim_no) return;
+ 
+        // 1️⃣ Clear CPL link from the Claim
+        frappe.call({
+            method: "frappe.client.set_value",
+            args: {
+                doctype: "Claim",
+                name: row.claim_no,
+                fieldname: "claim_payment_list",
+                value: ""
+            },
+            callback: function() {
+                // Show browser message for testing
+                frappe.msgprint(`✅ Claim Payment List link removed from Claim: <b>${row.claim_no}</b>`);
+ 
+             
+            }
+        });
+ 
+        // 2️⃣ Update bundle status for the related Claim Bundle
+        if (row.claim_bundle_no) {
+            frappe.call({
+                method: "tqerp_mrcms.api.update_bundle_status",
+                args: { bundle_name: row.claim_bundle_no }
+            });
+        }
+    },
+ 
+ 
 });
-
-
-// ---------------------------------------
-// Sum passed_amount and set payment_total
-// ---------------------------------------
+ 
 function calculate_payment_total(frm) {
     let total = 0.0;
-
+    let bundles = {};
+ 
     (frm.doc.details || []).forEach(row => {
-        total += flt(row.passed_amount, 2);
+        if(row.claim_bundle_no) bundles[row.claim_bundle_no] = true;
     });
-
+ 
+    for(let bundle_no in bundles){
+        frappe.call({
+            method: "frappe.client.get_list",
+            async: false,  // synchronous call to wait for result
+            args: {
+                doctype: "Claim Bundle Details",
+                filters: { parent: bundle_no },
+                fields: ["passed_amount"]
+            },
+            callback: function(r) {
+                r.message.forEach(d => {
+                    total += flt(d.passed_amount, 2);
+                });
+            }
+        });
+    }
+ 
     frm.set_value("payment_total", total);
 }
