@@ -46,9 +46,6 @@ class ClaimBundleManagement(Document):
                     f"Claim Proceedings {proceedings}. You cannot add it to a bundle."
                 )
 
-            if self.workflow_state != "Draft":
-                self.bundle_status = "Closed"
-
     def before_save(self):
         # Store bundle number in each Claim
         for row in self.details:  
@@ -59,6 +56,13 @@ class ClaimBundleManagement(Document):
                     "claim_bundle_management",
                     self.name
                 )
+ 
+        # - Draft (including auto-created drafts where workflow_state may be empty) →bundle status is Open
+        # - Any non-Draft workflow state → bundle status is Closed
+        if not self.workflow_state or self.workflow_state == "Draft":
+            self.bundle_status = "Open"
+        else:
+            self.bundle_status = "Processing"
 
     def on_trash(self):
         """

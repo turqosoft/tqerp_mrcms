@@ -1,6 +1,6 @@
 frappe.ui.form.on("Claim Payment List", {
-  
-    onload: function(frm) {
+
+    onload: function (frm) {
         // Set Organisation field of logged in user automatically only if empty
         if (!frm.doc.organisation) {
             frappe.call({
@@ -8,11 +8,11 @@ frappe.ui.form.on("Claim Payment List", {
                 args: {
                     doctype: "User",
                     filters: { name: frappe.session.user },
-                    fieldname: "organisation"  
+                    fieldname: "organisation"
                 },
-                callback: function(r) {
+                callback: function (r) {
                     if (r && r.message) {
-                        frm.set_value("organisation", r.message.organisation);  
+                        frm.set_value("organisation", r.message.organisation);
                         frm.refresh_field("organisation");
 
                         // 🔹 Filter Fund Manager based on office
@@ -33,10 +33,10 @@ frappe.ui.form.on("Claim Payment List", {
     //     frm.set_value("payment_total", total);
     // },
 
-    refresh: function(frm) {
+    refresh: function (frm) {
         // Show Download button ONLY if submitted
-        if (frm.doc.docstatus === 1) {
-            frm.add_custom_button(__('Download List'), function() {
+        if (frm.doc.payment_state === "Sanctioned") {
+            frm.add_custom_button(__('Download List'), function () {
                 let d = new frappe.ui.Dialog({
                     title: __('Download Payment List'),
                     fields: [
@@ -58,7 +58,7 @@ frappe.ui.form.on("Claim Payment List", {
                         frappe.call({
                             method: method,
                             args: { docname: frm.doc.name },
-                            callback: function(r) {
+                            callback: function (r) {
                                 if (r.message) {
                                     window.open(r.message);
                                 } else {
@@ -135,7 +135,7 @@ frappe.ui.form.on("Claim Payment List", {
     },
 
 
-    claim_payment_no: frappe.utils.debounce(function(frm) {
+    claim_payment_no: frappe.utils.debounce(function (frm) {
         if (!frm.doc.claim_payment_no) return;
 
         frappe.call({
@@ -146,7 +146,7 @@ frappe.ui.form.on("Claim Payment List", {
                 fields: ['name'],
                 limit_page_length: 1
             },
-            callback: function(r) {
+            callback: function (r) {
                 if (r.message && r.message.length && r.message[0].name !== frm.doc.name) {
                     frappe.msgprint({
                         title: __('Duplicate Value'),
@@ -160,106 +160,61 @@ frappe.ui.form.on("Claim Payment List", {
     }, 300)
 });
 
-
 // ---------------------------------------
 // Child Table: Claim Payment Details
 // ---------------------------------------
 frappe.ui.form.on("Claim Payment Details", {
  
-    // Apply filter for claim_no field
-    details_add: function(frm, cdt, cdn) {
-        frm.fields_dict["details"].grid.get_field("claim_no").get_query = function(doc, cdt, cdn) {
-            return {
-                filters: {
-                    claim_status: "Sanctioned"
-                }
-            };
-        };
-    },
+    details_add(frm, cdt, cdn) {
  
-    // Row added
-    details_add: function(frm, cdt, cdn) {
-        calculate_payment_total(frm);
-    },
+        // ✅ Apply claim_no filter
+        if (frm.fields_dict["details"]) {
+            let claim_no_field =
+                frm.fields_dict["details"].grid.get_field("claim_no");
  
-    // Row removed
-    details_remove: function(frm, cdt, cdn) {
-        calculate_payment_total(frm);
-    },
- 
-    // Table rendered
-    details_on_form_rendered: function(frm, cdt, cdn) {
-        calculate_payment_total(frm);
-    },
- 
-    // Trigger whenever passed_amount is fetched/changed
-    passed_amount: function(frm, cdt, cdn) {
-        calculate_payment_total(frm);
-    },
- 
-   
-    claim_no: function(frm, cdt, cdn) {
-        calculate_payment_total(frm);
-    },
- 
-    // Row removed from child table
-    details_remove: function(frm, cdt, cdn) {
-        let row = locals[cdt][cdn];
-        if (!row.claim_no) return;
- 
-        // 1️⃣ Clear CPL link from the Claim
-        frappe.call({
-            method: "frappe.client.set_value",
-            args: {
-                doctype: "Claim",
-                name: row.claim_no,
-                fieldname: "claim_payment_list",
-                value: ""
-            },
-            callback: function() {
-                // Show browser message for testing
-                frappe.msgprint(`✅ Claim Payment List link removed from Claim: <b>${row.claim_no}</b>`);
- 
-             
+            if (claim_no_field) {
+                claim_no_field.get_query = function () {
+                    return {
+                        filters: [
+                            ["Claim", "claim_category", "in", ["Category C1", "Category C2", "Category D"]],
+                            ["Claim", "claim_payment_list", "is", "not set"],
+                            ["Claim", "claim_status", "=", "Sanctioned"]
+                        ]
+                    };
+                };
             }
-        });
- 
-        // 2️⃣ Update bundle status for the related Claim Bundle
-        if (row.claim_bundle_no) {
-            frappe.call({
-                method: "tqerp_mrcms.api.update_bundle_status",
-                args: { bundle_name: row.claim_bundle_no }
-            });
         }
+ 
+        // Recalculate total
+        calculate_payment_total(frm);
     },
  
+    details_remove(frm) {
+        calculate_payment_total(frm);
+    },
  
+    details_on_form_rendered(frm) {
+        calculate_payment_total(frm);
+    },
+ 
+    passed_amount(frm) {
+        calculate_payment_total(frm);
+    },
+ 
+    claim_no(frm) {
+        calculate_payment_total(frm);
+    }
 });
  
+ 
+//calculate payment total and total alocated from passed amount
 function calculate_payment_total(frm) {
-    let total = 0.0;
-    let bundles = {};
+    let total = 0;
  
     (frm.doc.details || []).forEach(row => {
-        if(row.claim_bundle_no) bundles[row.claim_bundle_no] = true;
+        total += flt(row.passed_amount);
     });
  
-    for(let bundle_no in bundles){
-        frappe.call({
-            method: "frappe.client.get_list",
-            async: false,  // synchronous call to wait for result
-            args: {
-                doctype: "Claim Bundle Details",
-                filters: { parent: bundle_no },
-                fields: ["passed_amount"]
-            },
-            callback: function(r) {
-                r.message.forEach(d => {
-                    total += flt(d.passed_amount, 2);
-                });
-            }
-        });
-    }
- 
     frm.set_value("payment_total", total);
+    frm.set_value('total_allocated', total);
 }

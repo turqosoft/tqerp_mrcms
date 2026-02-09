@@ -1,6 +1,5 @@
 import frappe
 from frappe.model.document import Document
-from frappe.model.naming import make_autoname
 from tqerp_mrcms.api import update_bundle_status
 
 
@@ -15,82 +14,240 @@ class ClaimPaymentList(Document):
         self.submitted_by_name = user.full_name
         self.submitted_by_authority = user.authority
 
+    # --------------------------------------------------
+    # BEFORE INSERT
+    # --------------------------------------------------
+    def before_insert(self):
+        """
+        Allow only:
+        - Unlinked claims
+        - Claims already linked to THIS CPL
+        Block claims linked to OTHER CPLs
+        """
+        valid_rows = []
+        skipped_claims = []
 
+        for row in self.details:
+            if not row.claim_no:
+                continue
 
+            existing_pl = frappe.db.get_value(
+                "Claim", row.claim_no, "claim_payment_list"
+            )
 
+            if existing_pl and existing_pl != self.name:
+                skipped_claims.append(
+                    f"{row.claim_no} (already in {existing_pl})"
+                )
+            else:
+                valid_rows.append(row)
+
+        if not valid_rows:
+            frappe.throw(
+                "❌ All selected claims are already linked to other Claim Payment Lists:<br><br>"
+                + "<br>".join(skipped_claims)
+            )
+
+        # if skipped_claims:
+        #     frappe.msgprint(
+        #         "⚠️ These claims were skipped because they are already linked to other CPLs:<br><br>"
+        #         + "<br>".join(skipped_claims),
+        #         indicator="orange",
+        #         title="Skipped Claims"
+        #     )
+
+        self.details = valid_rows
 
     def before_save(self):
-        # Get current claim numbers from child table
-        current_rows = [row for row in self.details if row.claim_no]
+        if self.is_new():
+            return
 
-        current_claims = [row.claim_no for row in current_rows]
+        from tqerp_mrcms.api import reverse_fund_on_cancel
 
-        # Get all Claims that were previously linked to this CPL
-        previous_claims = frappe.get_all(
-            "Claim",
-            filters={"claim_payment_list": self.name},
-            fields=["name"]
+        old_fund = frappe.db.get_value(
+            self.doctype, self.name, "fund_manager"
         )
 
-        # -------------------------------
-        # Remove CPL link from Claims that were deleted
-        # -------------------------------
-        for claim in previous_claims:
-            if claim.name not in current_claims:
-                # Clear link from Claim
-                frappe.db.set_value("Claim", claim.name, "claim_payment_list", None)
+        # Refund old fund if fund manager changed
+        if old_fund and old_fund != self.fund_manager:
+            reverse_fund_on_cancel(name=self.name, doctype=self.doctype)
 
-                # Also clear link in Claim Bundle Details
-                rows = frappe.get_all(
-                    "Claim Bundle Details",
-                    filters={"claim_no": claim.name},
-                    fields=["parent"]
+
+    # --------------------------------------------------
+    # ON UPDATE claim bundle-claim payment link
+    # --------------------------------------------------
+    # def before_save(self):
+    def on_update(self):
+        #  Prevent recursion in same request
+        if frappe.flags.get("in_cpl_before_save"):
+            return
+
+        frappe.flags.in_cpl_before_save = True
+
+        try:
+            if self.is_new():
+                return
+
+            affected_bundles = set()
+            browser_messages = []
+
+            # --------------------------------------------------
+            # CLAIMS CURRENTLY LINKED TO THIS CPL (DB STATE)
+            # --------------------------------------------------
+            db_claims = set(
+                frappe.get_all(
+                    "Claim",
+                    filters={"claim_payment_list": self.name},
+                    pluck="name"
                 )
-                for r in rows:
+            )
+
+            ui_claims = {r.claim_no for r in self.details if r.claim_no}
+
+            # --------------------------------------------------
+            # REMOVED CLAIMS (UI → DB DIFF)
+            # --------------------------------------------------
+            for claim_no in db_claims - ui_claims:
+
+                # Clear Claim master link
+                frappe.db.set_value(
+                    "Claim",
+                    claim_no,
+                    "claim_payment_list",
+                    None,
+                    update_modified=False
+                )
+
+                # Clear ONLY rows linked to THIS CPL
+                child_rows = frappe.get_all(
+                    "Claim Bundle Details",
+                    filters={
+                        "claim_no": claim_no,
+                        "claim_payment_list": self.name,
+                        "parenttype": "Claim Bundle Management"
+                    },
+                    fields=["name", "parent"]
+                )
+
+                for r in child_rows:
                     frappe.db.set_value(
                         "Claim Bundle Details",
-                        {
-                            "parent": r.parent,
-                            "parenttype": "Claim Bundle Management",
-                            "claim_no": claim.name
-                        },
+                        r.name,
                         "claim_payment_list",
-                        None
+                        None,
+                        update_modified=False
                     )
-                    # Optional: update bundle status
-                    update_bundle_status(r.parent)
 
-        # -------------------------------
-        # Update CPL link for all current rows
-        # -------------------------------
-        for row in current_rows:
-            if row.claim_no:
-                # Update Claim
-                frappe.db.set_value("Claim", row.claim_no, "claim_payment_list", self.name)
+                    affected_bundles.add(r.parent)
 
-                # Update Claim Bundle Details
-                if row.claim_bundle_no:
+                    # browser_messages.append(
+                    #     f"❌ Claim <b>{claim_no}</b> unlinked from "
+                    #     f"Claim Payment List <b>{self.name}</b>"
+                    # )
+
+            # --------------------------------------------------
+            # ADD / UPDATE CLAIMS FROM UI
+            # --------------------------------------------------
+            for row in self.details:
+                if not row.claim_no or not row.claim_bundle_no:
+                    continue
+
+                # Current CPL on Claim 
+                existing_pl = frappe.db.get_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_payment_list"
+                )
+
+                #  Never override another CPL
+                if existing_pl and existing_pl != self.name:
+                    continue
+
+                # Link Claim → CPL if unlinked
+                if not existing_pl:
                     frappe.db.set_value(
-                        "Claim Bundle Details",
-                        {
-                            "parent": row.claim_bundle_no,
-                            "parenttype": "Claim Bundle Management",
-                            "claim_no": row.claim_no
-                        },
+                        "Claim",
+                        row.claim_no,
                         "claim_payment_list",
-                        self.name
+                        self.name,
+                        update_modified=False
                     )
-                    update_bundle_status(row.claim_bundle_no)
 
+                # Fetch EXACT bundle child row
+                child_row = frappe.db.get_value(
+                    "Claim Bundle Details",
+                    {
+                        "claim_no": row.claim_no,
+                        "parent": row.claim_bundle_no,
+                        "parenttype": "Claim Bundle Management"
+                    },
+                    ["name", "claim_payment_list"],
+                    as_dict=True
+                )
+
+                if not child_row:
+                    continue
+
+                old_pl = child_row.claim_payment_list
 
                 
+                if old_pl != self.name:
+                    frappe.db.set_value(
+                        "Claim Bundle Details",
+                        child_row.name,
+                        "claim_payment_list",
+                        self.name,
+                        update_modified=False
+                    )
+
+                    # browser_messages.append(
+                    #     f" Claim <b>{row.claim_no}</b> linked to "
+                    #     f"Claim Payment List <b>{self.name}</b>"
+                    # )
+
+                    affected_bundles.add(row.claim_bundle_no)
+
+            # --------------------------------------------------
+            # UPDATE BUNDLE STATUS 
+            # --------------------------------------------------
+            for bundle in affected_bundles:
+                update_bundle_status(bundle)
+
+            # --------------------------------------------------
+            # SHOW BROWSER MESSAGE (ONCE)
+            # --------------------------------------------------
+            if browser_messages:
+                frappe.msgprint(
+                    "<br>".join(browser_messages),
+                    title="Claim Payment List Changes",
+                    indicator="green"
+                )
+
+        finally:
+            frappe.flags.in_cpl_before_save = False
+
+
+
+   # --------------------------------------------------
+    # ON TRASH
+    # --------------------------------------------------
     def on_trash(self):
-        """
-        Clear claim_bundle_management link from Claim
-        when this document is deleted.
-        """
+        from tqerp_mrcms.api import reverse_fund_on_cancel
+
+        # 1️⃣ Reverse allocated fund
+        reverse_fund_on_cancel(name=self.name, doctype=self.doctype)
+
+        # 2️⃣ Clear CPL link from Claims
         for row in self.details:
-            if row.claim_no:
+            if not row.claim_no:
+                continue
+
+            current_link = frappe.db.get_value(
+                "Claim", row.claim_no, "claim_payment_list"
+            )
+
+            # Only unlink if THIS CPL set it
+            if current_link == self.name:
                 frappe.db.set_value(
                     "Claim",
                     row.claim_no,
@@ -98,77 +255,56 @@ class ClaimPaymentList(Document):
                     None
                 )
 
+
+    # --------------------------------------------------
+    # VALIDATE
+    # --------------------------------------------------
     def validate(self):
-        """
-        Validate the Claim Payment List:
-        1. Prevent duplicate claims in the same Payment List.
-        2. Optional: check that passed amounts or other fields are correct.
-        """
         seen = set()
+
         for row in self.details:
             if not row.claim_no:
                 continue
 
-            # Prevent duplicate claim in same document
             if row.claim_no in seen:
-                frappe.throw(f"❌ Claim {row.claim_no} is duplicated in the Payment List.")
+                frappe.throw(
+                    f"❌ Claim <b>{row.claim_no}</b> is duplicated in this Claim Payment List."
+                )
+
             seen.add(row.claim_no)
 
-        # Optional: other validations (e.g., total passed amount, fund checks, etc.)
         if not self.details:
-            frappe.throw("⚠️ No valid Claims available to save in this Payment List.")
+            frappe.throw(
+                "⚠️ At least one Claim is required to save the Claim Payment List."
+            )
 
-    def before_insert(self):
-        # Filter out rows already linked to another Payment List
-        valid_rows = []
-        for row in self.details:
-            if not row.claim_no:
-                continue
-            existing_pl = frappe.db.get_value("Claim", row.claim_no, "claim_payment_list")
-            if existing_pl:
-                frappe.msgprint(
-                    f"⚠️ Claim {row.claim_no} is already linked to "
-                    f"Claim Payment List <b>{existing_pl}</b> and will be skipped.",
-                    title="Skipped Claim",
-                    indicator="orange"
-                )
-            else:
-                valid_rows.append(row)
+      # ✅ FINAL authority for totals
+        self.payment_total = sum(
+            (row.passed_amount or 0) for row in self.details
+        )  
 
-        # Replace child table with only valid rows
-        self.details = valid_rows
+        self.total_allocated = sum(
+            (row.passed_amount or 0) for row in self.details
+        )  
 
 
-        
+    
 
+       
 
-    # def on_submit(self):
-    #     # Store bundle number in each Claim
-    #     for row in self.details:   
+    # def on_cancel(self):
+    #     from tqerp_mrcms.api import reverse_fund_on_cancel
+    #     reverse_fund_on_cancel(self.name)
+
+    #      # Clear bundle number from Claim
+    #     for row in self.details:
     #         if row.claim_no:
     #             frappe.db.set_value(
     #                 "Claim",
     #                 row.claim_no,
     #                 "claim_payment_list",
-    #                 self.name
+    #                 None
     #             )
-
-
-       
-
-    def on_cancel(self):
-        from tqerp_mrcms.api import reverse_fund_on_cancel
-        reverse_fund_on_cancel(self.name)
-
-         # Clear bundle number from Claim
-        for row in self.details:
-            if row.claim_no:
-                frappe.db.set_value(
-                    "Claim",
-                    row.claim_no,
-                    "claim_payment_list",
-                    None
-                )
 
 
 def get_child_organisations(root_office):

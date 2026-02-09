@@ -66,6 +66,7 @@ frappe.ui.form.on("Claim Bundle Management", {
 // Child Table: Claim Bundle Details
 // Apply filter for claim_no field
 // ---------------------------------------
+// --------------------------------------
 frappe.ui.form.on("Claim Bundle Details", {
     details_add: function(frm, cdt, cdn) {
         frm.fields_dict["details"].grid.get_field("claim_no").get_query = function(doc, cdt, cdn) {
@@ -76,12 +77,10 @@ frappe.ui.form.on("Claim Bundle Details", {
                 }
             };
         };
-    },
-
-    // Row added
-    details_add: function(frm, cdt, cdn) {
         calculate_bundle_total(frm);
     },
+ 
+   
     // Row removed
     details_remove: function(frm, cdt, cdn) {
         calculate_bundle_total(frm);
@@ -95,7 +94,7 @@ frappe.ui.form.on("Claim Bundle Details", {
         calculate_bundle_total(frm);
     }
 });
-
+ 
 // function to sum 'passed_amount' from table and set 'bundle_total'
 function calculate_bundle_total(frm) {
     let total = 0.0;
@@ -103,5 +102,5 @@ function calculate_bundle_total(frm) {
         total += flt(row.passed_amount, 2); // convert to float, 2 decimals
     });
     frm.set_value('bundle_total', total);
+   
 }
-

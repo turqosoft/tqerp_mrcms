@@ -8,7 +8,25 @@ frappe.ui.form.on('Claim Payment List', {
             };
         });
     },
-    
+    after_save(frm) {
+        // ✅ Guard using REAL field
+        if (frm.doc.payment_status === "Paid") {
+            return;
+        }
+ 
+        frappe.call({
+            method: "tqerp_mrcms.api.allocate_fund_on_submit",
+            args: {
+                docname: frm.doc.name,
+                doctype: "Claim Payment List"
+            },
+            callback(r) {
+                if (!r.exc) {
+                    frm.reload_doc(); // refresh balances + status
+                }
+            }
+        });
+    },
     onload: function(frm) {
 
         if (!frm.is_new()) return;
