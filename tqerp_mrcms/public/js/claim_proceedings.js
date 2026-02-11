@@ -63,21 +63,6 @@ frappe.ui.form.on('Claim Proceedings', {
     claim_proceedings_remove: update_total,
 
     // -------------------------------
-    // REFRESH
-    // -------------------------------
-    refresh: function (frm) {
-
-        // 🔒 AFTER SUBMIT → NO UI LOGIC
-        if (frm.doc.docstatus === 1) return;
-
-        if (frm.doc.fund_manager && frm.doc.organisation) {
-            fetch_fund_details(frm);
-        }
-
-        update_total(frm);
-    },
-
-    // -------------------------------
     // VALIDATION
     // -------------------------------
     validate: function (frm) {
