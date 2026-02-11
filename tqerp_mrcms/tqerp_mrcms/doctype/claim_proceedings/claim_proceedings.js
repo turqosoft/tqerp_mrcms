@@ -104,17 +104,72 @@ frappe.ui.form.on("Claim Proceedings", {
 // Child Table: Claim Proceedings Details
 // Apply filter for claim_no field
 // ---------------------------------------
+// ---------------------------------------
+// Child Table: Claim Proceedings Details
+// ---------------------------------------
 frappe.ui.form.on("Claim Proceedings Details", {
+ 
+    // When row added
     claim_proceedings_add: function(frm, cdt, cdn) {
-        frm.fields_dict["claim_proceedings"]
-            .grid.get_field("claim_no")
-            .get_query = function() {
-                return {
-                    filters: {
-                        claim_status: "Sanctioned",
-                        claim_category: ["in", ["Category A", "Category B"]]
-                    }
+ 
+        // Apply filter for claim_no
+        if (frm.fields_dict["claim_proceedings"]) {
+ 
+            let claim_field =
+                frm.fields_dict["claim_proceedings"]
+                    .grid.get_field("claim_no");
+ 
+            if (claim_field) {
+                claim_field.get_query = function () {
+                    return {
+                        filters: [
+                            ["Claim", "claim_status", "=", "Sanctioned"],
+                            ["Claim", "claim_category", "in", ["Category A", "Category B"]],
+                            ["Claim", "claim_proceedings", "is", "not set"]
+                        ]
+                    };
                 };
-            };
+            }
+        }
+ 
+        calculate_proceedings_total(frm);
+    },
+ 
+    // When row removed
+    claim_proceedings_remove: function(frm) {
+        calculate_proceedings_total(frm);
+    },
+ 
+    // When passed_amount changes
+    passed_amount: function(frm) {
+        calculate_proceedings_total(frm);
+    },
+ 
+    // When claim selected
+    claim_no: function(frm) {
+        calculate_proceedings_total(frm);
     }
 });
+ 
+ 
+// ---------------------------------------
+// Calculate Total Allocated
+// ---------------------------------------
+function calculate_proceedings_total(frm) {
+ 
+    let total = 0;
+ 
+    (frm.doc.claim_proceedings || []).forEach(row => {
+        total += flt(row.passed_amount || 0);
+    });
+ 
+    frm.set_value("total_allocated", total);
+ 
+    // Live balance calculation
+    if (frm.doc.available) {
+        frm.set_value(
+            "balance",
+            flt(frm.doc.available) - flt(total)
+        );
+    }
+}

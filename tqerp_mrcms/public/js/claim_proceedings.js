@@ -3,7 +3,7 @@ frappe.ui.form.on('Claim Proceedings', {
     // -------------------------------
     // ONLOAD
     // -------------------------------
-    onload: function(frm) {
+    onload: function (frm) {
 
         // 🔹 Auto-set Organisation from logged-in user
         frappe.call({
@@ -13,13 +13,13 @@ frappe.ui.form.on('Claim Proceedings', {
                 filters: { name: frappe.session.user },
                 fieldname: ["organisation"]
             },
-            callback: function(r) {
+            callback: function (r) {
                 if (r.message && r.message.organisation) {
 
                     frm.set_value("organisation", r.message.organisation);
 
                     // 🔹 Filter Fund Manager based on organisation
-                    frm.set_query("fund_manager", function() {
+                    frm.set_query("fund_manager", function () {
                         return {
                             query: "tqerp_mrcms.api.get_available_fund_managers",
                             filters: { organisation: r.message.organisation }
@@ -34,11 +34,24 @@ frappe.ui.form.on('Claim Proceedings', {
             }
         });
     },
+    // -------------------------------
+    // REFRESH
+    // -------------------------------
+    refresh: function (frm) {
+
+        if (frm.doc.docstatus === 1) return;
+
+        if (frm.is_new() && frm.doc.fund_manager && frm.doc.organisation) {
+            fetch_fund_details(frm, frm.doc.organisation);
+        }
+
+        // update_total(frm);
+    },
 
     // -------------------------------
     // FUND MANAGER CHANGE (DRAFT ONLY)
     // -------------------------------
-    fund_manager: function(frm) {
+    fund_manager: function (frm) {
         if (!frm.doc.fund_manager || frm.doc.docstatus === 1) return;
         fetch_fund_details(frm);
     },
@@ -52,7 +65,7 @@ frappe.ui.form.on('Claim Proceedings', {
     // -------------------------------
     // REFRESH
     // -------------------------------
-    refresh: function(frm) {
+    refresh: function (frm) {
 
         // 🔒 AFTER SUBMIT → NO UI LOGIC
         if (frm.doc.docstatus === 1) return;
@@ -67,7 +80,7 @@ frappe.ui.form.on('Claim Proceedings', {
     // -------------------------------
     // VALIDATION
     // -------------------------------
-    validate: function(frm) {
+    validate: function (frm) {
         if (
             frm.doc.total_allocated &&
             frm.doc.available &&
@@ -80,29 +93,29 @@ frappe.ui.form.on('Claim Proceedings', {
         }
     },
 
-    // -------------------------------
-    // BEFORE SUBMIT
-    // -------------------------------
-    before_submit: function(frm) {
+    after_save: function (frm) {
 
+        if (frm.doc.proceedings_status === "Paid") {
+            return;
+        }
+
+        // ✅ Validation
         if (flt(frm.doc.total_allocated) > flt(frm.doc.available)) {
             frappe.throw(
-                __("Cannot submit. Total Allocated ({0}) is greater than Available Fund ({1})",
+                __("Cannot save. Total Allocated ({0}) is greater than Available Fund ({1})",
                     [frm.doc.total_allocated, frm.doc.available])
             );
         }
-
         frappe.call({
             method: "tqerp_mrcms.api.allocate_fund_on_submit",
             args: {
                 docname: frm.doc.name,
                 doctype: "Claim Proceedings"
-            },
-            async: false
+            }
         });
+
     }
 });
-
 
 // ======================================
 // HELPER FUNCTIONS
@@ -136,7 +149,7 @@ function fetch_fund_details(frm) {
             fund_manager: frm.doc.fund_manager,
             organisation: frm.doc.organisation
         },
-        callback: function(r) {
+        callback: function (r) {
 
             if (!r.message) return;
 

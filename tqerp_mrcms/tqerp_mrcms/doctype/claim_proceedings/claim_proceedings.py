@@ -115,24 +115,75 @@ class ClaimProceedings(Document):
                     f"You cannot create another Claim Proceedings for this claim."
                 )
  
- 
+    # --------------------------------------------------
+    # BEFORE SAVE
+    # --------------------------------------------------
     def before_save(self):
-        for row in self.claim_proceedings:
-            if row.claim_no:
-                frappe.db.set_value(
-                    "Claim",
-                    row.claim_no,
-                    "claim_proceedings",
-                    self.name
+ 
+        # ------------------------------------------
+        # 1️⃣ Refund old fund if Fund Manager changed
+        # ------------------------------------------
+        if not self.is_new():
+ 
+            old_fund = frappe.db.get_value(
+                self.doctype,
+                self.name,
+                "fund_manager"
+            )
+ 
+            if old_fund and old_fund != self.fund_manager:
+                from tqerp_mrcms.api import reverse_fund_on_cancel
+ 
+                reverse_fund_on_cancel(
+                    name=self.name,
+                    doctype=self.doctype
                 )
-   
-    def on_trash(self):
-        """
-        Clear claim_proceedings link from Claim
-        when a draft Claim Proceedings is deleted.
-        """
+ 
+        # ------------------------------------------
+        # 2️⃣ Link Claim → Claim Proceedings
+        # ------------------------------------------
         for row in self.claim_proceedings:
-            if row.claim_no:
+            if not row.claim_no:
+                continue
+ 
+            frappe.db.set_value(
+                "Claim",
+                row.claim_no,
+                "claim_proceedings",
+                self.name
+            )
+ 
+ 
+    # --------------------------------------------------
+    # ON TRASH
+    # --------------------------------------------------
+    def on_trash(self):
+ 
+        from tqerp_mrcms.api import reverse_fund_on_cancel
+ 
+        # ------------------------------------------
+        # 1️⃣ Reverse allocated fund
+        # ------------------------------------------
+        reverse_fund_on_cancel(
+            name=self.name,
+            doctype=self.doctype
+        )
+ 
+        # ------------------------------------------
+        # 2️⃣ Clear claim_proceedings link safely
+        # ------------------------------------------
+        for row in self.claim_proceedings:
+            if not row.claim_no:
+                continue
+ 
+            current_link = frappe.db.get_value(
+                "Claim",
+                row.claim_no,
+                "claim_proceedings"
+            )
+ 
+            # Only unlink if THIS CP set it
+            if current_link == self.name:
                 frappe.db.set_value(
                     "Claim",
                     row.claim_no,
