@@ -347,7 +347,6 @@ fixtures = [
                 "District",
                 "Authority",
                 "Claim Bundle Management",
-                "Claim Sanction List",
                 "Local Office",
                 "Claim Payment List",
                 "Workflow",
