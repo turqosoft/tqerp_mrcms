@@ -16,6 +16,7 @@
     "district",
     "cb_break_cbm1",
     "bundle_date",
+    "bundle_state",
     "remarks",
     "sbm_section",
     "details",
@@ -25,8 +26,8 @@
     "cb_break_u1",
     "submitted_by_name",
     "cb_break_u2",
-    "submitted_by_authority",
-    "bundle_state"
+    "submitted_by_authority"
+    
   ],
   "fields": [
     {

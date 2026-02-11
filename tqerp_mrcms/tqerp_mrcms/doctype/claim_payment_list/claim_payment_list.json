@@ -15,6 +15,7 @@
     "claim_category",
     "cb_break_cpl1",
     "payment_date",
+    "payment_state",
     "remarks",
     "cpl_section2",
     "fund_manager",
@@ -38,8 +39,7 @@
     "cb_break_cpu1",
     "submitted_by_name",
     "cb_break_cpu2",
-    "submitted_by_authority",
-    "payment_state"
+    "submitted_by_authority"
   ],
   "fields": [
     {
