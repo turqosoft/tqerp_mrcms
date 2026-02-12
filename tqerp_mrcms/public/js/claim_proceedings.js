@@ -1,15 +1,17 @@
 frappe.ui.form.on('Claim Proceedings', {
 
     
-    setup: function(frm) {
+   setup: function(frm) {
         frm.set_query("fund_manager", function() {
             return {
                 query: "tqerp_mrcms.api.get_available_fund_managers",
-                filters: { organisation: frm.doc.organisation }
+                filters: {
+                    organisation: frm.doc.organisation,
+                    expired: 0
+                }
             };
         });
     },
-    
     onload: function(frm) {
 
         if (!frm.is_new()) return;

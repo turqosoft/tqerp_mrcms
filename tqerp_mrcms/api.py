@@ -2131,6 +2131,10 @@ def get_available_fund_managers(doctype=None, txt=None, searchfield=None,
     for fm_name in fm_names:
         fm_doc = frappe.get_doc("Fund Manager", fm_name)
  
+        # ✅ Skip expired funds
+        if fm_doc.expired:
+            continue
+
         total_allocatable = sum(
             flt(row.fixed or 0) - flt(row.allocated or 0)
             for row in fm_doc.details

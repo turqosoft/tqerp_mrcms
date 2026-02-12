@@ -4,7 +4,10 @@ frappe.ui.form.on('Claim Payment List', {
         frm.set_query("fund_manager", function() {
             return {
                 query: "tqerp_mrcms.api.get_available_fund_managers",
-                filters: { organisation: frm.doc.organisation }
+                filters: {
+                    organisation: frm.doc.organisation,
+                    expired: 0
+                }
             };
         });
     },
