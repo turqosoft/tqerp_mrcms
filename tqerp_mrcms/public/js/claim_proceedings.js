@@ -1,11 +1,20 @@
 frappe.ui.form.on('Claim Proceedings', {
 
-    // -------------------------------
-    // ONLOAD
-    // -------------------------------
-    onload: function (frm) {
+    
+    setup: function(frm) {
+        frm.set_query("fund_manager", function() {
+            return {
+                query: "tqerp_mrcms.api.get_available_fund_managers",
+                filters: { organisation: frm.doc.organisation }
+            };
+        });
+    },
+    
+    onload: function(frm) {
 
-        // 🔹 Auto-set Organisation from logged-in user
+        if (!frm.is_new()) return;
+    
+        // Get logged-in user's organisation
         frappe.call({
             method: "frappe.client.get_value",
             args: {
@@ -13,45 +22,27 @@ frappe.ui.form.on('Claim Proceedings', {
                 filters: { name: frappe.session.user },
                 fieldname: ["organisation"]
             },
-            callback: function (r) {
-                if (r.message && r.message.organisation) {
+            callback: function(r) {
+                if (r.message && r.message.organisation && !frm.doc.organisation) {
 
-                    frm.set_value("organisation", r.message.organisation);
-
-                    // 🔹 Filter Fund Manager based on organisation
-                    frm.set_query("fund_manager", function () {
-                        return {
-                            query: "tqerp_mrcms.api.get_available_fund_managers",
-                            filters: { organisation: r.message.organisation }
-                        };
-                    });
-
-                    // 🔹 Fetch fund details if already selected
-                    if (frm.doc.fund_manager && frm.doc.docstatus === 0) {
-                        fetch_fund_details(frm);
-                    }
+                    
+                    frm.doc.organisation = r.message.organisation;
+                    frm.refresh_field("organisation");
                 }
             }
         });
-    },
-    // -------------------------------
-    // REFRESH
-    // -------------------------------
-    refresh: function (frm) {
-
-        if (frm.doc.docstatus === 1) return;
-
-        if (frm.is_new() && frm.doc.fund_manager && frm.doc.organisation) {
-            fetch_fund_details(frm, frm.doc.organisation);
+    
+        // Silent autofill total_allocated (NEW DOC ONLY)
+        if (frm.doc.payment_total && !frm.doc.total_allocated) {
+            frm.doc.total_allocated = frm.doc.payment_total;
+            frm.refresh_field("total_allocated");
         }
-
-        // update_total(frm);
     },
 
     // -------------------------------
     // FUND MANAGER CHANGE (DRAFT ONLY)
     // -------------------------------
-    fund_manager: function (frm) {
+    fund_manager: function(frm) {
         if (!frm.doc.fund_manager || frm.doc.docstatus === 1) return;
         fetch_fund_details(frm);
     },
@@ -63,9 +54,23 @@ frappe.ui.form.on('Claim Proceedings', {
     claim_proceedings_remove: update_total,
 
     // -------------------------------
+    // REFRESH
+    // -------------------------------
+    refresh: function(frm) {
+
+        if (frm.doc.docstatus === 1) return;
+    
+        if (frm.is_new() && frm.doc.fund_manager && frm.doc.organisation) {
+            fetch_fund_details(frm, frm.doc.organisation);
+        }
+    
+        // update_total(frm);
+    },    
+
+    // -------------------------------
     // VALIDATION
     // -------------------------------
-    validate: function (frm) {
+    validate: function(frm) {
         if (
             frm.doc.total_allocated &&
             frm.doc.available &&
@@ -91,6 +96,8 @@ frappe.ui.form.on('Claim Proceedings', {
                     [frm.doc.total_allocated, frm.doc.available])
             );
         }
+
+    
         frappe.call({
             method: "tqerp_mrcms.api.allocate_fund_on_submit",
             args: {
@@ -98,9 +105,12 @@ frappe.ui.form.on('Claim Proceedings', {
                 doctype: "Claim Proceedings"
             }
         });
-
+    
     }
+    
+
 });
+
 
 // ======================================
 // HELPER FUNCTIONS
@@ -134,7 +144,7 @@ function fetch_fund_details(frm) {
             fund_manager: frm.doc.fund_manager,
             organisation: frm.doc.organisation
         },
-        callback: function (r) {
+        callback: function(r) {
 
             if (!r.message) return;
 

@@ -1924,10 +1924,14 @@ def validate_fund_availability(doc):
  
  
 def validate(doc, method):
-    if doc.doctype not in ("Claim Payment List", "Claim Proceedings"):
+ 
+    # Skip if workflow triggered
+    if frappe.form_dict.cmd == "frappe.model.workflow.apply_workflow":
         return
  
-    validate_fund_availability(doc)
+    if doc.docstatus == 0:
+        validate_fund_availability(doc)
+ 
  
  
 # -------------------------------------------------
@@ -1939,7 +1943,7 @@ def allocate_fund_on_submit(docname, doctype=None):
     doctype = doctype or "Claim Payment List"
     doc = frappe.get_doc(doctype, docname)
  
-    validate_fund_availability(doc)
+    # validate_fund_availability(doc)
  
     if not doc.fund_manager or not doc.organisation:
         return True
