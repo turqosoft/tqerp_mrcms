@@ -34,28 +34,28 @@ frappe.ui.form.on("Claim Bundle Management", {
 
 
     physical_bundle_no: frappe.utils.debounce(function(frm) {
-        if (!frm.doc.physical_bundle_no) return;
-
-        frappe.call({
-            method: 'frappe.client.get_list',
-            args: {
-                doctype: 'Claim Bundle Management',
-                filters: { physical_bundle_no: frm.doc.physical_bundle_no },
-                fields: ['name'],
-                limit_page_length: 1
-            },
-            callback: function(r) {
-                if (r.message && r.message.length && r.message[0].name !== frm.doc.name) {
-                    frappe.msgprint({
-                        title: __('Duplicate Value'),
-                        message: __('Physical Bundle Number already exists'),
-                        indicator: 'red'
-                    });
-                    frm.set_value('physical_bundle_no', '');
+            if (!frm.doc.physical_bundle_no) return;
+    
+            frappe.call({
+                method: 'frappe.client.get_list',
+                args: {
+                    doctype: 'Claim Bundle Management',
+                    filters: { physical_bundle_no: frm.doc.physical_bundle_no },
+                    fields: ['name'],
+                    limit_page_length: 1
+                },
+                callback: function(r) {
+                    if (r.message && r.message.length && r.message[0].name !== frm.doc.name) {
+                        frappe.msgprint({
+                            title: __('Duplicate Value'),
+                            message: __('Physical Bundle Number already exists'),
+                            indicator: 'red'
+                        });
+                        frm.set_value('physical_bundle_no', '');
+                    }
                 }
-            }
-        });
-    }, 300),
+            });
+        }, 300),
 
     
     
