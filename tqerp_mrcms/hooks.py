@@ -266,13 +266,19 @@ doc_events = {
     "Claim Proceedings": {
         "on_submit": "tqerp_mrcms.api.update_claim_status_on_submit",
         "on_cancel": "tqerp_mrcms.api.update_claim_status_on_cancel",
-        "validate": "tqerp_mrcms.api.validate"
+        "validate": "tqerp_mrcms.api.validate",
+        "on_update": "tqerp_mrcms.tqerp_mrcms.doctype.fund_utilization_entry.fund_utilization_entry.create_utilization_entry"
     },
     "Claim Payment List": {
-        "validate": "tqerp_mrcms.api.validate"
+        "validate": "tqerp_mrcms.api.validate",
+        "on_update": "tqerp_mrcms.tqerp_mrcms.doctype.fund_utilization_entry.fund_utilization_entry.create_utilization_entry"
     },
     "Claim": {
         "on_update": "tqerp_mrcms.api.auto_add_claim_to_bundle"
+    },
+    "Fund Manager": {
+        "on_submit": "tqerp_mrcms.tqerp_mrcms.doctype.fund_manager.fund_manager.create_opening_entries",
+        "on_cancel": "tqerp_mrcms.tqerp_mrcms.doctype.fund_manager.fund_manager.create_opening_entries"
     }
 }
 
