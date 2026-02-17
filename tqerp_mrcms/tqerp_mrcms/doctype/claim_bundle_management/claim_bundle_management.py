@@ -47,18 +47,85 @@ class ClaimBundleManagement(Document):
                 )
 
     def before_save(self):
-        # Store bundle number in each Claim
-        for row in self.details:  
-            if row.claim_no:
+ 
+        # --------------------------------------------------
+        # 1️⃣ BUNDLE → CLAIM LINK SYNC
+        # --------------------------------------------------
+ 
+        # Get old child claims (only if document already exists)
+        old_claims = set()
+ 
+        if not self.is_new():
+            old_rows = frappe.get_all(
+                "Claim Bundle Details",  
+                filters={"parent": self.name},
+                pluck="claim_no"
+            )
+            old_claims = set(old_rows)
+ 
+        # Current UI claims
+        current_claims = {
+            row.claim_no for row in self.details if row.claim_no
+        }
+ 
+        # Claims removed from UI
+        removed_claims = old_claims - current_claims
+ 
+        # Claims newly added
+        added_claims = current_claims - old_claims
+ 
+        # --------------------------------------------------
+        # 2️⃣ CLEAR REMOVED CLAIM LINKS
+        # --------------------------------------------------
+        for claim_no in removed_claims:
+ 
+            current_link = frappe.db.get_value(
+                "Claim",
+                claim_no,
+                "claim_bundle_management"
+            )
+ 
+            # Only clear if linked to THIS bundle
+            if current_link == self.name:
                 frappe.db.set_value(
                     "Claim",
-                    row.claim_no,
+                    claim_no,
                     "claim_bundle_management",
-                    self.name
+                    None,
+                    update_modified=False
                 )
  
-        # - Draft (including auto-created drafts where workflow_state may be empty) →bundle status is Open
-        # - Any non-Draft workflow state → bundle status is Closed
+        # --------------------------------------------------
+        # 3️⃣ LINK ADDED CLAIMS
+        # --------------------------------------------------
+        for claim_no in added_claims:
+ 
+            existing_link = frappe.db.get_value(
+                "Claim",
+                claim_no,
+                "claim_bundle_management"
+            )
+ 
+            # Do not override another bundle
+            if existing_link and existing_link != self.name:
+                continue
+ 
+            frappe.db.set_value(
+                "Claim",
+                claim_no,
+                "claim_bundle_management",
+                self.name,
+                update_modified=False
+            )
+ 
+       
+ 
+        # --------------------------------------------------
+        #  BUNDLE STATUS LOGIC
+        # --------------------------------------------------
+        # Draft (or empty workflow_state) → Open
+        # Any other workflow state → Processing
+ 
         if not self.workflow_state or self.workflow_state == "Draft":
             self.bundle_status = "Open"
         else:

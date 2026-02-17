@@ -140,15 +140,56 @@ class ClaimProceedings(Document):
                 )
  
         # ------------------------------------------
-        # 2️⃣ Link Claim → Claim Proceedings
+        # 2️⃣ Handle Claim Link Updates
         # ------------------------------------------
-        for row in self.claim_proceedings:
-            if not row.claim_no:
-                continue
  
+        # 🔹 Get OLD claims from DB
+        old_claims = set()
+        if not self.is_new():
+            old_rows = frappe.get_all(
+                "Claim Proceedings Details",  
+                filters={"parent": self.name},
+                pluck="claim_no"
+            )
+            old_claims = set(old_rows)
+ 
+        # 🔹 Get CURRENT claims from document
+        current_claims = set()
+        for row in self.claim_proceedings:
+            if row.claim_no:
+                current_claims.add(row.claim_no)
+ 
+        # 🔹 Claims removed
+        removed_claims = old_claims - current_claims
+ 
+        # 🔹 Claims added
+        added_claims = current_claims - old_claims
+ 
+        # ------------------------------------------
+        # 3️⃣ Clear removed claims
+        # ------------------------------------------
+        for claim in removed_claims:
+            current_link = frappe.db.get_value(
+                "Claim",
+                claim,
+                "claim_proceedings"
+            )
+ 
+            if current_link == self.name:
+                frappe.db.set_value(
+                    "Claim",
+                    claim,
+                    "claim_proceedings",
+                    None
+                )
+ 
+        # ------------------------------------------
+        # 4️⃣ Set new/remaining claims
+        # ------------------------------------------
+        for claim in current_claims:
             frappe.db.set_value(
                 "Claim",
-                row.claim_no,
+                claim,
                 "claim_proceedings",
                 self.name
             )

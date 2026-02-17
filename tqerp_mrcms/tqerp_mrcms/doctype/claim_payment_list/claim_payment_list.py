@@ -59,18 +59,95 @@ class ClaimPaymentList(Document):
         self.details = valid_rows
 
     def before_save(self):
-        if self.is_new():
-            return
-
+ 
         from tqerp_mrcms.api import reverse_fund_on_cancel
-
-        old_fund = frappe.db.get_value(
-            self.doctype, self.name, "fund_manager"
-        )
-
-        # Refund old fund if fund manager changed
-        if old_fund and old_fund != self.fund_manager:
-            reverse_fund_on_cancel(name=self.name, doctype=self.doctype)
+ 
+        # --------------------------------------------------
+        # 1️⃣ Refund old fund if fund manager changed (EDIT ONLY)
+        # --------------------------------------------------
+        if not self.is_new():
+ 
+            old_fund = frappe.db.get_value(
+                self.doctype,
+                self.name,
+                "fund_manager"
+            )
+ 
+            if old_fund and old_fund != self.fund_manager:
+                reverse_fund_on_cancel(
+                    name=self.name,
+                    doctype=self.doctype
+                )
+ 
+        # --------------------------------------------------
+        # 2️⃣ CLAIM PAYMENT LIST LINK SYNC (NEW + EDIT)
+        # --------------------------------------------------
+ 
+        # Get old child claims (only if document already exists)
+        old_claims = set()
+ 
+        if not self.is_new():
+            old_rows = frappe.get_all(
+                "Claim Payment Details",  # ⚠ Replace if different
+                filters={"parent": self.name},
+                pluck="claim_no"
+            )
+            old_claims = set(old_rows)
+ 
+        # Current UI claims
+        current_claims = {
+            row.claim_no for row in self.details if row.claim_no
+        }
+ 
+        # Claims removed from UI
+        removed_claims = old_claims - current_claims
+ 
+        # Claims newly added
+        added_claims = current_claims - old_claims
+ 
+        # --------------------------------------------------
+        # 3️⃣ CLEAR REMOVED CLAIM LINKS
+        # --------------------------------------------------
+        for claim_no in removed_claims:
+ 
+            current_link = frappe.db.get_value(
+                "Claim",
+                claim_no,
+                "claim_payment_list"
+            )
+ 
+            # Only clear if linked to THIS CPL
+            if current_link == self.name:
+                frappe.db.set_value(
+                    "Claim",
+                    claim_no,
+                    "claim_payment_list",
+                    None,
+                    update_modified=False
+                )
+ 
+        # --------------------------------------------------
+        # 4️⃣ LINK ADDED CLAIMS
+        # --------------------------------------------------
+        for claim_no in added_claims:
+ 
+            existing_link = frappe.db.get_value(
+                "Claim",
+                claim_no,
+                "claim_payment_list"
+            )
+ 
+            # Do not override another CPL
+            if existing_link and existing_link != self.name:
+                continue
+ 
+            frappe.db.set_value(
+                "Claim",
+                claim_no,
+                "claim_payment_list",
+                self.name,
+                update_modified=False
+            )
 
 
     # --------------------------------------------------
