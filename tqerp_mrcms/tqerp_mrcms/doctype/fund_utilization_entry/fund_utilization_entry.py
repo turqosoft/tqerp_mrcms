@@ -42,12 +42,12 @@ def create_utilization_entry(doc, method):
         old_entry.save(ignore_permissions=True)
 
         # Reverse allocation from old fund
-        old_fund_doc = frappe.get_doc("Fund Manager", old_entry.fund_id)
-        for row in old_fund_doc.details:
-            if row.organisation == old_entry.organisation:
-                row.allocated = max(0, float(row.allocated or 0) - float(old_entry.credit or 0))
-                break
-        old_fund_doc.save(ignore_permissions=True)
+        # old_fund_doc = frappe.get_doc("Fund Manager", old_entry.fund_id)
+        # for row in old_fund_doc.details:
+        #     if row.organisation == old_entry.organisation:
+        #         row.allocated = max(0, float(row.allocated or 0) - float(old_entry.credit or 0))
+        #         break
+        # old_fund_doc.save(ignore_permissions=True)
 
     # Step 2: Fetch Fund Manager Details for current fund
     fund_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
