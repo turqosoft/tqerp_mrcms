@@ -902,50 +902,51 @@ def get_family_member_details(ip_no, member_name):
 
 @frappe.whitelist()
 def create_claim_proceeding_for_multiple(claims_data):
-    """
-    Create ONE Claim Proceedings document with all selected claims in the child table
-    """
     import json
     import frappe
  
     if not claims_data:
         frappe.throw("No claims selected.")
  
-    # Parse JSON string if needed
     if isinstance(claims_data, str):
         claims_data = json.loads(claims_data)
  
-    # Get logged-in user's organisation
-    user_org = frappe.db.get_value("User", frappe.session.user, "organisation")
-    emp_full_name = frappe.db.get_value("User", frappe.session.user, "full_name")
+    # Get logged-in user's organisation and full name
+    user_org, emp_full_name = frappe.db.get_value(
+        "User", frappe.session.user, ["organisation", "full_name"]
+    )
  
-    # Create parent document
+    if not user_org:
+        frappe.throw(f"Organisation not set for the logged-in user {frappe.session.user}")
+ 
+    first_claim_no = claims_data[0].get("claim_no")
+   
+    # Create Claim Proceedings parent doc
     cp = frappe.get_doc({
         "doctype": "Claim Proceedings",
-        "claim_proceedings": []         # child table fieldname
+        "claim_proceedings": []
     })
  
-    # Set organisation on the parent if available
-    if user_org:
-        cp.organisation = user_org  
- 
-    # Set logged-in user as employee on the parent if available
+    cp.organisation = user_org
+   
     cp.employee = frappe.session.user
-    if emp_full_name:
-        cp.employee_name = emp_full_name
+    cp.employee_name = emp_full_name
  
-    # Append each selected claim to the child table
+    # Append child table rows
     for claim in claims_data:
-        cp.append("claim_proceedings", {  # must be child table fieldname
-            "claim_no": claim.get("claim_no", ""),
-            "name1": claim.get("ip_name", ""),
-            "ip_no": claim.get("ip_no", ""),
-            "claim_date": claim.get("claim_date", ""),
-            "phone": claim.get("phone", ""),
-            "ifsc": claim.get("ifs_code", ""),
-            "bank_account_no": claim.get("bank_account_no", ""),
-            "passed_amount": claim.get("passed_amount", 0)
+        cp.append("claim_proceedings", {
+            "claim_no": claim.get("claim_no"),
+            "name1": claim.get("ip_name"),
+            "ip_no": claim.get("ip_no"),
+            "claim_date": claim.get("claim_date"),
+            "phone": claim.get("phone"),
+            "ifsc": claim.get("ifs_code"),
+            "bank_account_no": claim.get("bank_account_no"),
+            "passed_amount": claim.get("passed_amount")
         })
+ 
+    # --- Calculate total passed_amount before insert ---
+    cp.total_allocated = sum([row.passed_amount or 0 for row in cp.claim_proceedings])
  
     cp.insert(ignore_permissions=True)
     return {"name": cp.name}
@@ -1909,17 +1910,41 @@ def validate_fund_availability(doc):
  
     fm_doc = frappe.get_doc("Fund Manager", doc.fund_manager)
  
-    # ✅ SOURCE OF TRUTH: Fund Manager Details
-    fund_available = sum(
-        flt(row.fixed or 0) - flt(row.allocated or 0)
-        for row in fm_doc.details
-        if row.organisation == doc.organisation
+    # Get organisation row
+    fund_row = None
+    for row in fm_doc.details:
+        if row.organisation == doc.organisation:
+            fund_row = row
+            break
+ 
+    if not fund_row:
+        return
+ 
+    fixed = flt(fund_row.fixed or 0)
+    allocated = flt(fund_row.allocated or 0)
+ 
+    # STEP 1: Get old utilization entry for this document
+    old_entry = frappe.get_all(
+        "Fund Utilization Entry",
+        filters={
+            "voucher_no": doc.name,
+            "transaction_type": "Utilization",
+            "is_cancelled": 0
+        },
+        fields=["credit"],
+        limit=1
     )
  
-    if total_allocated > fund_available:
+    old_credit = flt(old_entry[0].credit) if old_entry else 0
+ 
+    # STEP 2: Add back old allocation
+    real_available = (fixed - allocated) + old_credit
+ 
+    # STEP 3: Validate
+    if total_allocated > real_available:
         frappe.throw(
             f"Total Allocated ({total_allocated}) exceeds "
-            f"Available Fund ({fund_available}) for this organisation."
+            f"Available Fund ({real_available}) for this organisation."
         )
  
  

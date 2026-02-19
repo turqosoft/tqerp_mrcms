@@ -11,15 +11,26 @@ class ClaimProceedings(Document):
         """Log creation of a new Claim"""
         # Optional: You may still log creation if needed
         pass
-        
+    
     def on_cancel(self):
         if not self.fund_manager or not self.total_allocated:
             return
-
+ 
         frappe.get_attr("tqerp_mrcms.api.reverse_fund_on_cancel")(
             self.name,
             doctype="Claim Proceedings"
         )
+ 
+         # 🔹 Clear claim_proceedings link
+        for row in self.claim_proceedings:
+            if row.claim_no:
+                frappe.db.set_value(
+                    "Claim",
+                    row.claim_no,
+                    "claim_proceedings",
+                    None
+                )
+ 
 
     # def validate(self):
     #     """
