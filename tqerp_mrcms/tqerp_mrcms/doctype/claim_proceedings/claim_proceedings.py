@@ -14,14 +14,38 @@ class ClaimProceedings(Document):
     
     def on_cancel(self):
  
-        #  Reverse Fund (if allocated)
+        # ------------------------------------------
+        # 1️ Reverse Fund (if allocated)
+        # ------------------------------------------
         if self.fund_manager and self.total_allocated:
             frappe.get_attr("tqerp_mrcms.api.reverse_fund_on_cancel")(
                 self.name,
                 doctype="Claim Proceedings"
             )
  
-        #  Clear link + Reset claim status
+        # ------------------------------------------
+        # 2️ Mark Fund Utilization Entry as Cancelled
+        # ------------------------------------------
+        entries = frappe.get_all(
+            "Fund Utilization Entry",
+            filters={
+                "voucher_no": self.name,
+                "transaction_type": "Utilization",
+                "is_cancelled": 0
+            }
+        )
+ 
+        for entry in entries:
+            frappe.db.set_value(
+                "Fund Utilization Entry",
+                entry.name,
+                "is_cancelled",
+                1
+            )
+ 
+        # ------------------------------------------
+        # 3 Clear link + Reset claim status
+        # ------------------------------------------
         for row in self.claim_proceedings:
             if row.claim_no:
  

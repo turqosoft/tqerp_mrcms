@@ -21,39 +21,6 @@ def create_utilization_entry(doc, method):
     if not getattr(doc, "fund_manager", None):
         return  # No fund selected
 
-    # ==========================
-    # CANCEL LOGIC (ADD THIS)
-    # ==========================
-    if doc.docstatus == 2:  # If document is Cancelled
- 
-        entries = frappe.get_all(
-            "Fund Utilization Entry",
-            filters={
-                "voucher_no": doc.name,
-                "transaction_type": "Utilization",
-                "is_cancelled": 0
-            }
-        )
- 
-        for e in entries:
-            old_entry = frappe.get_doc("Fund Utilization Entry", e.name)
-            old_entry.is_cancelled = 1
-            old_entry.save(ignore_permissions=True)
- 
-            # Reverse allocation from Fund Manager
-            old_fund_doc = frappe.get_doc("Fund Manager", old_entry.fund_id)
-            for row in old_fund_doc.details:
-                if row.organisation == old_entry.organisation:
-                    row.allocated = max(
-                        0,
-                        float(row.allocated or 0) - float(old_entry.credit or 0)
-                    )
-                    break
- 
-            old_fund_doc.save(ignore_permissions=True)
- 
-        return
-
     allocated_amount = float(getattr(doc, "total_allocated", 0) or 0)
     if allocated_amount <= 0:
         return  # Nothing to allocate

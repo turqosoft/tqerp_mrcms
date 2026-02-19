@@ -265,7 +265,6 @@ website_route_rules = [
 doc_events = {
     "Claim Proceedings": {
         "on_submit": "tqerp_mrcms.api.update_claim_status_on_submit",
-        "on_cancel": "tqerp_mrcms.tqerp_mrcms.doctype.fund_utilization_entry.fund_utilization_entry.create_utilization_entry",
         "validate": "tqerp_mrcms.api.validate",
         "on_update": "tqerp_mrcms.tqerp_mrcms.doctype.fund_utilization_entry.fund_utilization_entry.create_utilization_entry"
     },
