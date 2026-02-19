@@ -1129,24 +1129,20 @@ def update_claim_status_on_submit(doc, method=None):
 #                     frappe.errprint(f"Already Paid: {row.claim_no}")
 
 
-def update_claim_status_on_cancel(doc, method=None):
-    """
-    On cancel of Claim Proceedings:
-    Set each linked Claim's claim_status = 'Sanctioned'
-    """
-    frappe.errprint(f"update_claim_status_on_cancel triggered for doc: {doc.name}")
+# def update_claim_status_on_cancel(doc, method=None):
+#     """
+#     On cancel of Claim Proceedings:
+#     Set each linked Claim's claim_status = 'Sanctioned'
+#     """
+#     frappe.errprint(f"update_claim_status_on_cancel triggered for doc: {doc.name}")
 
-    for row in doc.claim_proceedings:
-        if row.claim_no:
-            claim_doc = frappe.get_doc("Claim", row.claim_no)
-            frappe.errprint(f"Current claim_status: {claim_doc.claim_status}")
+#     for row in doc.claim_proceedings:
+#         if row.claim_no:
+#             claim_doc = frappe.get_doc("Claim", row.claim_no)
+#             frappe.errprint(f"Current claim_status: {claim_doc.claim_status}")
             
-            frappe.db.set_value("Claim", row.claim_no, "claim_status", "Sanctioned")
-            frappe.errprint(f"Updated claim_status to 'Sanctioned' for: {row.claim_no}")
-
-import frappe
-import pandas as pd
-from frappe.utils import getdate
+#             frappe.db.set_value("Claim", row.claim_no, "claim_status", "Sanctioned")
+#             frappe.errprint(f"Updated claim_status to 'Sanctioned' for: {row.claim_no}")
 
 @frappe.whitelist()
 def process_payment_file(docname, file_url):

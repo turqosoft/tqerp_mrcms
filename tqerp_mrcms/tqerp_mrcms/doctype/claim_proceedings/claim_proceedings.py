@@ -13,23 +13,27 @@ class ClaimProceedings(Document):
         pass
     
     def on_cancel(self):
-        if not self.fund_manager or not self.total_allocated:
-            return
  
-        frappe.get_attr("tqerp_mrcms.api.reverse_fund_on_cancel")(
-            self.name,
-            doctype="Claim Proceedings"
-        )
+        #  Reverse Fund (if allocated)
+        if self.fund_manager and self.total_allocated:
+            frappe.get_attr("tqerp_mrcms.api.reverse_fund_on_cancel")(
+                self.name,
+                doctype="Claim Proceedings"
+            )
  
-         # 🔹 Clear claim_proceedings link
+        #  Clear link + Reset claim status
         for row in self.claim_proceedings:
             if row.claim_no:
-                frappe.db.set_value(
-                    "Claim",
-                    row.claim_no,
-                    "claim_proceedings",
-                    None
-                )
+ 
+                claim_doc = frappe.get_doc("Claim", row.claim_no)
+ 
+                # Clear Claim Proceedings link
+                claim_doc.claim_proceedings = None
+ 
+                # Reset claim status
+                claim_doc.claim_status = "Sanctioned"
+ 
+                claim_doc.save(ignore_permissions=True)
  
 
     # def validate(self):
